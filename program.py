@@ -5,13 +5,6 @@ import rasterio
 import glob
 import os
 import matplotlib.pyplot as plt
-# 20205/08/06 Versi awal
-# 2025/08/07 Menambahkan fungsi untuk menyimpan raster
-#            Menambahkan kode untuk menampilkan raster pada histogram    
-#            Menambahkan kode untuk melakukan thresholding
-# 2025/09/03 Menambahkan fungsi clip raster dari shapefile poligon
-#            Melakukan masking pada seluruh kanal multispektral
-#            Menambahkan fungsi untuk memeriksa ukuran raster
 
 # Fungsi untuk memeriksa ukuran raster
 def ukuran_raster(input_raster):

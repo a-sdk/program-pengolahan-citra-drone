@@ -1,8 +1,6 @@
 '''
 Pustaka untuk mengekstrak fitur citra.
 '''
-# Changelog
-# 2025/09/03 - Versi awal
 
 # Libraries
 import numpy as np

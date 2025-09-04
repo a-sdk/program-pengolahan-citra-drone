@@ -2,8 +2,6 @@
 Pustaka untuk mentransformasi citra
 menggunakan beberapa indeks vegetasi.
 '''
-# Changelog: 
-# 2025/08/06 - Versi awal
 
 # Libraries
 import numpy as np
