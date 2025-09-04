@@ -66,9 +66,7 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ---
 
 ## Changelogs
-# 2025/09/03 
-#            
-#            
+          
 ### Versi 1.2 - 9 September 2025
 * **Fitur Baru**:
     * Menambahkan fungsi clip raster dari shapefile poligon.
