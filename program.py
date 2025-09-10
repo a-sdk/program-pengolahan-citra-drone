@@ -64,15 +64,15 @@ for i in file_input:
 print("Daftar File '.shp' dalam Folder Shapefiles")
 for i in shp_input:
     print("\t", i)
-print(f"Memproses {file_input[0]}...")
-print(f"Memproses {shp_input[0]}...")
+print(f"Memproses {file_input[2]}...")
+print(f"Memproses {shp_input[1]}...")
 
 # ---- Mengakses citra multispektral ---- 
 # ---- Mengambil petakan sawah berdasarkan shapefile poligon ----
-clipped_file_path = ekstraksi.clip_raster_by_mask(file_input[0], shp_input[0])
+clipped_file_path = ekstraksi.clip_raster_by_mask(file_input[2], shp_input[1])
 # Mengakses citra beserta band yang diperlukan 
 print("Membaca band yang diperlukan...")
-with rasterio.open(file_input[1]) as citra_src:
+with rasterio.open(clipped_file_path) as citra_src:
     # Membaca data setiap band
     green = citra_src.read(4)
     red = citra_src.read(5)
@@ -151,7 +151,7 @@ print("Menghitung NDVI...")
 transform_ndvi = transformasi.hitung_ndvi(nir_masked, red_masked)
 transform_ndvi[(nir_masked == -9999) | (red_masked == -9999)] = -9999
 # Menyimpan hasil transformasi ke dalam file GeoTIFF
-ndvi_file_path = simpan_raster(transform_ndvi, profile, "Hasil/Tranfsormasi/NDVI","NDVI_1.tif")
+ndvi_file_path = simpan_raster(transform_ndvi, profile, "Hasil/Transformasi/NDVI","NDVI_1.tif")
 ukuran_raster(clipped_file_path)
 ukuran_raster(savi_file_path)
 ukuran_raster(threshold_file_path)
