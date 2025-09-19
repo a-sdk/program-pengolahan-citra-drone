@@ -5,3 +5,6 @@ Hasil/
 Shapefiles/
 venv/
 
+# File
+*.csv
+
