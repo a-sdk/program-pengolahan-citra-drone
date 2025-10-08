@@ -1,5 +1,5 @@
 '''
-Pustaka untuk mengekstrak fitur citra.
+Pustaka untuk memodifikasi ukuran dan mengekstrak fitur citra.
 '''
 
 # Libraries
@@ -10,21 +10,21 @@ import geopandas as gpd
 import os
 
 
-def clip_raster_by_mask(input_layer, shapefile_layer):
+def clip_raster_by_mask(input_layer, shapefile_layer, output_filename):
     """
     Memotong citra sesuai dengan shaepfile poligon yang dibuat.
 
     Args:
         input_layer (np.ndarray): Data raster yang akan dipotong.
         shapefile_layer (dict): Shapefile yang menjadi acuan.
+        output_filename (str): Nama file output, termasuk ekstensi
         
     Returns:
         str: Output path.
     """
     # Tentukan lokasi hasil clip
     output_folder = "Hasil/Clip"
-    output_file = "1.tif"
-    output_path = os.path.join(output_folder, output_file)
+    output_path = os.path.join(output_folder, output_filename)
     # Pastikan folder output ada, jika tidak, buat folder baru
     os.makedirs(output_folder, exist_ok=True)
     # Baca Shapefile Menggunakan GeoPandas
@@ -50,7 +50,7 @@ def clip_raster_by_mask(input_layer, shapefile_layer):
     print("Menyimpan hasil clipping...")
     with rasterio.open(output_path, "w", **out_meta) as dest:
         dest.write(out_image)
-    print(f"File {output_file} berhasil disimpan di {output_folder}")
+    print(f"File {output_filename} berhasil disimpan di {output_folder}")
     return output_path
 
 # Fungsi untuk melakukan masking

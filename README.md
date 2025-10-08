@@ -69,6 +69,8 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ### Versi 1.3 - 8 Oktober 2025
 * **Fitur Baru**:
     * Menambahkan fitur input supaya pengguna dapat memilih file yang diproses.
+    * Memodifikasi fungsi menyimpan raster sehingga tidak menimpa file sebelumnya.
+    
 ### Versi 1.2 - 9 September 2025
 * **Fitur Baru**:
     * Menambahkan fungsi clip raster dari shapefile poligon.
