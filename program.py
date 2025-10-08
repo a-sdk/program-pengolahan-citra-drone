@@ -7,7 +7,7 @@ import os
 import matplotlib.pyplot as plt
 
 # Fungsi untuk memeriksa ukuran raster
-def ukuran_raster(input_raster):
+def cek_ukuran_raster(input_raster):
     with rasterio.open(input_raster) as src:
         print(f"Memeriksa bentuk...")
         band1 = src.read(1)
@@ -59,17 +59,23 @@ shp_input_path = r"Shapefiles/*.shp"
 shp_input = glob.glob(shp_input_path)
 # Memeriksa file yang relevan pada folder input
 print("Daftar File '.tif' dalam Folder Input")
+c1 = c2 = 1
 for i in file_input:
-    print("\t", i)
+    print(f"\t {c1}) {i}")
+    c1 += 1
 print("Daftar File '.shp' dalam Folder Shapefiles")
 for i in shp_input:
-    print("\t", i)
-print(f"Memproses {file_input[2]}...")
-print(f"Memproses {shp_input[1]}...")
+    print(f"\t {c2}) {i}")
+    c2 += 1
+# Menentukan file yang diproses berdasarkan input pengguna
+file_target = int(input(f"Pilih file .tif (1-{len(file_input)}): "))
+shp_target = int(input(f"Pilih file .shp (1-{len(shp_input)}): "))
+print(f"Memproses {file_input[file_target - 1]}...")
+print(f"Memproses {shp_input[shp_target - 1]}...")
 
 # ---- Mengakses citra multispektral ---- 
 # ---- Mengambil petakan sawah berdasarkan shapefile poligon ----
-clipped_file_path = ekstraksi.clip_raster_by_mask(file_input[2], shp_input[1])
+clipped_file_path = ekstraksi.clip_raster_by_mask(file_input[file_target - 1], shp_input[shp_target - 1])
 # Mengakses citra beserta band yang diperlukan 
 print("Membaca band yang diperlukan...")
 with rasterio.open(clipped_file_path) as citra_src:
@@ -152,13 +158,14 @@ transform_ndvi = transformasi.hitung_ndvi(nir_masked, red_masked)
 transform_ndvi[(nir_masked == -9999) | (red_masked == -9999)] = -9999
 # Menyimpan hasil transformasi ke dalam file GeoTIFF
 ndvi_file_path = simpan_raster(transform_ndvi, profile, "Hasil/Transformasi/NDVI","NDVI_1.tif")
-ukuran_raster(clipped_file_path)
-ukuran_raster(savi_file_path)
-ukuran_raster(threshold_file_path)
-ukuran_raster(green_mask_path)
-ukuran_raster(red_mask_path)
-ukuran_raster(red_edge_mask_path)
-ukuran_raster(nir_mask_path)
-ukuran_raster(ndvi_file_path)
+cek_ukuran_raster(file_input[file_target - 1])
+cek_ukuran_raster(clipped_file_path)
+cek_ukuran_raster(savi_file_path)
+cek_ukuran_raster(threshold_file_path)
+cek_ukuran_raster(green_mask_path)
+cek_ukuran_raster(red_mask_path)
+cek_ukuran_raster(red_edge_mask_path)
+cek_ukuran_raster(nir_mask_path)
+cek_ukuran_raster(ndvi_file_path)
 print('aman aja')
     
