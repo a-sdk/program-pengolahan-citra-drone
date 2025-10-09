@@ -1,6 +1,7 @@
 import ekstraksi
 import transformasi
 
+import numpy as np
 import rasterio
 import glob
 import os
@@ -50,6 +51,57 @@ def simpan_raster(array_data, profile, output_folder, output_filename, nodata_va
     print(f"File {output_filename} berhasil disimpan di {output_folder}")
     return output_path
 
+# Fungsi untuk menentukan threshold secara otomatis
+import numpy as np
+
+def otsu_threshold(input_raster, jumlah_bin=256, rentang_nilai=(-1, 1)):
+    """
+    Menghitung threshold untuk masking raster.
+
+    Args:
+        input_raster (np.ndarray): Data raster yang akan dihitung thresholdnya.
+        jumlah_bin (int): Jumlah bin histogram.
+        rentang_nilai (str): Nilai min dan max yang ada pada data raster.
+        
+    Returns:
+        float: Nilai threshold.
+    """
+    # Histogram dan probabilitas
+    hist, bin_edges = np.histogram(input_raster.ravel(), bins=jumlah_bin, range=rentang_nilai)
+    prob = hist.astype(float) / hist.sum()
+
+    # Bin center
+    bin_mids = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+    # Probabilitas kumulatif (q1) dan mean kumulatif (mu1)
+    q1 = np.cumsum(prob)
+    mu1 = np.cumsum(prob * bin_mids)
+
+    # Total mean
+    global_mean = mu1[-1]
+
+    # Kelas 2
+    q2 = 1 - q1
+    mu2 = global_mean - mu1
+
+    # Hindari pembagian dengan nol
+    valid = (q1 > 0) & (q2 > 0)
+
+    mean1 = np.zeros_like(mu1)
+    mean2 = np.zeros_like(mu1)
+
+    mean1[valid] = mu1[valid] / q1[valid]
+    mean2[valid] = mu2[valid] / q2[valid]
+
+    # Variansi antar kelas
+    selisih_var = q1 * q2 * (mean1 - mean2) ** 2
+
+    # Ambil threshold dengan variansi antar kelas maksimum
+    nilai_terbaik = np.argmax(selisih_var * valid) 
+    threshold = bin_mids[nilai_terbaik]
+
+    return threshold
+
 
 # ---- Menetukan folder kerja ----
 # Menentukan lokasi folder, file, dan shapefile yang digunakan
@@ -82,37 +134,30 @@ print(f"Memproses {shp_input[shp_target - 1]}...")
 clipped_file_path = ekstraksi.clip_raster_by_mask(file_input[file_target - 1], shp_input[shp_target - 1], f"{nama_proyek}_clip.tif")
 # Mengakses citra beserta band yang diperlukan 
 print("Membaca band yang diperlukan...")
-with rasterio.open(clipped_file_path) as citra_src:
+with rasterio.open(clipped_file_path) as src_citra:
     # Membaca data setiap band
-    green = citra_src.read(4)
-    red = citra_src.read(5)
-    red_edge = citra_src.read(6)
-    nir = citra_src.read(7)
+    green = src_citra.read(4)
+    red = src_citra.read(5)
+    red_edge = src_citra.read(6)
+    nir = src_citra.read(7)
+    # Membaca mask yang berisi data
+    valid_mask = src_citra.read_masks(1) > 0
     # Membuat metadata profile
-    profile = citra_src.profile
+    profile = src_citra.profile
 
 # ---- Menghitung SAVI ----
 # Mentransformasi citra menggunakan SAVI
 print("Menghitung SAVI...")
 transform_savi = transformasi.hitung_savi(nir, red, L=0.5)
-# Menyimpan hasil transformasi ke dalam file GeoTIFF
-savi_file_path = simpan_raster(transform_savi, profile, "Hasil/Transformasi/SAVI", f"{nama_proyek}_SAVI.tif")
-
 # ---- Membaca SAVI dan menampilkan histogram ----
-# Membaca hasil transformasi SAVI 
-print("Membaca SAVI...")
-with rasterio.open(savi_file_path) as src_savi:
-    # Baca band pertama sebagai numpy array
-    savi = src_savi.read(1)
-    # Ini akan membuat array di mana True berarti data valid
-    boolean_mask = src_savi.read_masks(1) > 0
-    # Mengubah array 2D menjadi 1D agar mudah diplot
-    valid_savi = savi[boolean_mask]
-
+# Mengubah bagian yang bukan data menjadi NaN
+transform_savi[~valid_mask] = np.nan
+# Mengubah array 2D menjadi 1D agar mudah diplot
+savi_1d = transform_savi[~np.isnan(transform_savi)] # Ambil nilai yang bukan NaN
 # Membuat histogram untuk menampilkan data piksel SAVI
 print("Menampilkan histogram...")
 plt.figure(figsize=(10, 6))
-plt.hist(valid_savi, bins=100, color='lightgreen', edgecolor='black')
+plt.hist(savi_1d, bins=100, color='lightgreen', edgecolor='black')
 plt.title('Histogram Nilai SAVI')
 plt.xlabel('Nilai SAVI')
 plt.ylabel('Frekuensi Piksel')
@@ -121,19 +166,29 @@ plt.grid(True, alpha=0.5)
 plt.axvline(x=0.2, color='r', linestyle='--', label='Contoh Threshold = 0.2')
 plt.legend()
 plt.show()
+# Menyimpan hasil transformasi ke dalam file GeoTIFF
+savi_file_path = simpan_raster(transform_savi, profile, "Hasil/Transformasi/SAVI", f"{nama_proyek}_SAVI.tif")
 
 # ---- Melakukan thresholding ----
+print("Memuat file SAVI...")
+with rasterio.open(savi_file_path) as src_savi:
+    savi = src_savi.read(1)
 # Menentukan threshold vegetasi
-print("Melakukan thresholding...")
-manual_threshold = 0.2
-thresholding = savi > manual_threshold
+opsi_thresholding = input("Tentukan sendiri nilai threshold? (y/n): ")
+if opsi_thresholding == "y":
+    manual_threshold = float(input("Masukkan nilai threshold: "))
+    thresholding = savi > manual_threshold
+    print(f"Melakukan thresholding dengan batas {manual_threshold}...")
+else :
+    auto_threshold = otsu_threshold(savi, jumlah_bin=256, rentang_nilai=(-1, 1))
+    thresholding = savi > auto_threshold
+    print(f"Melakukan thresholding dengan batas {auto_threshold}...")
 hasil_threshold = thresholding.astype(rasterio.uint8)
 # Menyimpan hasil threshold
 threshold_file_path = simpan_raster(hasil_threshold, profile, "Hasil/Threshold", f"{nama_proyek}_threshold.tif")
 
 # ---- Melakukan masking ----
 # Masking kanal green, red, red_edge, dan nir
-# Memuat file threshold
 print("Memuat file threshold...")
 with rasterio.open(threshold_file_path) as src_mask:
     threshold_mask = src_mask.read(1)

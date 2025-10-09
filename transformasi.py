@@ -18,9 +18,12 @@ def hitung_savi(nir_band, red_band, L):
     Returns:
         np.ndarray: Array NumPy SAVI.
     """
+    # Normalisasi nilai piksel
+    nir_band_norm = nir_band / 65535.0
+    red_band_norm = red_band / 65535.0
     # Hindari pembagian dengan nol
     with np.errstate(divide='ignore', invalid='ignore'):
-        savi = ((nir_band.astype(float) - red_band.astype(float)) * (1 + L)) / (nir_band.astype(float) + red_band.astype(float) + L) 
+        savi = ((nir_band_norm.astype(float) - red_band_norm.astype(float)) * (1 + L)) / (nir_band_norm.astype(float) + red_band_norm.astype(float) + L) 
         # savi = np.nan_to_num(savi, nan = 0) # Mengganti nilai NaN dengan 0 atau nilai lain
     return savi
 
@@ -35,9 +38,11 @@ def hitung_ndvi(nir_band, red_band):
     Returns:
         np.ndarray: Array NumPy NDVI.
     """
+    nir_band_norm = nir_band / 65535.0
+    red_band_norm = red_band / 65535.0
     # Hindari pembagian dengan nol
     with np.errstate(divide='ignore', invalid='ignore'):
-        ndvi = (nir_band.astype(float) - red_band.astype(float)) / (nir_band.astype(float) + red_band.astype(float))
+        ndvi = (nir_band_norm.astype(float) - red_band_norm.astype(float)) / (nir_band_norm.astype(float) + red_band_norm.astype(float))
         # ndvi = np.nan_to_num(ndvi, nan = 0) # Mengganti nilai NaN dengan 0 atau nilai lain
     return ndvi
 
@@ -52,9 +57,11 @@ def hitung_gndvi(nir_band, green_band):
     Returns:
         np.ndarray: Array NumPy GNDVI.
     """
+    nir_band_norm = nir_band / 65535.0
+    green_band_norm = green_band / 65535.0
     # Hindari pembagian dengan nol
     with np.errstate(divide='ignore', invalid='ignore'):
-        gndvi = (nir_band.astype(float) - green_band.astype(float)) / (nir_band.astype(float) + green_band.astype(float))
+        gndvi = (nir_band_norm.astype(float) - green_band_norm.astype(float)) / (nir_band_norm.astype(float) + green_band_norm.astype(float))
         # gndvi = np.nan_to_num(gndvi, nan = 0) # Mengganti nilai NaN dengan 0 atau nilai lain
     return gndvi
 
@@ -69,8 +76,10 @@ def hitung_ndrei(nir_band, red_edge_band):
     Returns:
         np.ndarray: Array NumPy NDRE.
     """
+    nir_band_norm = nir_band / 65535.0
+    red_edge_band_norm = red_edge_band / 65535.0
     # Hindari pembagian dengan nol
     with np.errstate(divide='ignore', invalid='ignore'):
-        ndre = (nir_band.astype(float) - red_edge_band.astype(float)) / (nir_band.astype(float) + red_edge_band.astype(float))
+        ndre = (nir_band_norm.astype(float) - red_edge_band_norm.astype(float)) / (nir_band_norm.astype(float) + red_edge_band_norm.astype(float))
         # ndre = np.nan_to_num(ndre, nan = 0) # Mengganti nilai NaN dengan 0 atau nilai lain
     return ndre

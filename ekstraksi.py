@@ -10,13 +10,13 @@ import geopandas as gpd
 import os
 
 
-def clip_raster_by_mask(input_layer, shapefile_layer, output_filename):
+def clip_raster_by_mask(input_raster, shapefile_layer, output_filename):
     """
     Memotong citra sesuai dengan shaepfile poligon yang dibuat.
 
     Args:
-        input_layer (np.ndarray): Data raster yang akan dipotong.
-        shapefile_layer (dict): Shapefile yang menjadi acuan.
+        input_raster (str): Data raster yang akan dipotong.
+        shapefile_layer (str): Shapefile yang menjadi acuan.
         output_filename (str): Nama file output, termasuk ekstensi
         
     Returns:
@@ -32,7 +32,7 @@ def clip_raster_by_mask(input_layer, shapefile_layer, output_filename):
     mask_gdf = gpd.read_file(shapefile_layer)
     # Operasi clip
     print("Melakukan clipping raster...")
-    with rasterio.open(input_layer) as src:
+    with rasterio.open(input_raster) as src:
         # Dapatkan geometri dari GeoDataFrame dalam format yang dibutuhkan oleh rasterio
         geometries = mask_gdf.geometry
         # Lakukan masking

@@ -70,6 +70,9 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 * **Fitur Baru**:
     * Menambahkan fitur input supaya pengguna dapat memilih file yang diproses.
     * Memodifikasi fungsi menyimpan raster sehingga tidak menimpa file sebelumnya.
+    * Menambahkan fitur auto-thresholding berdasarkan citra SAVI.
+* **Perbaikan Bug**:
+    * Memperbaiki bug pada fungsi transformasi SAVI.
     
 ### Versi 1.2 - 9 September 2025
 * **Fitur Baru**:
