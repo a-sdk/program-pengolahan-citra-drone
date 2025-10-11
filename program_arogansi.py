@@ -7,6 +7,7 @@ import glob
 import os
 import matplotlib.pyplot as plt
 import time
+from tqdm import tqdm
 
 # Fungsi untuk memeriksa ukuran raster
 def cek_ukuran_raster(input_raster):
@@ -17,7 +18,7 @@ def cek_ukuran_raster(input_raster):
 
 
 # Fungsi untuk menyimpan array NumPy ke dalam file GeoTIFF
-def simpan_raster(array_data, profile, output_folder, output_nama_file, nodata_value=None):
+def simpan_raster(array_data, profile, output_folder, output_filename, nodata_value=None):
     """
     Menyimpan array NumPy sebagai file GeoTIFF ke folder yang ditentukan.
 
@@ -25,13 +26,13 @@ def simpan_raster(array_data, profile, output_folder, output_nama_file, nodata_v
         array_data (np.ndarray): Array NumPy yang akan disimpan.
         profile (dict): Metadata raster dari file sumber.
         output_folder (str): Nama folder tempat file akan disimpan.
-        output_nama_file (str): Nama file output, termasuk ekstensi.
+        output_filename (str): Nama file output, termasuk ekstensi.
         
     Returns:
         str: Output path.
     """
     # Gabungkan nama folder dan nama file
-    output_path = os.path.join(output_folder, output_nama_file)
+    output_path = os.path.join(output_folder, output_filename)
 
     # Pastikan folder output ada, jika tidak, buat folder baru
     os.makedirs(output_folder, exist_ok=True)
@@ -49,7 +50,7 @@ def simpan_raster(array_data, profile, output_folder, output_nama_file, nodata_v
     with rasterio.open(output_path, 'w', **profile) as dst:
         dst.write(array_data, 1)
 
-    print(f"File {output_nama_file} berhasil disimpan di {output_folder}")
+    print(f"File {output_filename} berhasil disimpan di {output_folder}")
     return output_path
 
 # Fungsi untuk menentukan threshold secara otomatis
@@ -101,6 +102,35 @@ def otsu_threshold(input_raster, jumlah_bin=256, rentang_nilai=(-1, 1)):
 
     return threshold
 
+# Fungsi untuk melakukan transformasi tanpa segmentasi (thresholding/masking)
+def proses_transformasi_citra(raster_data, folder_output):
+    nf_raster = os.path.splitext(os.path.basename(raster_data))[0]
+    print(f"  Memproses {nf_raster}...")
+    # ---- Mengakses citra multispektral ---- 
+    # Mengakses citra beserta band yang diperlukan 
+    print("Membaca band yang diperlukan...")
+    with rasterio.open(raster_data) as src_citra:
+        # Membaca data setiap band
+        green = src_citra.read(4)
+        red = src_citra.read(5)
+        red_edge = src_citra.read(6)
+        nir = src_citra.read(7)
+        # Membuat metadata profile
+        profile = src_citra.profile
+    print("Menghitung SAVI..")
+    transform_savi = transformasi.hitung_savi(nir, red, L=0.5)
+    savi_file_path = simpan_raster(transform_savi, profile, rf"{folder_output}\Hasil\Transformasi\SAVI", f"{nf_raster}_SAVI.tif")
+    print("Menghitung NDVI..")
+    transform_ndvi = transformasi.hitung_ndvi(nir, red)
+    ndvi_file_path = simpan_raster(transform_ndvi, profile, rf"{folder_output}\Hasil\Transformasi\NDVI", f"{nf_raster}_NDVI.tif")
+    print("Menghitung GNDVI..")
+    transform_gndvi = transformasi.hitung_gndvi(nir, green)
+    gndvi_file_path = simpan_raster(transform_gndvi, profile, rf"{folder_output}\Hasil\Transformasi\GNDVI", f"{nf_raster}_GNDVI.tif")
+    print("Menghitung NDREI..")
+    transform_ndrei = transformasi.hitung_ndrei(nir, red_edge)
+    ndrei_file_path = simpan_raster(transform_ndrei, profile, rf"{folder_output}\Hasil\Transformasi\NDREI", f"{nf_raster}_NDREI.tif")
+    print("Transformasi selesai")
+
 ########################################################
 #
 #            PROGRAM UTAMA
@@ -112,67 +142,82 @@ t0 = time.perf_counter()
 # Memeriksa folder atau file yang akan diproses
 try:
     lokasi_folder_raster = input("Masukkan path folder berisi file .tif: ")
-    lokasi_folder_shp = input("Masukkan path folder berisi file .shp: ")
+    # nama_folder_shp = input("Masukkan path folder berisi file .shp: ")
     print("Memeriksa folder...")
 
     # Cek apakah folder ada
     if not os.path.isdir(lokasi_folder_raster):
-        raise FileNotFoundError(f"Folder raster tidak ditemukan: {lokasi_folder_raster}. Silahkan cek dulu")
-    if not os.path.isdir(lokasi_folder_shp):
-        raise FileNotFoundError(f"Folder shapefile tidak ditemukan: {lokasi_folder_shp}. Silahkan cek dulu")
+        raise FileNotFoundError(f"Folder raster tidak ditemukan: {lokasi_folder_raster}")
+    # if not os.path.isdir(nama_folder_shp):
+        raise FileNotFoundError(f"Folder shapefile tidak ditemukan: {nama_folder_shp}")
 
     # Ambil semua file .tif dan .shp
     folder_raster = os.path.join(lokasi_folder_raster, "*.tif")
-    folder_shp = os.path.join(lokasi_folder_shp, "*.shp")
+    # folder_shp_path = os.path.join(nama_folder_shp, "*.shp")
 
     raster_input = glob.glob(folder_raster)
-    shp_input = glob.glob(folder_shp)
+    # shp_input = glob.glob(folder_shp_path)
 
     # Cek apakah file di dalam folder ditemukan
     if not raster_input:
         print("Tidak ada file .tif ditemukan di folder tersebut.")
-    if not shp_input:
+    # if not shp_input:
         print("Tidak ada file .shp ditemukan di folder tersebut.")
 
 except FileNotFoundError as e:
     print(e)
 
-# Menampilkan file yang relevan pada folder 
-print("Daftar File '.tif' dalam Folder Bahan")
-c1 = c2 = 1
-for i in raster_input:
-    print(f"\t {c1}) {i}")
-    c1 += 1
-# Menentukan file .tif yang diproses berdasarkan input pengguna
-raster_idx = int(input(f"Pilih file .tif (1-{len(raster_input)}): "))
-raster_target = raster_input[raster_idx- 1]
-nf_raster = os.path.splitext(os.path.basename(raster_target))
-print(f"Memproses {raster_target}...")
+while True: 
+    print("Tidak ada masalah ditemukan.")
+    raster_input = glob.glob(folder_raster)
+    print("\nPROGRAM PENGOLAHAN CITRA MULTISPEKTRAL")
+    print("\n1. Clip Raster")
+    print("2. Segmentasi")
+    print("3. Transformasi")
+    pilih_proses = int(input("Pilih proses (1-3): "))
+    if pilih_proses == 3:
+        print("=================== Transformasi SAVI, NDVI, GNDVI, NDREI ===================")
+        print("Pilih mode:")
+        print("1. Proses satu file dalam folder")
+        print("2. Proses semua file dalam folder (batch)")
+        mode = int(input("Pilih mode (1/2): "))
+        # Mode 1 Jalankan pemrosesan satuan
+        if mode == 1: 
+            # Menampilkan file yang relevan pada folder 
+            print("Daftar File '.tif' dalam Folder")
+            c1 = c2 = 1
+            for i in raster_input:
+                print(f"\t {c1}) {i}")
+                c1 += 1
+            # Menentukan file .tif yang diproses berdasarkan input pengguna
+            raster_idx = int(input(f"Pilih file .tif (1-{len(raster_input)}): "))
+            raster_pilihan = raster_input[raster_idx - 1]
+            proses_transformasi_citra(raster_pilihan, lokasi_folder_raster)
+        # Mode 2 Jalankan pemrosesan batch
+        elif mode == 2:
+            print("Daftar File '.tif' dalam Folder")
+            c1 = c2 = 1
+            for i in raster_input:
+                print(f"\t {c1}) {i}")
+                c1 += 1
+            # Memproses semua file .tif dalam folder
+            for raster in tqdm(raster_input, "\nMemproses ", unit="file"):
+                proses_transformasi_citra(raster, lokasi_folder_raster)
+    exit()
+
+
+
+
 print("Daftar File '.shp' dalam Folder Shapefiles")
 for i in shp_input:
     print(f"\t {c2}) {i}")
     c2 += 1
 # Menentukan file .shp yang diproses berdasarkan input pengguna
 print("Silahkan pilih file .shp untuk clipping")
-shp_idx = int(input(f"Pilih file .shp (1-{len(shp_input)}): "))
-shp_target = shp_input[shp_idx - 1]
-print(f"Memproses {shp_target}...")
+shp_target = int(input(f"Pilih file .shp (1-{len(shp_input)}): "))
+print(f"Memproses {shp_input[shp_target - 1]}...")
 
-# ---- Mengakses citra multispektral ---- 
-# ---- Mengambil petakan sawah berdasarkan shapefile poligon ----
-clipped_file_path = ekstraksi.clip_raster_by_mask(raster_target, shp_target, f"{lokasi_folder_raster}/Hasil/Clip",f"{nf_raster}_clip.tif")
-# Mengakses citra beserta band yang diperlukan 
-print("Membaca band yang diperlukan...")
-with rasterio.open(clipped_file_path) as src_citra:
-    # Membaca data setiap band
-    green = src_citra.read(4)
-    red = src_citra.read(5)
-    red_edge = src_citra.read(6)
-    nir = src_citra.read(7)
-    # Membaca mask yang berisi data
-    valid_mask = src_citra.read_masks(1) > 0
-    # Membuat metadata profile
-    profile = src_citra.profile
+
 
 # ---- Menghitung SAVI ----
 # Mentransformasi citra menggunakan SAVI
@@ -196,7 +241,7 @@ plt.axvline(x=0.2, color='r', linestyle='--', label='Contoh Threshold = 0.2')
 plt.legend()
 plt.show()
 # Menyimpan hasil transformasi ke dalam file GeoTIFF
-savi_file_path = simpan_raster(transform_savi, profile, rf"{lokasi_folder_raster}/Hasil/Transformasi/SAVI", f"{nf_raster}_SAVI.tif")
+savi_file_path = simpan_raster(transform_savi, profile, rf"{nama_folder_raster}/Hasil/Transformasi/SAVI", f"{nama_proyek}_SAVI.tif")
 
 # ---- Melakukan thresholding ----
 print("Memuat file SAVI...")
@@ -214,7 +259,7 @@ else :
     print(f"Melakukan thresholding dengan batas {auto_threshold}...")
 hasil_threshold = thresholding.astype(rasterio.uint8)
 # Menyimpan hasil threshold
-threshold_file_path = simpan_raster(hasil_threshold, profile, rf"{lokasi_folder_raster}/Hasil/Threshold", f"{nf_raster}_threshold.tif")
+threshold_file_path = simpan_raster(hasil_threshold, profile, rf"{nama_folder_raster}/Hasil/Threshold", f"{nama_proyek}_threshold.tif")
 
 # ---- Melakukan masking ----
 # Masking kanal green, red, red_edge, dan nir
@@ -229,10 +274,10 @@ hasil_masking_red = ekstraksi.mask_raster(red, masking_vegetasi, nodata_value=-9
 hasil_masking_red_edge = ekstraksi.mask_raster(red_edge, masking_vegetasi, nodata_value=-9999)
 hasil_masking_nir = ekstraksi.mask_raster(nir, masking_vegetasi, nodata_value=-9999)
 # Menyimpan raster hasil masking
-green_mask_path = simpan_raster(hasil_masking_green, profile, rf"{lokasi_folder_raster}/Hasil/Mask", f"{nf_raster}_green.tif", nodata_value=-9999)
-red_mask_path = simpan_raster(hasil_masking_red, profile, rf"{lokasi_folder_raster}/Hasil/Mask", f"{nf_raster}_red.tif", nodata_value=-9999)
-red_edge_mask_path = simpan_raster(hasil_masking_red_edge, profile, rf"{lokasi_folder_raster}/Hasil/Mask", f"{nf_raster}_red_edge.tif", nodata_value=-9999)
-nir_mask_path = simpan_raster(hasil_masking_nir, profile, rf"{lokasi_folder_raster}/Hasil/Mask", f"{nf_raster}_nir.tif", nodata_value=-9999)
+green_mask_path = simpan_raster(hasil_masking_green, profile, rf"{nama_folder_raster}/Hasil/Mask", f"{nama_proyek}_green.tif", nodata_value=-9999)
+red_mask_path = simpan_raster(hasil_masking_red, profile, rf"{nama_folder_raster}/Hasil/Mask", f"{nama_proyek}_red.tif", nodata_value=-9999)
+red_edge_mask_path = simpan_raster(hasil_masking_red_edge, profile, rf"{nama_folder_raster}/Hasil/Mask", f"{nama_proyek}_red_edge.tif", nodata_value=-9999)
+nir_mask_path = simpan_raster(hasil_masking_nir, profile, rf"{nama_folder_raster}/Hasil/Mask", f"{nama_proyek}_nir.tif", nodata_value=-9999)
 
 # --- Menghitung NDVI ----
 # Memuat Band NIR dan Red hasil masking
@@ -245,8 +290,8 @@ print("Menghitung NDVI...")
 transform_ndvi = transformasi.hitung_ndvi(nir_masked, red_masked)
 transform_ndvi[(nir_masked == -9999) | (red_masked == -9999)] = -9999
 # Menyimpan hasil transformasi ke dalam file GeoTIFF
-ndvi_file_path = simpan_raster(transform_ndvi, profile, rf"{lokasi_folder_raster}/Hasil/Transformasi/NDVI", f"{nf_raster}_NDVI.tif")
-cek_ukuran_raster(raster_target)
+ndvi_file_path = simpan_raster(transform_ndvi, profile, rf"{nama_folder_raster}/Hasil/Transformasi/NDVI", f"{nama_proyek}_NDVI.tif")
+cek_ukuran_raster(raster_input[raster_target - 1])
 cek_ukuran_raster(clipped_file_path)
 cek_ukuran_raster(savi_file_path)
 cek_ukuran_raster(threshold_file_path)

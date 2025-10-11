@@ -60,12 +60,19 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
     │   └── Poligon.shp             # Contoh file poligon untuk acuan ekstraksi
     ├── ekstraksi.py                # Program ekstrasi fitur citra.
     ├── program.py                  # Program utama.
+    ├── program_arogansi.py         # Program untuk keperluan percobaan.
     └── transformasi.py             # Program transformasi indeks vegetasi.
 
 
 ---
 
 ## Changelogs
+### Versi 1.4 - 11 Oktober 2025
+* **Fitur Baru**:
+    * Menambahkan fitur supaya pengguna dapat menentukan folder kerja di luar folder proyek ini.
+    * Memodifikasi penamaan file hasil proses supaya menyesuaikan dengan nama file yang diproses.
+    * Membuat file `program_arogansi.py` untuk eksperimen batch file processing.
+
 ### Versi 1.3 - 8 Oktober 2025
 * **Fitur Baru**:
     * Menambahkan fitur input supaya pengguna dapat memilih file yang diproses.

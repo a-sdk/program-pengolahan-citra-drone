@@ -10,7 +10,7 @@ import geopandas as gpd
 import os
 
 
-def clip_raster_by_mask(input_raster, shapefile_layer, output_filename):
+def clip_raster_by_mask(input_raster, shapefile_layer, output_folder, output_filename):
     """
     Memotong citra sesuai dengan shaepfile poligon yang dibuat.
 
@@ -23,7 +23,6 @@ def clip_raster_by_mask(input_raster, shapefile_layer, output_filename):
         str: Output path.
     """
     # Tentukan lokasi hasil clip
-    output_folder = "Hasil/Clip"
     output_path = os.path.join(output_folder, output_filename)
     # Pastikan folder output ada, jika tidak, buat folder baru
     os.makedirs(output_folder, exist_ok=True)
@@ -34,10 +33,13 @@ def clip_raster_by_mask(input_raster, shapefile_layer, output_filename):
     print("Melakukan clipping raster...")
     with rasterio.open(input_raster) as src:
         # Dapatkan geometri dari GeoDataFrame dalam format yang dibutuhkan oleh rasterio
+        if src.nodata is not None:
+            nilai_nodata = src.nodata
+        else:
+            nilai_nodata = 0
         geometries = mask_gdf.geometry
-        # Lakukan masking
-        # crop=True akan memotong raster sesuai extent/bounding box dari mask
-        out_image, out_transform = mask(src, geometries, crop=True)
+        # Melakukan masking
+        out_image, out_transform = mask(src, geometries, crop=True, nodata=nilai_nodata)
         # Salin metadata dari raster asli
         out_meta = src.meta.copy()
     # Perbarui metadata dengan informasi dari hasil clip
@@ -45,7 +47,8 @@ def clip_raster_by_mask(input_raster, shapefile_layer, output_filename):
         "driver": "GTiff",
         "height": out_image.shape[1],
         "width": out_image.shape[2],
-        "transform": out_transform
+        "transform": out_transform,
+        "nodata": nilai_nodata
     })
     print("Menyimpan hasil clipping...")
     with rasterio.open(output_path, "w", **out_meta) as dest:
