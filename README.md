@@ -67,6 +67,17 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ---
 
 ## Changelogs
+### Versi 1.4.1 - 13 Oktober 2025
+* **Fitur Baru**:
+    * Menambahkan fitur ekstraksi nilai piksel berdasarkan verteks poligon.
+    * Memberikan fitur ekstraksi kemampuan untuk mengekstrak semua band dalam folder.
+    * Menyimpan hasil ekstraksi dalam sebuah file `.csv`
+* **Perbaikan Bug**:
+    * Mengubah lokasi folder hasil masking dan transformasi untuk memudahkan ekstraksi.
+    * Memperbaiki masalah file yang overwrite.
+    * Memperbaiki masalah NoData yang diekstrak ke `.csv`
+    * Memperbaiki urutan alfabetis kolom ekstraksi menjadi sesuai kebutuhan.
+    
 ### Versi 1.4 - 11 Oktober 2025
 * **Fitur Baru**:
     * Menambahkan fitur supaya pengguna dapat menentukan folder kerja di luar folder proyek ini.
