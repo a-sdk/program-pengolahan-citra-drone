@@ -8,6 +8,7 @@ import rasterio
 from rasterio.mask import mask
 import geopandas as gpd
 import os
+from mahotas.polygon import fill_polygon
 
 
 def clip_raster_by_mask(input_raster, shapefile_layer, output_folder, output_filename):
@@ -36,10 +37,15 @@ def clip_raster_by_mask(input_raster, shapefile_layer, output_folder, output_fil
         if src.nodata is not None:
             nilai_nodata = src.nodata
         else:
-            nilai_nodata = 0
+            nilai_nodata = -9999
         geometries = mask_gdf.geometry
         # Melakukan masking
-        out_image, out_transform = mask(src, geometries, crop=True, nodata=nilai_nodata)
+        out_image, out_transform = mask(src, geometries, crop=True)
+        out_image = out_image.astype("float32")
+        # Ganti nilai NoData di hasil dengan -9999
+        if nilai_nodata is not None:
+            out_image[out_image == nilai_nodata] = np.nan  # jika sumber punya nodata lama
+        out_image[np.isnan(out_image)] = -9999
         # Salin metadata dari raster asli
         out_meta = src.meta.copy()
     # Perbarui metadata dengan informasi dari hasil clip
@@ -48,7 +54,8 @@ def clip_raster_by_mask(input_raster, shapefile_layer, output_folder, output_fil
         "height": out_image.shape[1],
         "width": out_image.shape[2],
         "transform": out_transform,
-        "nodata": nilai_nodata
+        "nodata": -9999,
+        "dtype": "float32"
     })
     print("Menyimpan hasil clipping...")
     with rasterio.open(output_path, "w", **out_meta) as dest:
@@ -72,3 +79,17 @@ def mask_raster(input_raster, mask_array, nodata_value=-9999):
     hasil = np.full(input_raster.shape, nodata_value, dtype=np.float32)
     hasil[mask_array] = input_raster[mask_array]
     return hasil
+
+# Fungsi untuk membuat polygon sebagai grid titik
+def render(poly):
+    """
+    Membuat grid titik dari poligon berdasarkan koordinat piksel.
+    Mengembalikan daftar semua koordinat piksel (row, col) di dalam poligon.
+    """
+    xs, ys = zip(*poly)
+    minx, maxx = min(xs), max(xs)
+    miny, maxy = min(ys), max(ys)
+    newPoly = [(int(x - minx), int(y - miny)) for (x, y) in poly]
+    grid = np.zeros((maxx - minx + 1, maxy - miny + 1), dtype=np.int8)
+    fill_polygon(newPoly, grid)
+    return [(x + minx, y + miny) for (x, y) in zip(*np.nonzero(grid))]

@@ -5,7 +5,6 @@ menggunakan beberapa indeks vegetasi.
 
 # Libraries
 import numpy as np
-import rasterio
 
 def hitung_savi(nir_band, red_band, L):
     """
@@ -20,11 +19,11 @@ def hitung_savi(nir_band, red_band, L):
         np.ndarray: Array NumPy SAVI.
     """
     # Normalisasi nilai piksel
-    nir_band_norm = nir_band / 65535.0
-    red_band_norm = red_band / 65535.0
+    nir_band_norm = nir_band / np.float32(65535.0)
+    red_band_norm = red_band / np.float32(65535.0)
     # Hindari pembagian dengan nol
     with np.errstate(divide='ignore', invalid='ignore'):
-        savi = ((nir_band_norm.astype(rasterio.float64) - red_band_norm.astype(rasterio.float64)) * (1 + L)) / (nir_band_norm.astype(rasterio.float64) + red_band_norm.astype(rasterio.float64) + L) 
+        savi = ((nir_band_norm.astype("float32") - red_band_norm.astype("float32")) * (1 + L)) / (nir_band_norm.astype("float32") + red_band_norm.astype("float32") + L) 
         # savi = np.nan_to_num(savi, nan = 0) # Mengganti nilai NaN dengan 0 atau nilai lain
     return savi
 
@@ -39,11 +38,11 @@ def hitung_ndvi(nir_band, red_band):
     Returns:
         np.ndarray: Array NumPy NDVI.
     """
-    nir_band_norm = nir_band / 65535.0
-    red_band_norm = red_band / 65535.0
+    nir_band_norm = nir_band / np.float32(65535.0)
+    red_band_norm = red_band / np.float32(65535.0)
     # Hindari pembagian dengan nol
     with np.errstate(divide='ignore', invalid='ignore'):
-        ndvi = (nir_band_norm.astype(rasterio.float64) - red_band_norm.astype(rasterio.float64)) / (nir_band_norm.astype(rasterio.float64) + red_band_norm.astype(rasterio.float64))
+        ndvi = (nir_band_norm.astype("float32") - red_band_norm.astype("float32")) / (nir_band_norm.astype("float32") + red_band_norm.astype("float32"))
         # ndvi = np.nan_to_num(ndvi, nan = 0) # Mengganti nilai NaN dengan 0 atau nilai lain
     return ndvi
 
@@ -58,11 +57,11 @@ def hitung_gndvi(nir_band, green_band):
     Returns:
         np.ndarray: Array NumPy GNDVI.
     """
-    nir_band_norm = nir_band / 65535.0
-    green_band_norm = green_band / 65535.0
+    nir_band_norm = nir_band / np.float32(65535.0)
+    green_band_norm = green_band / np.float32(65535.0)
     # Hindari pembagian dengan nol
     with np.errstate(divide='ignore', invalid='ignore'):
-        gndvi = (nir_band_norm.astype(rasterio.float64) - green_band_norm.astype(rasterio.float64)) / (nir_band_norm.astype(rasterio.float64) + green_band_norm.astype(rasterio.float64))
+        gndvi = (nir_band_norm.astype("float32") - green_band_norm.astype("float32")) / (nir_band_norm.astype("float32") + green_band_norm.astype("float32"))
         # gndvi = np.nan_to_num(gndvi, nan = 0) # Mengganti nilai NaN dengan 0 atau nilai lain
     return gndvi
 
@@ -77,10 +76,10 @@ def hitung_ndrei(nir_band, red_edge_band):
     Returns:
         np.ndarray: Array NumPy NDRE.
     """
-    nir_band_norm = nir_band / 65535.0
-    red_edge_band_norm = red_edge_band / 65535.0
+    nir_band_norm = nir_band / np.float32(65535.0)
+    red_edge_band_norm = red_edge_band / np.float32(65535.0)
     # Hindari pembagian dengan nol
     with np.errstate(divide='ignore', invalid='ignore'):
-        ndre = (nir_band_norm.astype(rasterio.float64) - red_edge_band_norm.astype(rasterio.float64)) / (nir_band_norm.astype(rasterio.float64) + red_edge_band_norm.astype(rasterio.float64))
+        ndre = (nir_band_norm.astype("float32") - red_edge_band_norm.astype("float32")) / (nir_band_norm.astype("float32") + red_edge_band_norm.astype("float32"))
         # ndre = np.nan_to_num(ndre, nan = 0) # Mengganti nilai NaN dengan 0 atau nilai lain
     return ndre
