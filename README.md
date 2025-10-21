@@ -67,6 +67,13 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ---
 
 ## Changelogs
+### Versi 1.4.2 - 21 Oktober 2025
+* **Fitur Baru**:
+    * Memuat bagian untuk meminta folder dan file ke dalam fungsi `ambil_file()`.
+    * Menambahkan NDREI sebagai acuan thresholding untuk memisahkan antara tanaman dengan gulma.
+* **Perbaikan Bug**:
+    * Memperbaiki bug program terus berjalan meskipun folder atau file tidak valid. 
+ 
 ### Versi 1.4.1 - 13 Oktober 2025
 * **Fitur Baru**:
     * Menambahkan fitur ekstraksi nilai piksel berdasarkan verteks poligon.
