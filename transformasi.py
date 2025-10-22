@@ -1,5 +1,5 @@
 '''
-Pustaka untuk mentransformasi citra
+Modul untuk mentransformasi citra
 menggunakan beberapa indeks vegetasi.
 '''
 

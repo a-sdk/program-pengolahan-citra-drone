@@ -1,5 +1,5 @@
 '''
-Pustaka untuk memodifikasi ukuran dan mengekstrak fitur citra.
+Modul untuk memodifikasi ukuran dan mengekstrak fitur citra.
 '''
 
 # Libraries
@@ -11,7 +11,7 @@ import os
 from mahotas.polygon import fill_polygon
 
 
-def clip_raster_by_mask(input_raster, shapefile_layer, output_folder, output_filename):
+def clip_raster(input_raster, shapefile_layer, output_folder, output_filename):
     """
     Memotong citra sesuai dengan shaepfile poligon yang dibuat.
 
@@ -30,22 +30,24 @@ def clip_raster_by_mask(input_raster, shapefile_layer, output_folder, output_fil
     # Baca Shapefile Menggunakan GeoPandas
     print("Membaca shapefile...")
     mask_gdf = gpd.read_file(shapefile_layer)
+    nilai_nodata = -9999
     # Operasi clip
     print("Melakukan clipping raster...")
     with rasterio.open(input_raster) as src:
-        # Dapatkan geometri dari GeoDataFrame dalam format yang dibutuhkan oleh rasterio
-        if src.nodata is not None:
-            nilai_nodata = src.nodata
-        else:
-            nilai_nodata = -9999
+        nodata_citra = src.nodata
         geometries = mask_gdf.geometry
         # Melakukan masking
-        out_image, out_transform = mask(src, geometries, crop=True)
+        out_image, out_transform = mask(
+            src, 
+            geometries, 
+            crop=True,
+            nodata=nodata_citra,
+            filled=True
+            )
+        # Mengubah nilai 0 di luar hasil klip menjadi -9999
+        mask_luar_clip = (out_image == 0)
         out_image = out_image.astype("float32")
-        # Ganti nilai NoData di hasil dengan -9999
-        if nilai_nodata is not None:
-            out_image[out_image == nilai_nodata] = np.nan  # jika sumber punya nodata lama
-        out_image[np.isnan(out_image)] = -9999
+        out_image[mask_luar_clip] = nilai_nodata
         # Salin metadata dari raster asli
         out_meta = src.meta.copy()
     # Perbarui metadata dengan informasi dari hasil clip
@@ -54,8 +56,9 @@ def clip_raster_by_mask(input_raster, shapefile_layer, output_folder, output_fil
         "height": out_image.shape[1],
         "width": out_image.shape[2],
         "transform": out_transform,
-        "nodata": -9999,
-        "dtype": "float32"
+        "nodata": nilai_nodata,
+        "dtype": "float32",
+        "count": out_image.shape[0]
     })
     print("Menyimpan hasil clipping...")
     with rasterio.open(output_path, "w", **out_meta) as dest:

@@ -54,10 +54,6 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ## Struktur Proyek
 
     /program_pengolahan_citra_drone
-    ├── /Bahan/                     # File-file citra berformat `.tif`
-    │   └──Citra.tif                # Contoh file citra yang akan diproses
-    ├── /Shapefiles/                # File-file titik, garis, poligon
-    │   └── Poligon.shp             # Contoh file poligon untuk acuan ekstraksi
     ├── ekstraksi.py                # Program ekstrasi fitur citra.
     ├── program.py                  # Program utama.
     ├── program_arogansi.py         # Program untuk keperluan percobaan.
@@ -67,6 +63,15 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ---
 
 ## Changelogs
+### Versi 1.4.3 - 22 Oktober 2025
+* **Fitur Baru**:
+    * Menjadikan struktur proyek lebih fleksibel berdasarkan input pengguna.
+    * Memuat bagian untuk menampilkan histogram ke dalam fungsi `tampilkan_histogram()`.
+    * Menambahkan bagian untuk menampilkan hasil clipping.
+* **Perbaikan Bug**:
+    * Menghilangkan bounding box hitam di sekitar hasil clipping.
+    * Memperbaiki bug lonjakan nilai 0 pada histogram akibat nilai nodata yang dihitung pada saat transformasi.
+
 ### Versi 1.4.2 - 21 Oktober 2025
 * **Fitur Baru**:
     * Memuat bagian untuk meminta folder dan file ke dalam fungsi `ambil_file()`.

@@ -138,6 +138,21 @@ def otsu_threshold(input_raster, jumlah_bin=256, rentang_nilai=(-1, 1)):
 
     return threshold
 
+# Fungsi menampilkan histogram 
+def tampilan_histogram(nama, data, threshold):
+    # Membuat histogram untuk menampilkan data piksel SAVI
+    print("Menampilkan histogram...")
+    plt.figure(figsize=(10, 6))
+    plt.hist(data, bins=100, color='lightgreen', edgecolor='black')
+    plt.title(f"Histogram Nilai {nama}")
+    plt.xlabel(f"Nilai {nama}")
+    plt.ylabel("Frekuensi Piksel")
+    plt.grid(True, alpha=0.5)
+    # Menggunakan bantuan garis vertikal untuk threshold
+    plt.axvline(x=threshold, color='r', linestyle='--', label=f'Threshold = {threshold}')
+    plt.legend()
+    plt.show()
+
 
 ########################################################
 #
@@ -148,13 +163,6 @@ t0 = time.perf_counter()
 # ---- MENENTUKAN FOLDER KERJA ----
 raster_input, lokasi_folder_raster = ambil_file("tif")
 shp_input, lokasi_folder_shp = ambil_file("shp")
-# Cek apakah file di dalam folder ditemukan
-if not raster_input:
-    print("Tidak ada file .tif ditemukan di folder tersebut.")
-
-if not shp_input:
-    print("Tidak ada file .shp ditemukan di folder tersebut.")
-
 # Menampilkan file .tif dalam folder 
 print(f"\nDaftar File '.tif' dalam Folder {lokasi_folder_raster}")
 c1 = c2 = 1
@@ -177,12 +185,10 @@ shp_idx = int(input(f"Pilih file .shp (1-{len(shp_input)}): "))
 shp_target = shp_input[shp_idx - 1]
 print(f"Memproses {shp_target}...")
 
-
 # ---- PROSES CLIPPING AWAL ----
 # ---- MENGAMBIL PETAKAN SAWAH BERDASARKAN POLIGON ----
-clipped_file_path = ekstraksi.clip_raster_by_mask(raster_target, shp_target, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Clip", f"{nf_raster}_clip.tif")
+clipped_file_path = ekstraksi.clip_raster(raster_target, shp_target, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Clip", f"{nf_raster}_clip.tif")
 # Mengakses citra beserta band yang diperlukan 
-print("\nMembaca band yang diperlukan...")
 with rio.open(clipped_file_path) as src_citra:
     # Membaca data setiap band
     red = src_citra.read(1)
@@ -192,36 +198,34 @@ with rio.open(clipped_file_path) as src_citra:
     m_red = src_citra.read(5)
     red_edge = src_citra.read(6)
     nir = src_citra.read(7)
-    # Membaca mask yang berisi data
-    valid_mask = src_citra.read_masks(1) > 0
+    nodata_asli = src_citra.nodata
+    # Memisahkan bagian yang tidak valid
+    mask_citra = src_citra.read_masks(1)
+    invalid_mask = (mask_citra == 0)
     # Membuat metadata profile
     profile = src_citra.profile
-
+# Menampilkan mask citra hasil clipping
+plt.figure(figsize=(8, 6)) # Tambahkan ini untuk ukuran plot yang lebih baik
+plt.title("Tampilan Mask Hasil Clipping")
+plt.imshow(mask_citra, cmap='gray') 
+plt.show()
+print("\nMembaca band yang diperlukan...")
 
 # ---- PROSES SEGMENTASI ----
 # ---- Menghitung SAVI ----
 # Mentransformasi citra menggunakan SAVI dan NDREI
-print("\nMenghitung SAVI untuk thresholding...")
-transform_savi_thresholding = transformasi.hitung_savi(nir, m_red, L=0.5)
-transform_ndrei_thresholding = transformasi.hitung_ndrei(nir, red_edge)
-# ---- Membaca SAVI dan menampilkan histogram ----
-# Mengubah bagian yang bukan data menjadi NaN
-transform_savi_thresholding[~valid_mask] = np.nan
-transform_ndrei_thresholding[~valid_mask] = np.nan
+# Mengeliminasi nodata dari band untuk perhitungan 
+nir_valid = np.ma.masked_array(nir, mask=invalid_mask)
+m_red_valid = np.ma.masked_array(m_red, mask=invalid_mask)
+red_edge_valid = np.ma.masked_array(red_edge, mask=invalid_mask)
+print("\nMenghitung SAVI dan NDREI untuk thresholding...")
+transform_savi_thresholding = transformasi.hitung_savi(nir_valid, m_red_valid, L=0.5)
+transform_ndrei_thresholding = transformasi.hitung_ndrei(nir_valid, red_edge_valid)
+# ---- Membaca SAVI dan NDREI lalu menampilkan histogram ----
 # Mengubah array 2D menjadi 1D agar mudah diplot
-savi_1d = transform_savi_thresholding[~np.isnan(transform_savi_thresholding)] # Ambil nilai yang bukan NaN
-# Membuat histogram untuk menampilkan data piksel SAVI
-print("Menampilkan histogram...")
-plt.figure(figsize=(10, 6))
-plt.hist(savi_1d, bins=100, color='lightgreen', edgecolor='black')
-plt.title('Histogram Nilai SAVI')
-plt.xlabel('Nilai SAVI')
-plt.ylabel('Frekuensi Piksel')
-plt.grid(True, alpha=0.5)
-# Menggunakan bantuan garis vertikal untuk threshold
-plt.axvline(x=0.2, color='r', linestyle='--', label='Contoh Threshold = 0.2')
-plt.legend()
-# plt.show()
+savi_1d = transform_savi_thresholding.ravel() 
+ndrei_1d = transform_ndrei_thresholding.ravel()
+
 # Menyimpan hasil transformasi ke dalam file GeoTIFF
 savi_file_path = simpan_raster(transform_savi_thresholding, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Thresholding", "threshold_SAVI.tif", nodata_value=-9999)
 ndrei_file_path = simpan_raster(transform_ndrei_thresholding, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Thresholding", "threshold_NDREI.tif", nodata_value=-9999)
@@ -241,6 +245,8 @@ with rio.open(savi_file_path) as src_savi, rio.open(ndrei_file_path) as src_ndre
 # else :
 t_savi = otsu_threshold(savi, jumlah_bin=256, rentang_nilai=(-1, 1))
 t_ndrei = otsu_threshold(ndrei, jumlah_bin=256, rentang_nilai=(-1,1))
+tampilan_histogram("SAVI", savi_1d, t_savi)
+tampilan_histogram("NDREI", ndrei_1d, t_ndrei)
 mask_savi = savi > t_savi
 print(f"Melakukan thresholding SAVI dengan batas {t_savi}...")
 ndre_masked = np.where(mask_savi, ndrei, np.nan)
@@ -312,7 +318,7 @@ savi_file_path = simpan_raster(transform_savi, profile, rf"{lokasi_folder_raster
 
 # ---- PROSES EKSTRAKSI ----
 # --- Menentukan lokasi file ----
-csv_path = input("\nMasukkan path file verteks poligon (.csv): ")  # File verteks poligon
+csv_path = input("Path file csv: ")  # File verteks poligon
 folder_ekstraksi = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi" # Folder tempat citra akan diekstrak
 file_ekstraksi = glob.glob(os.path.join(folder_ekstraksi, "*tif"))  # File .tif yang ingin dibaca
 # --- Membaca file verteks ----
