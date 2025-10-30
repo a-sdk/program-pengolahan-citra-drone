@@ -54,15 +54,26 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ## Struktur Proyek
 
     /program_pengolahan_citra_drone
-    ├── ekstraksi.py                # Program ekstrasi fitur citra.
-    ├── program.py                  # Program utama.
-    ├── program_arogansi.py         # Program untuk keperluan percobaan.
-    └── transformasi.py             # Program transformasi indeks vegetasi.
+    ├── ekstraksi.py                    # Program ekstrasi fitur citra.
+    ├── model_random_forest_0.joblib    # Model klasifikasi padi dan gulma.
+    ├── program.py                      # Program utama.
+    ├── program_arogansi.py             # Program untuk keperluan percobaan.
+    ├── segmentasi_gulma.py             # Program menjalankan klasifikasi padi dan gulma.
+    └── transformasi.py                 # Program transformasi indeks vegetasi.
 
 
 ---
 
 ## Changelogs
+### Versi 1.4.4 - 30 Oktober 2025
+* **Fitur Baru**:
+    * Memodifikasi fungsi `ambil_file()` supaya menampilkan daftar file yang relevan.
+    * Menambahkan fungsi `tumpuk_fitur()` untuk menumpuk semua fitur berdasarkan list.
+    * Menambahkan `model_random_forest_0.joblib` sebagai model klasifikasi padi dan gulma.
+    * Menambahkan `segmentasi_gulma.py` untuk menjalankan klasifikasi pad dan gulma.
+* **Perbaikan Bug**:
+    * Mengganti nilai nodata menjadi NaN dari sebelumnya -9999 untuk menghindari galat.
+    
 ### Versi 1.4.3 - 22 Oktober 2025
 * **Fitur Baru**:
     * Menjadikan struktur proyek lebih fleksibel berdasarkan input pengguna.

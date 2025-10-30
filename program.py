@@ -1,5 +1,6 @@
 import ekstraksi
 import transformasi
+from segmentasi_gulma import pisahkan_gulma
 
 import numpy as np
 import pandas as pd
@@ -23,7 +24,7 @@ def ambil_file(ekstensi):
         list: File target dan lokasi folder
     """
     while True:
-        lokasi_folder = input(f"Masukkan path folder berisi file .{ekstensi}: ").strip('"').strip("'")
+        lokasi_folder = input(f"\nMasukkan path folder berisi file .{ekstensi}: ").strip('"').strip("'")
         if  not os.path.isdir(lokasi_folder):
             print(f"Folder tidak ditemukan: {lokasi_folder}")
             print("Silahkan dicek dahulu.")
@@ -35,6 +36,12 @@ def ambil_file(ekstensi):
             print("Silahkan dicek dahulu.")
         else:
             print(f"Ditemukan {len(file_target)} file .{ekstensi} di folder {lokasi_folder}")
+            # Menampilkan file dalam folder 
+            print(f"Daftar File '.{ekstensi}' dalam Folder {lokasi_folder}")
+            c = 1
+            for files in file_target:
+                print(f"\t {c}) {files}")
+                c += 1
             return file_target, lokasi_folder
 
 # Fungsi untuk memeriksa ukuran raster
@@ -139,9 +146,20 @@ def otsu_threshold(input_raster, jumlah_bin=256, rentang_nilai=(-1, 1)):
     return threshold
 
 # Fungsi menampilkan histogram 
-def tampilan_histogram(nama, data, threshold):
+def tampilkan_histogram(nama, data, threshold):
+    """
+    Menampilkan histogram dari hasil perhitungan transformasi indeks vegetasi.
+
+    Args:
+        nama (str): Nama transformasi indeks vegetasi yang digunakan.
+        data (np.ndarray): Array NumPy yang akan ditampilkan.
+        threshold (float): Batas yang ditentukan.
+        
+    Returns:
+        None.
+    """
     # Membuat histogram untuk menampilkan data piksel SAVI
-    print("Menampilkan histogram...")
+    print(f"Menampilkan histogram {nama}...")
     plt.figure(figsize=(10, 6))
     plt.hist(data, bins=100, color='lightgreen', edgecolor='black')
     plt.title(f"Histogram Nilai {nama}")
@@ -153,6 +171,43 @@ def tampilan_histogram(nama, data, threshold):
     plt.legend()
     plt.show()
 
+# Fungsi menumpuk semua fitur (band)
+def tumpuk_fitur(list_fitur, output_folder):
+    """
+    Menumpuk seluruh band atau fitur menjadi array tiga dimensi.
+
+    Args:
+        list_fitur (list): List fitur-fitur yang akan ditumpuk.
+        output_folder (str): Nama folder tempat file akan disimpan.
+        
+    Returns:
+        str: Output path.
+    """
+    # Baca semua file dan kumpulkan datanya
+    feature_stack = []
+    profile = None # Kita akan ambil metadata dari file pertama
+
+    for fitur in list_fitur:
+        with rio.open(fitur) as src:
+            if profile is None:
+                profile = src.profile
+            
+            # Baca semua band dari file ini
+            feature_stack.append(src.read())
+
+    # Gabungkan semua data menjadi satu array NumPy besar
+    full_stack_array = np.vstack(feature_stack)
+
+    # Perbarui profile untuk file stack baru
+    total_bands = full_stack_array.shape[0]
+    profile.update(count=total_bands, nodata=np.nan) 
+
+    # Tulis ke file stack baru
+    with rio.open(output_folder, 'w', **profile) as dst:
+        dst.write(full_stack_array)
+
+    print(f"Selesai! Tumpukan fitur dengan {total_bands} band disimpan di: {output_folder}")
+    return output_folder
 
 ########################################################
 #
@@ -162,26 +217,14 @@ def tampilan_histogram(nama, data, threshold):
 t0 = time.perf_counter()
 # ---- MENENTUKAN FOLDER KERJA ----
 raster_input, lokasi_folder_raster = ambil_file("tif")
-shp_input, lokasi_folder_shp = ambil_file("shp")
-# Menampilkan file .tif dalam folder 
-print(f"\nDaftar File '.tif' dalam Folder {lokasi_folder_raster}")
-c1 = c2 = 1
-for raster in raster_input:
-    print(f"\t {c1}) {raster}")
-    c1 += 1
 # Menentukan file .tif yang diproses berdasarkan input pengguna
-raster_idx = int(input(f"Pilih file .tif (1-{len(raster_input)}): "))
+raster_idx = int(input(f"Pilih file .tif: "))
 raster_target = raster_input[raster_idx - 1]
 nf_raster = os.path.splitext(os.path.basename(raster_target))[0]
 print(f"Memproses {raster_target}...")
-# Menampilkan file .shp dalam folder
-print(f"\nDaftar File '.shp' dalam Folder {lokasi_folder_shp}")
-for shp in shp_input:
-    print(f"\t {c2}) {shp}")
-    c2 += 1
 # Menentukan file .shp yang diproses berdasarkan input pengguna
-print("Silahkan pilih file .shp untuk clipping")
-shp_idx = int(input(f"Pilih file .shp (1-{len(shp_input)}): "))
+shp_input, lokasi_folder_shp = ambil_file("shp")
+shp_idx = int(input(f"Pilih file .shp untuk clipping: "))
 shp_target = shp_input[shp_idx - 1]
 print(f"Memproses {shp_target}...")
 
@@ -218,44 +261,57 @@ print("\nMembaca band yang diperlukan...")
 nir_valid = np.ma.masked_array(nir, mask=invalid_mask)
 m_red_valid = np.ma.masked_array(m_red, mask=invalid_mask)
 red_edge_valid = np.ma.masked_array(red_edge, mask=invalid_mask)
-print("\nMenghitung SAVI dan NDREI untuk thresholding...")
+m_green_valid = np.ma.masked_array(m_green, mask=invalid_mask)
+print("Menghitung SAVI dan NDREI untuk thresholding...")
 transform_savi_thresholding = transformasi.hitung_savi(nir_valid, m_red_valid, L=0.5)
 transform_ndrei_thresholding = transformasi.hitung_ndrei(nir_valid, red_edge_valid)
+transform_ndvi_thresholding = transformasi.hitung_ndvi(nir_valid, m_red_valid)
+transform_gndvi_thresholding = transformasi.hitung_gndvi(nir_valid, m_green_valid)
 # ---- Membaca SAVI dan NDREI lalu menampilkan histogram ----
 # Mengubah array 2D menjadi 1D agar mudah diplot
 savi_1d = transform_savi_thresholding.ravel() 
 ndrei_1d = transform_ndrei_thresholding.ravel()
-
 # Menyimpan hasil transformasi ke dalam file GeoTIFF
-savi_file_path = simpan_raster(transform_savi_thresholding, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Thresholding", "threshold_SAVI.tif", nodata_value=-9999)
-ndrei_file_path = simpan_raster(transform_ndrei_thresholding, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Thresholding", "threshold_NDREI.tif", nodata_value=-9999)
+savi_file_path = simpan_raster(transform_savi_thresholding, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Thresholding", "threshold_SAVI.tif", nodata_value=np.nan)
+ndrei_file_path = simpan_raster(transform_ndrei_thresholding, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Thresholding", "threshold_NDREI.tif", nodata_value=np.nan)
+ndvi_file_path = simpan_raster(transform_ndvi_thresholding, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Thresholding", "threshold_NDVI.tif", nodata_value=np.nan)
+gndvi_file_path = simpan_raster(transform_gndvi_thresholding, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Thresholding", "threshold_GNDVI.tif", nodata_value=np.nan)
 # ---- Melakukan thresholding ----
-print("Memuat file SAVI dan NDREI...")
-with rio.open(savi_file_path) as src_savi, rio.open(ndrei_file_path) as src_ndrei:
+# Menumpuk fitur untuk segmentasi gulma
+lst_fitur = [
+    clipped_file_path,
+    gndvi_file_path,
+    ndrei_file_path,
+    ndvi_file_path,
+    savi_file_path
+]
+lokasi_fitur_stack = tumpuk_fitur(lst_fitur, output_folder=rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Thresholding\tumpukan_fitur.tif")
+# Membuat peta segmentasi gulma dan padi
+peta_segmentasi_gulma = pisahkan_gulma(model_path="model_random_forest_0.joblib", stack_path=lokasi_fitur_stack, output_folder=rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Thresholding\segmentasi_gulma.tif")
+print("Memuat file SAVI...")
+with rio.open(savi_file_path) as src_savi, rio.open(peta_segmentasi_gulma) as src_gulma, rio.open(ndrei_file_path) as src_ndrei:
     savi = src_savi.read(1).astype("float32")
     ndrei = src_ndrei.read(1).astype("float32")
+    mask_padi = src_gulma.read(1).astype("float32") < 2
     savi_nodata = src_savi.nodata
-    ndrei_nodata = src_ndrei.nodata
-# Menentukan threshold vegetasi
-# opsi_thresholding = input("Tentukan sendiri nilai threshold? (y/n): ")
-# if opsi_thresholding == "y":
-#     manual_threshold = float(input("Masukkan nilai threshold: "))
-#     thresholding = savi > manual_threshold
-#     print(f"Melakukan thresholding dengan batas {manual_threshold}...")
-# else :
 t_savi = otsu_threshold(savi, jumlah_bin=256, rentang_nilai=(-1, 1))
-t_ndrei = otsu_threshold(ndrei, jumlah_bin=256, rentang_nilai=(-1,1))
-tampilan_histogram("SAVI", savi_1d, t_savi)
-tampilan_histogram("NDREI", ndrei_1d, t_ndrei)
+t_ndrei = -0.05
+# Menampilkan histogram SAVI
+tampilkan_histogram("SAVI", savi_1d, t_savi)
+tampilkan_histogram("NDREI", ndrei_1d, t_ndrei)
 mask_savi = savi > t_savi
+mask_ndrei = ndrei > t_ndrei
+mask_final = mask_savi & mask_padi
+mask_final_indeks = mask_savi & mask_ndrei
 print(f"Melakukan thresholding SAVI dengan batas {t_savi}...")
-ndre_masked = np.where(mask_savi, ndrei, np.nan)
-mask_ndrei = ndre_masked > t_ndrei
-print(f"Melakukan thresholding NDREI dengan batas {t_ndrei}...")
-mask_final = mask_savi & mask_ndrei
 hasil_threshold = mask_final.astype("float32")
+hasil_threshold_2 = mask_final_indeks.astype("float32")
 # Menyimpan hasil threshold
-threshold_file_path = simpan_raster(hasil_threshold, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Thresholding", "hasil_threshold.tif", nodata_value=savi_nodata)
+threshold_file_path = simpan_raster(hasil_threshold, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Thresholding", "hasil_threshold_model.tif", nodata_value=savi_nodata)
+threshold2_file_path = simpan_raster(hasil_threshold_2, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Thresholding", "hasil_threshold_indeks.tif", nodata_value=savi_nodata)
+os.remove(lokasi_fitur_stack)
+os.remove(gndvi_file_path)
+os.remove(ndvi_file_path)
 
 # ---- Melakukan masking ----
 # Masking kanal green, red, red_edge, dan nir
@@ -265,21 +321,21 @@ with rio.open(threshold_file_path) as src_mask:
 masking_vegetasi = (threshold_mask == 1)
 # Menerapkan mask
 print("Melakukan masking...")
-hasil_masking_red = ekstraksi.mask_raster(red, masking_vegetasi, nodata_value=-9999)
-hasil_masking_green = ekstraksi.mask_raster(green, masking_vegetasi, nodata_value=-9999)
-hasil_masking_blue = ekstraksi.mask_raster(blue, masking_vegetasi, nodata_value=-9999)
-hasil_masking_m_green = ekstraksi.mask_raster(m_green, masking_vegetasi, nodata_value=-9999)
-hasil_masking_m_red = ekstraksi.mask_raster(m_red, masking_vegetasi, nodata_value=-9999)
-hasil_masking_red_edge = ekstraksi.mask_raster(red_edge, masking_vegetasi, nodata_value=-9999)
-hasil_masking_nir = ekstraksi.mask_raster(nir, masking_vegetasi, nodata_value=-9999)
+hasil_masking_red = ekstraksi.mask_raster(red, masking_vegetasi, nodata_value=np.nan)
+hasil_masking_green = ekstraksi.mask_raster(green, masking_vegetasi, nodata_value=np.nan)
+hasil_masking_blue = ekstraksi.mask_raster(blue, masking_vegetasi, nodata_value=np.nan)
+hasil_masking_m_green = ekstraksi.mask_raster(m_green, masking_vegetasi, nodata_value=np.nan)
+hasil_masking_m_red = ekstraksi.mask_raster(m_red, masking_vegetasi, nodata_value=np.nan)
+hasil_masking_red_edge = ekstraksi.mask_raster(red_edge, masking_vegetasi, nodata_value=np.nan)
+hasil_masking_nir = ekstraksi.mask_raster(nir, masking_vegetasi, nodata_value=np.nan)
 # Menyimpan raster hasil masking
-red_mask_path = simpan_raster(hasil_masking_red, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "RED.tif", nodata_value=-9999)
-green_mask_path = simpan_raster(hasil_masking_green, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "GREEN.tif", nodata_value=-9999)
-blue_mask_path = simpan_raster(hasil_masking_blue, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "BLUE.tif", nodata_value=-9999)
-m_green_mask_path = simpan_raster(hasil_masking_m_green, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "M_GREEN.tif", nodata_value=-9999)
-m_red_mask_path = simpan_raster(hasil_masking_m_red, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "M_RED.tif", nodata_value=-9999)
-red_edge_mask_path = simpan_raster(hasil_masking_red_edge, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "RED_EDGE.tif", nodata_value=-9999)
-nir_mask_path = simpan_raster(hasil_masking_nir, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "NIR.tif", nodata_value=-9999)
+red_mask_path = simpan_raster(hasil_masking_red, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "RED.tif", nodata_value=np.nan)
+green_mask_path = simpan_raster(hasil_masking_green, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "GREEN.tif", nodata_value=np.nan)
+blue_mask_path = simpan_raster(hasil_masking_blue, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "BLUE.tif", nodata_value=np.nan)
+m_green_mask_path = simpan_raster(hasil_masking_m_green, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "M_GREEN.tif", nodata_value=np.nan)
+m_red_mask_path = simpan_raster(hasil_masking_m_red, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "M_RED.tif", nodata_value=np.nan)
+red_edge_mask_path = simpan_raster(hasil_masking_red_edge, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "RED_EDGE.tif", nodata_value=np.nan)
+nir_mask_path = simpan_raster(hasil_masking_nir, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "NIR.tif", nodata_value=np.nan)
 
 
 # ---- PROSES TRANSFORMASI ----
@@ -294,25 +350,25 @@ with rio.open(m_green_mask_path) as src_m_green_mask, rio.open(m_red_mask_path) 
 # Mentransformasi citra menggunakan NDVI
 print("Menghitung NDVI...")
 transform_ndvi = transformasi.hitung_ndvi(nir_masked, m_red_masked)
-transform_ndvi[(nir_masked == -9999) | (m_red_masked == -9999)] = -9999
+# transform_ndvi[(nir_masked == -9999) | (m_red_masked == -9999)] = -9999
 # Menyimpan hasil transformasi
 ndvi_file_path = simpan_raster(transform_ndvi, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "NDVI.tif")
 # Mentransformasi citra menggunakan GNDVI
 print("Menghitung GNDVI...")
 transform_gndvi = transformasi.hitung_gndvi(nir_masked, m_green_masked)
-transform_ndvi[(nir_masked == -9999) | (m_green_masked == -9999)] = -9999
+# transform_ndvi[(nir_masked == -9999) | (m_green_masked == -9999)] = -9999
 # Menyimpan hasil transformasi
 gndvi_file_path = simpan_raster(transform_ndvi, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "GNDVI.tif")
 # Mentransformasi citra menggunakan NDREI
 print("Menghitung NDREI...")
 transform_ndrei = transformasi.hitung_ndrei(nir_masked, red_edge_masked)
-transform_ndrei[(nir_masked == -9999) | (red_edge_masked == -9999)] = -9999
+# transform_ndrei[(nir_masked == -9999) | (red_edge_masked == -9999)] = -9999
 # Menyimpan hasil transformasi
 ndrei_file_path = simpan_raster(transform_ndrei, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "NDREI.tif")
 # Mentransformasi citra menggunakan SAVI
 print("Menghitung SAVI...")
 transform_savi = transformasi.hitung_savi(nir_masked, m_red_masked, L=0.5)
-transform_savi[(nir_masked == -9999) | (m_red_masked == -9999)] = -9999
+# transform_savi[(nir_masked == -9999) | (m_red_masked == -9999)] = -9999
 # Menyimpan hasil transformasi
 savi_file_path = simpan_raster(transform_savi, profile, rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking dan Transformasi", "SAVI.tif")
 

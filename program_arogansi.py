@@ -7,7 +7,36 @@ import glob
 import os
 import matplotlib.pyplot as plt
 import time
+import sys
 from tqdm import tqdm
+
+# Fungsi untuk meminta folder path
+def ambil_file(ekstensi):
+    """
+    Mengambil file dengan ekstensi tertentu
+    dalam suatu folder berdasarkan input.
+
+    Args:
+        ekstensi (str): Ekstensi file yang diambil.
+
+    Returns:
+        list: File target dan lokasi folder
+    """
+    while True:
+        lokasi_folder = input(f"Masukkan path folder berisi file .{ekstensi}: ").strip('"').strip("'")
+        if  not os.path.isdir(lokasi_folder):
+            print(f"Folder tidak ditemukan: {lokasi_folder}")
+            print("Silahkan dicek dahulu.")
+            continue
+        folder_target = os.path.join(lokasi_folder, f"*.{ekstensi}")
+        file_target = glob.glob(folder_target)
+        if not file_target:
+            print(f"Tidak ada file .{ekstensi} ditemukan di folder tersebut.")
+            print("Silahkan dicek dahulu.")
+        else:
+            print(f"Ditemukan {len(file_target)} file .{ekstensi} di folder {lokasi_folder}")
+            return file_target, lokasi_folder
+
 
 # Fungsi untuk memeriksa ukuran raster
 def cek_ukuran_raster(input_raster):
@@ -131,52 +160,78 @@ def proses_transformasi_citra(raster_data, folder_output):
     ndrei_file_path = simpan_raster(transform_ndrei, profile, rf"{folder_output}\Hasil\Transformasi\NDREI", f"{nf_raster}_NDREI.tif")
     print("Transformasi selesai")
 
+# Fungsi untuk melakukan clipping
+def proses_clipping_citra(raster_data, shapefile_layer, folder_output):
+    nf_raster = os.path.splitext(os.path.basename(raster_data))[0]
+    clipped_file_path = ekstraksi.clip_raster(raster_data, shapefile_layer, folder_output, f"{nf_raster}_clip.tif")
+
 ########################################################
 #
 #            PROGRAM UTAMA
 #
 ##########################################################
 t0 = time.perf_counter()
-# ---- Menetukan folder kerja ----
-# Menentukan lokasi folder, file, dan shapefile yang digunakan
-# Memeriksa folder atau file yang akan diproses
-try:
-    lokasi_folder_raster = input("Masukkan path folder berisi file .tif: ")
-    # nama_folder_shp = input("Masukkan path folder berisi file .shp: ")
-    print("Memeriksa folder...")
-
-    # Cek apakah folder ada
-    if not os.path.isdir(lokasi_folder_raster):
-        raise FileNotFoundError(f"Folder raster tidak ditemukan: {lokasi_folder_raster}")
-    # if not os.path.isdir(nama_folder_shp):
-        raise FileNotFoundError(f"Folder shapefile tidak ditemukan: {nama_folder_shp}")
-
-    # Ambil semua file .tif dan .shp
-    folder_raster = os.path.join(lokasi_folder_raster, "*.tif")
-    # folder_shp_path = os.path.join(nama_folder_shp, "*.shp")
-
-    raster_input = glob.glob(folder_raster)
-    # shp_input = glob.glob(folder_shp_path)
-
-    # Cek apakah file di dalam folder ditemukan
-    if not raster_input:
-        print("Tidak ada file .tif ditemukan di folder tersebut.")
-    # if not shp_input:
-        print("Tidak ada file .shp ditemukan di folder tersebut.")
-
-except FileNotFoundError as e:
-    print(e)
-
+raster_input, lokasi_folder_raster = ambil_file("tif")
+shp_input, lokasi_folder_shp = ambil_file("shp")
 while True: 
-    print("Tidak ada masalah ditemukan.")
-    raster_input = glob.glob(folder_raster)
     print("\nPROGRAM PENGOLAHAN CITRA MULTISPEKTRAL")
     print("\n1. Clip Raster")
     print("2. Segmentasi")
     print("3. Transformasi")
     pilih_proses = int(input("Pilih proses (1-3): "))
+    # CLIP RASTER
+    if pilih_proses == 1:
+        print("=================== CLIP RASTER ===================")
+        print("Pilih mode:")
+        print("1. Proses satu file dalam folder")
+        print("2. Proses semua file dalam folder (batch)")
+        mode = int(input("Pilih mode (1/2): "))
+        # Mode 1 Jalankan pemrosesan satuan
+        if mode == 1: 
+            # Menampilkan file yang relevan pada folder 
+            print("Daftar File '.tif' dalam Folder")
+            c1 = c2 = 1
+            for i in raster_input:
+                print(f"\t {c1}) {i}")
+                c1 += 1
+            # Menentukan file .tif yang diproses berdasarkan input pengguna
+            raster_idx = int(input(f"Pilih file .tif (1-{len(raster_input)}): "))
+            raster_pilihan = raster_input[raster_idx - 1]
+            # Menampilkan file .shp dalam folder
+            print(f"\nDaftar File '.shp' dalam Folder {lokasi_folder_shp}")
+            for shp in shp_input:
+                print(f"\t {c2}) {shp}")
+                c2 += 1
+            # Menentukan file .shp yang diproses berdasarkan input pengguna
+            print("Silahkan pilih file .shp untuk clipping")
+            shp_idx = int(input(f"Pilih file .shp (1-{len(shp_input)}): "))
+            shp_target = shp_input[shp_idx - 1]
+            print(f"Memproses {shp_target}...")
+            proses_clipping_citra(raster_pilihan, shp_target, r"C:\Users\acer_\Documents\Hasil Clip\Lahan 1")
+        # Mode 2 Jalankan pemrosesan batch
+        elif mode == 2:
+            print("Daftar File '.tif' dalam Folder")
+            c1 = c2 = 1
+            for i in raster_input:
+                print(f"\t {c1}) {i}")
+                c1 += 1
+            # Menampilkan file .shp dalam folder
+            print(f"\nDaftar File '.shp' dalam Folder {lokasi_folder_shp}")
+            for shp in shp_input:
+                print(f"\t {c2}) {shp}")
+                c2 += 1
+            # Menentukan file .shp yang diproses berdasarkan input pengguna
+            print("Silahkan pilih file .shp untuk clipping")
+            shp_idx = int(input(f"Pilih file .shp (1-{len(shp_input)}): "))
+            shp_target = shp_input[shp_idx - 1]
+            print(f"Memproses {shp_target}...")
+            # Memproses semua file .tif dalam folder
+            for raster in tqdm(raster_input, "\nMemproses ", unit="file"):
+                proses_clipping_citra(raster, shp_target, r"C:\Users\acer_\Documents\Hasil Clip\Lahan 1")
+    sys.exit(0)
+    # TRANSFORMASI CITRA
     if pilih_proses == 3:
-        print("=================== Transformasi SAVI, NDVI, GNDVI, NDREI ===================")
+        print("=================== TRANSFORMASI SAVI, NDVI, GNDVI, NDREI ===================")
         print("Pilih mode:")
         print("1. Proses satu file dalam folder")
         print("2. Proses semua file dalam folder (batch)")
@@ -203,7 +258,16 @@ while True:
             # Memproses semua file .tif dalam folder
             for raster in tqdm(raster_input, "\nMemproses ", unit="file"):
                 proses_transformasi_citra(raster, lokasi_folder_raster)
-    exit()
+    sys.exit(0)
+
+    t1 = time.perf_counter()
+    t = t1 - t0
+    if t < 60:
+        print(f"\nSelesai dalam {t: 3.2f} detik")
+    else:
+        menit = int(t // 60)
+        ts = t % 60
+        print(f"\nSelesai dalam {menit:d} menit {ts: 3.2f} detik")
 
 
 

@@ -30,7 +30,7 @@ def clip_raster(input_raster, shapefile_layer, output_folder, output_filename):
     # Baca Shapefile Menggunakan GeoPandas
     print("Membaca shapefile...")
     mask_gdf = gpd.read_file(shapefile_layer)
-    nilai_nodata = -9999
+    nilai_nodata = np.nan
     # Operasi clip
     print("Melakukan clipping raster...")
     with rasterio.open(input_raster) as src:
@@ -67,7 +67,7 @@ def clip_raster(input_raster, shapefile_layer, output_folder, output_filename):
     return output_path
 
 # Fungsi untuk melakukan masking
-def mask_raster(input_raster, mask_array, nodata_value=-9999):
+def mask_raster(input_raster, mask_array, nodata_value=np.nan):
     """
     Menerapkan masking pada array berdasarkan mask boolean.
     
