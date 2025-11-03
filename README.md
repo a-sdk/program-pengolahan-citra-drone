@@ -65,6 +65,23 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ---
 
 ## Changelogs
+### Versi 1.4.5 - 03 November 2025
+* **Fitur Baru**:
+    * Membuat dua opsi alur kerja antara fitur terpisah atau tumpukan fitur.
+    * Memuat proses ektraksi nilai piksel ke dalam fungsi.
+    * Merapikan folder hasil dari masing-masing proses pengolahan.
+    * Memindahkan fungsi utilitas ke file `utils.py`.
+    * Memisahkan setiap band ke file terpisah beserta hasil transformasi indeks.
+    * Memodifikasi fungsi `mask_raster()` menjadi `mask_band_terpisah()` untuk melakukan masking pada file terpisah.
+    * Mengubah alur kerja menjadi: 
+        clip -> transformasi -> segmentasi -> masking -> ektraksi.
+    * Memodifikasi folder hasil dari setiap langkah sesuai dengan perubahan alur kerja.
+    * Memodifikasi fungsi masking dan ekstraksi supaya menampilkan jumlah piksel yang valid dan jumlah piksel yang diekstrak.
+    * Menambahkan visualisasi progress bar ke fungsi `ekstrak_tumpukan_fitur()`.
+    * Memuat proses transformasi dan segmentasi ke dalam fungsi di modul `transformasi.py`.
+* **Perbaikan Bug**:
+    * Memodfikasi fungsi `clip_raster()` supaya nilai piksel 0 tidak hilang.
+
 ### Versi 1.4.4 - 30 Oktober 2025
 * **Fitur Baru**:
     * Memodifikasi fungsi `ambil_file()` supaya menampilkan daftar file yang relevan.

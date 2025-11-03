@@ -1,0 +1,19 @@
+# Uji Finalisasi
+
+# Pipeline A (Tumpukan Fitur)
+Total piksel valid: 4327917
+Total piksel yang diekstrak: 101907 piksel
+Selesai dalam 2 menit  13.53 detik
+-------------------
+Total piksel valid: 4327917
+Total piksel yang diekstrak: 101907 piksel
+Selesai dalam 1 menit  53.59 detik
+
+# Pipeline B (Fitur Terpisah)
+Total piksel valid: 4327917
+Total piksel yang diekstrak: 103133 piksel
+Selesai dalam 2 menit  44.95 detik
+-------------------
+Total piksel valid: 4327917
+Total piksel yang diekstrak: 103133 piksel
+Selesai dalam 2 menit  32.12 detik

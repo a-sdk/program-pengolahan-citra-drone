@@ -1,11 +1,24 @@
 import rasterio
+import os
 import numpy as np
 import joblib
 
-def pisahkan_gulma(model_path, stack_path, output_folder, nodata_value=np.nan):
+def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, nilai_nodata=np.nan):
     """
-    Menerapkan model terlatih ke seluruh feature stack untuk klasifikasi.
+    Menerapkan model terlatih ke seluruh tumpukan fitur untuk memisahkan padi dan gulma.
+
+    Args:
+        model_path (str): Lokasi model klasifikasi.
+        stack_path (str): Lokasi tumpukan fitur.
+        output_folder (str): Nama folder tempat file akan disimpan.
+        output_filename (str): Nama file output, termasuk ekstensi. 
+        nilai_nodata (float): Nilai nodata.
+
+    Returns:
+        str: Output path.
     """
+    output_path = os.path.join(output_folder, output_filename)
+    os.makedirs(output_folder, exist_ok=True)
     print(f"Memuat model dari {model_path}...")
     try:
         model = joblib.load(model_path)
@@ -13,7 +26,7 @@ def pisahkan_gulma(model_path, stack_path, output_folder, nodata_value=np.nan):
         print(f"ERROR: File model tidak ditemukan. Jalankan skrip pelatihan dulu.")
         return
 
-    print(f"Membuka feature stack: {stack_path}")
+    print(f"Membuka tumpukan fitur...")
     with rasterio.open(stack_path) as src:
         # Dapatkan metadata untuk file output
         profile = src.profile
@@ -24,7 +37,7 @@ def pisahkan_gulma(model_path, stack_path, output_folder, nodata_value=np.nan):
         )
         
         print(f"Memisahkan padi dengan gulma...")
-        with rasterio.open(output_folder, 'w', **profile) as dst:
+        with rasterio.open(output_path, "w", **profile) as dest:
             
             # Proses citra dalam "potongan" (chunks/tiles) untuk menghemat RAM
             for ji, window in src.block_windows(1):
@@ -40,7 +53,7 @@ def pisahkan_gulma(model_path, stack_path, output_folder, nodata_value=np.nan):
                 
                 # 3. Handle NoData
                 # Cari piksel yang valid (bukan NoData di band pertama)
-                valid_mask = pixels_flat[:, 0] != nodata_value
+                valid_mask = pixels_flat[:, 0] != nilai_nodata
                 pixels_valid = pixels_flat[valid_mask]
                 
                 # Siapkan kanvas hasil untuk potongan ini
@@ -55,10 +68,10 @@ def pisahkan_gulma(model_path, stack_path, output_folder, nodata_value=np.nan):
                 
                 # 6. Bentuk kembali 1D -> 2D dan tulis ke file output
                 result_chunk_2d = result_chunk.reshape(window.height, window.width)
-                dst.write(result_chunk_2d.astype(rasterio.uint8), window=window, indexes=1)
+                dest.write(result_chunk_2d.astype(rasterio.uint8), window=window, indexes=1)
                 
     print(f"Klasifikasi selesai! Peta segmentasi disimpan di: {output_folder}")
-    return output_folder
+    return output_path
 
 # --- JALANKAN FUNGSI ---
 # if __name__ == "__main__":
