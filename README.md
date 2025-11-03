@@ -59,7 +59,8 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
     ├── program.py                      # Program utama.
     ├── program_arogansi.py             # Program untuk keperluan percobaan.
     ├── segmentasi_gulma.py             # Program menjalankan klasifikasi padi dan gulma.
-    └── transformasi.py                 # Program transformasi indeks vegetasi.
+    ├── transformasi.py                 # Program transformasi dan segmentasi.
+    └── utils.py                        # Program berisi fungsi-fungsi utilitas.
 
 
 ---
