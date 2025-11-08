@@ -66,6 +66,12 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ---
 
 ## Changelogs
+### Versi 1.4.6 - 08 November 2025
+* **Fitur Baru**:
+    * Membuat dukungan untuk melakukan batch processing.
+    * Menampilkan waktu terpisah per proses dan waktu keseluruhan.
+    * Memodifikasi fungsi `clip_raster()` untuk mendukung operasi BigTIFF.
+    
 ### Versi 1.4.5 - 03 November 2025
 * **Fitur Baru**:
     * Membuat dua opsi alur kerja antara fitur terpisah atau tumpukan fitur.

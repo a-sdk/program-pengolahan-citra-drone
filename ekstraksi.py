@@ -40,6 +40,7 @@ def clip_raster(input_raster, shp_layer, output_folder, output_filename, nilai_n
         profile = src.profile
     profile.update(
         dtype="float32",
+        BIGTIFF="YES",
         nodata=nilai_nodata
         )
     # Mengkonversi ke format float32
@@ -64,6 +65,7 @@ def clip_raster(input_raster, shp_layer, output_folder, output_filename, nilai_n
         width=out_image.shape[2],
         count=out_image.shape[0],
         transform=out_transform,
+        BIGTIFF="YES",
         nodata=nilai_nodata,
         driver="GTiff"
     )
@@ -89,7 +91,7 @@ def mask_band_terpisah(input_folder, mask_path, output_folder, logika=lambda x: 
     Returns:
         None.
     """
-    print("Memuat mask...")
+    print("\nMemuat mask...")
     with rio.open(mask_path) as src_mask:
         mask_data = src_mask.read(1)
     # Membuat boolean mask
@@ -134,7 +136,7 @@ def mask_tumpukan_band(input_folder, mask_path, output_folder, logika=lambda x: 
     Returns:
         None.
     """
-    print(f"Memuat mask...")
+    print("\nMemuat mask...")
     with rio.open(mask_path) as src_mask:
             mask_data = src_mask.read(1)
     # Membuat boolean mask
@@ -251,8 +253,8 @@ def ekstrak_piksel_dari_vertek(input_vertek, input_folder, output_folder, output
     os.makedirs(output_folder, exist_ok=True)
     hasil_ekstraksi = os.path.join(output_folder, output_filename)
     urutan_band = ["RED", "GREEN", "BLUE", "M_GREEN", "M_RED", "RED_EDGE", "NIR", "GNDVI", "NDREI", "NDVI", "SAVI"]
-    # kolom_awal = ["id", "row", "col", "X", "Y"]
-    kolom_akhir = [b for b in urutan_band if b in hasil_gabungan_band.columns] # kolom_awal + 
+    kolow_awal = "id" # kolom_awal = ["id", "row", "col", "X", "Y"]
+    kolom_akhir = kolow_awal + [b for b in urutan_band if b in hasil_gabungan_band.columns] 
     hasil_gabungan_band = hasil_gabungan_band[kolom_akhir]
     hasil_gabungan_band.to_csv(hasil_ekstraksi, index=False)
     print(f"Ekstraksi selesai...")
@@ -279,51 +281,54 @@ def ekstrak_tumpukan_fitur(shp_layer, input_folder, output_folder, output_filena
 
     gdf = gpd.read_file(shp_layer)
 
-    print("Memulai ekstraksi...")
     for file in file_ekstraksi:
         with rio.open(file) as src:
             for index, row in tqdm(gdf.iterrows(), desc="\nMengekstrak piksel", unit=" poligon", total=len(gdf)):
 
                 geometry = [row.geometry]
+                id_poligon = row["id"]
                 # label = row['label'] 
                 
                 # Memotong tumpukan 11-band menggunakan poligon
-                out_image, _= mask(src, geometry, crop=True, nodata=np.nan)
+                out_image, _ = mask(src, geometry, crop=True, nodata=np.nan)
                 
                 # Menentukan piksel yang valid
                 valid_mask_2d = ~np.isnan(out_image[0])
                 
                 # Menyiapkan array kosong
-                pixel_features = []
+                ekstrak_piksel = []
                 for band_idx in range(src.count): 
                     band_data = out_image[band_idx]
-                    valid_pixels = band_data[valid_mask_2d]
-                    pixel_features.append(valid_pixels)
+                    piksel_valid = band_data[valid_mask_2d]
+                    ekstrak_piksel.append(piksel_valid)
 
                 # Transpose array
-                pixels_as_features = np.array(pixel_features).T # (jumlah_piksel, 11)
+                fitur_piksel = np.array(ekstrak_piksel).T # (jumlah_piksel, 11)
                 
                 # Memberi label
-                # labels_for_pixels = np.full(pixels_as_features.shape[0], label)
-                
-                X_data.append(pixels_as_features)
+                # labels_for_pixels = np.full(fitur_piksel.shape[0], label)
+                kolom_id = np.full(fitur_piksel.shape[0], id_poligon)
+                fitur_lengkap = np.column_stack((kolom_id, fitur_piksel))
+                X_data.append(fitur_lengkap)
                 # y_data.append(labels_for_pixels)
 
         # Gabungkan semua data
         X = np.concatenate(X_data, axis=0) # (total_piksel, 11 fitur)
         # y = np.concatenate(y_data, axis=0) # (total_piksel, label)
 
-    nama_band = ["RED",
-                "GREEN",
-                "BLUE",
-                "M_GREEN",
-                "M_RED",
-                "RED_EDGE",
-                "NIR",
-                "GNDVI",
-                "NDREI",
-                "NDVI",
-                "SAVI"
+    nama_band = [
+        "id",
+        "RED",
+        "GREEN",
+        "BLUE",
+        "M_GREEN",
+        "M_RED",
+        "RED_EDGE",
+        "NIR",
+        "GNDVI",
+        "NDREI",
+        "NDVI",
+        "SAVI"
     ]
     df = pd.DataFrame(X, columns=nama_band)
     # df['label'] = y
