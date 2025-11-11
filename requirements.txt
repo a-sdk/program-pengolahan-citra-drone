@@ -3,4 +3,5 @@ matplotlib==3.10.0
 rasterio==1.4.3
 geopandas==1.1.1
 pandas==2.3.2
-mahotas==1.0
+mahotas==1.4.18
+tqdm==4.67.1

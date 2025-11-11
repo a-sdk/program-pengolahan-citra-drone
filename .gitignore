@@ -1,10 +1,5 @@
 # Folder
 __pycache__/
-Bahan/
-Hasil/
-Shapefiles/
-venv/
+.venv/
 
-# File
-*.csv
 
