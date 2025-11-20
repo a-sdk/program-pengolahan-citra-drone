@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import rasterio as rio
 from rasterio.mask import mask
+from rasterstats import zonal_stats
 import geopandas as gpd
 import os
 import glob
@@ -14,13 +15,14 @@ from mahotas.polygon import fill_polygon
 from tqdm import tqdm
 
 # Fungsi untuk memotong citra bedasarkan shapefile poligon
-def clip_raster(input_raster, shp_layer, output_folder, output_filename, nilai_nodata=np.nan):
+def clip_raster(input_folder, shp_layer, output_folder, output_filename, nilai_nodata=np.nan):
     """
     Memotong citra sesuai dengan shaepfile poligon yang dibuat.
 
     Args:
-        input_raster (str): Lokasi file raster yang akan dipotong.
+        input_folder (str): Lokasi file raster yang akan dipotong.
         shp_layer (str): Lokasi shapefile yang menjadi acuan.
+        output_folder (str): Nama folder tempat hasil klip disimpan.
         output_filename (str): Nama file output, termasuk ekstensi
         
     Returns:
@@ -34,8 +36,8 @@ def clip_raster(input_raster, shp_layer, output_folder, output_filename, nilai_n
     # Baca Shapefile Menggunakan GeoPandas
     print("Membaca shapefile...")
     mask_gdf = gpd.read_file(shp_layer)
-    print("Melakukan clipping raster...")
-    with rio.open(input_raster) as src:
+    print("Memotong raster berdasarkan shapefile...")
+    with rio.open(input_folder) as src:
         data = src.read()
         profile = src.profile
     profile.update(
@@ -273,11 +275,10 @@ def ekstrak_tumpukan_fitur(shp_layer, input_folder, output_folder, output_filena
         output_filename (str): Nama file output, termasuk ekstensi.
 
     Returns:
-        str: Output path.
+        str: None.
     """
     file_ekstraksi = glob.glob(os.path.join(input_folder, "*tif"))  # Mengambil semua file .tif yang ingin diekstrak
     X_data = [] # Untuk menyimpan fitur
-    # y_data = [] # Untuk menyimpan label/status
 
     gdf = gpd.read_file(shp_layer)
 
@@ -287,7 +288,6 @@ def ekstrak_tumpukan_fitur(shp_layer, input_folder, output_folder, output_filena
 
                 geometry = [row.geometry]
                 id_poligon = row["id"]
-                # label = row['label'] 
                 
                 # Memotong tumpukan 11-band menggunakan poligon
                 out_image, _ = mask(src, geometry, crop=True, nodata=np.nan)
@@ -305,18 +305,14 @@ def ekstrak_tumpukan_fitur(shp_layer, input_folder, output_folder, output_filena
                 # Transpose array
                 fitur_piksel = np.array(ekstrak_piksel).T # (jumlah_piksel, 11)
                 
-                # Memberi label
-                # labels_for_pixels = np.full(fitur_piksel.shape[0], label)
                 kolom_id = np.full(fitur_piksel.shape[0], id_poligon)
                 fitur_lengkap = np.column_stack((kolom_id, fitur_piksel))
                 X_data.append(fitur_lengkap)
-                # y_data.append(labels_for_pixels)
 
         # Gabungkan semua data
         X = np.concatenate(X_data, axis=0) # (total_piksel, 11 fitur)
-        # y = np.concatenate(y_data, axis=0) # (total_piksel, label)
 
-    nama_band = [
+    nama_kolom = [
         "id",
         "RED",
         "GREEN",
@@ -330,11 +326,71 @@ def ekstrak_tumpukan_fitur(shp_layer, input_folder, output_folder, output_filena
         "NDVI",
         "SAVI"
     ]
-    df = pd.DataFrame(X, columns=nama_band)
-    # df['label'] = y
+    df = pd.DataFrame(X, columns=nama_kolom)
     os.makedirs(output_folder, exist_ok=True)
     output_path = os.path.join(output_folder, output_filename)
     df.to_csv(output_path, index=False)
     print(f"Ekstraksi selesai...")
     print(f"Total piksel yang diekstrak: {X.shape[0]} piksel")
+    print(rf"File {output_filename} berhasil disimpan di {output_folder}")
+
+# Fungsi untuk mengekstrak rata-rata nilai piksel dalam sub poligon
+def ekstrak_rerata_piksel_multipol(shp_layer, input_folder, output_folder, output_filename):
+    """
+    Mengekstrak rata-rata piksel dalam poligon dari tumpukan fitur.
+
+    Args:
+        shp_layer (str): Lokasi shapefile yang menjadi acuan.
+        input_folder (str): Lokasi file tumpukan fitur.
+        output_folder (str): Nama folder tempat file akan disimpan.
+        output_filename (str): Nama file output, termasuk ekstensi.
+
+    Returns:
+        str: None.
+    """
+    file_ekstraksi = glob.glob(os.path.join(input_folder, "*tif"))
+    gdf = gpd.read_file(shp_layer)
+    hasil_ekstraksi = gdf[["id_2"]].copy()
+    nama_bands = [
+        "RED",
+        "GREEN",
+        "BLUE",
+        "M_GREEN",
+        "M_RED",
+        "RED_EDGE",
+        "NIR",
+        "GNDVI",
+        "NDREI",
+        "NDVI",
+        "SAVI"
+    ]
+    for file in file_ekstraksi:
+        with rio.open(file) as src:
+            # Iterasi melalui band, membaca satu per satu
+            for i, nama_band in tqdm(enumerate(nama_bands), desc="\nMengekstrak piksel", unit=" band", total=len(nama_bands)):
+                # Membaca data band
+                band_data = src.read(i + 1)
+                # Melakukan Zonal Stats untuk band tersebut
+                stats = zonal_stats(
+                    vectors=gdf, 
+                    raster=band_data, 
+                    affine=src.transform, 
+                    stats=['mean'], 
+                    nodata=src.nodata
+                )
+                
+                # Mendapatkan nilai rata-rata
+                mean_values = [s.get("mean", np.nan) for s in stats]
+                
+                # Menambahkan kolom ke DataFrame hasil
+                hasil_ekstraksi[nama_band] = mean_values
+            
+    df = pd.DataFrame(hasil_ekstraksi).dropna()
+    df = df.rename(columns={"id_2":"id"})
+    df_urut = df.sort_values(by="id", ascending=True)
+    os.makedirs(output_folder, exist_ok=True)
+    output_path = os.path.join(output_folder, output_filename)
+    df_urut.to_csv(output_path, index=False)
+    print(f"Ekstraksi selesai...")
+    print(f"Total rata-rata piksel yang diekstrak: {df_urut.shape[0]} piksel")
     print(rf"File {output_filename} berhasil disimpan di {output_folder}")

@@ -1,4 +1,4 @@
-from ekstraksi import clip_raster, mask_band_terpisah, mask_tumpukan_band, ekstrak_piksel_dari_vertek, ekstrak_tumpukan_fitur
+from ekstraksi import clip_raster, mask_band_terpisah, mask_tumpukan_band, ekstrak_piksel_dari_vertek, ekstrak_tumpukan_fitur, ekstrak_rerata_piksel_multipol
 from transformasi import proses_segmentasi, proses_transformasi
 from utils import ambil_file, cek_ukuran_raster
 import rasterio as rio
@@ -11,6 +11,10 @@ import time
 #            PROGRAM UTAMA
 #
 ##########################################################
+print("\n====================================================")
+print("PROGRAM PENGOLAHAN CITRA MULTISPEKTRAL")
+print("====================================================")
+
 t0 = time.perf_counter()
 # ---- MENENTUKAN FOLDER KERJA ----
 # FOLDER INPUT
@@ -20,7 +24,7 @@ lst_raster_input, lokasi_folder_raster = ambil_file(".tif")
 # raster_target = lst_raster_input[raster_idx - 1]
 # Menentukan file .shp yang diproses berdasarkan input pengguna
 shp_input, lokasi_folder_shp = ambil_file(".shp")
-shp_idx = int(input(f"Pilih file .shp untuk clipping: "))
+shp_idx = int(input(f"Pilih file .shp untuk acuan klip: "))
 shp_target = shp_input[shp_idx - 1]
 
 
@@ -80,11 +84,13 @@ for raster_file in lst_raster_input:
     # ---- PROSES EKSTRAKSI ----
     file_vertek = r"C:\Users\acer_\Documents\Shapefiles\verteks_poligon_rumpun_lahan_2.csv"  # File koordinat vertek poligon
     file_shp = r"C:\Users\acer_\Documents\Shapefiles\poligon_rumpun_lahan_2.shp" # File poligon rumpun
+    file_multipol = r"C:\Users\acer_\Documents\Shapefiles\multipoligon_rumpun_lahan_2.shp" # File multi poligon
     # Mengekstrak piksel setiap band dari file terpisah berdasarkan koordinat verteks
     # ekstrak_piksel_dari_vertek(file_vertek, folder_hasil_masking, folder_hasil_ekstraksi, f"Hasil_Ekstraksi_{nf_raster}.csv")
     # Mengekstrak piksel dari tumpukan fitur
-    ekstrak_tumpukan_fitur(file_shp, folder_hasil_masking, folder_hasil_ekstraksi, f"{nf_raster}.csv")
-    
+    # ekstrak_tumpukan_fitur(file_shp, folder_hasil_masking, folder_hasil_ekstraksi, f"{nf_raster}.csv")
+    # Mengekstrak rata rata nilai piksel dalam multi poligon
+    ekstrak_rerata_piksel_multipol(file_multipol, folder_hasil_masking, folder_hasil_ekstraksi, f"{nf_raster}_mean.csv")
     # ---- PROSES TAMBAHAN ----
     # Menghitung ukuran raster 
     # cek_ukuran_raster(tumpukan_band)

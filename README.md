@@ -66,6 +66,10 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ---
 
 ## Changelogs
+### Versi 1.4.7 - 20 November 2025
+* **Fitur Baru**:
+    * Membuat fungsi untuk mengekstrak rata-rata nilai piksel dari multi poligon.
+    
 ### Versi 1.4.6 - 08 November 2025
 * **Fitur Baru**:
     * Membuat dukungan untuk melakukan batch processing.

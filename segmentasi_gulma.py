@@ -23,7 +23,7 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, nilai
     try:
         model = joblib.load(model_path)
     except FileNotFoundError:
-        print(f"ERROR: File model tidak ditemukan. Jalankan skrip pelatihan dulu.")
+        print(f"ERROR: File model tidak ditemukan. Silahkan dicek dulu.")
         return
 
     print(f"Membuka tumpukan fitur...")
@@ -72,11 +72,3 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, nilai
                 
     print(f"Klasifikasi selesai! Peta segmentasi disimpan di: {output_folder}")
     return output_path
-
-# --- JALANKAN FUNGSI ---
-# if __name__ == "__main__":
-#     MODEL_PATH = 'model_random_forest_1.joblib' # Sesuaikan
-#     STACK_PATH = 'Hasil/feature_stack_training_1.tif' # Ganti ke path stack 
-#     OUTPUT_PATH = 'Hasil/KLASIFIKASI_PADI_GULMA_1.tif'
-    
-#     pisahkan_gulma(MODEL_PATH, STACK_PATH, OUTPUT_PATH)

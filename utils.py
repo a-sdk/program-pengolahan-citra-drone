@@ -206,5 +206,5 @@ def tumpuk_fitur(lst_fitur, output_folder, output_filename):
     with rio.open(output_path, 'w', **profile) as dst:
         dst.write(full_stack_array)
 
-    print(f"Tumpukan fitur dengan {total_bands} band disimpan di: {output_folder}")
+    print(f"Tumpukan fitur berhasil disimpan di: {output_folder}")
     return output_path

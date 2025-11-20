@@ -1,7 +1,10 @@
+joblib==1.5.2
 numpy==2.3.0
 matplotlib==3.10.0
 rasterio==1.4.3
+rasterstats==0.20.0
 geopandas==1.1.1
 pandas==2.3.2
 mahotas==1.4.18
+scikit-learn==1.7.2
 tqdm==4.67.1
