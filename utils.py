@@ -37,7 +37,8 @@ def ambil_file(ekstensi):
             print(f"Daftar File '{ekstensi}' dalam Folder {lokasi_folder}")
             c = 1
             for files in file_target:
-                print(f"\t {c}) {files}")
+                nf = os.path.splitext(os.path.basename(files))[0]
+                print(f"\t {c}) {nf}")
                 c += 1
             return file_target, lokasi_folder
 

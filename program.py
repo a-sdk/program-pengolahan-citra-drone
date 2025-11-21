@@ -11,9 +11,9 @@ import time
 #            PROGRAM UTAMA
 #
 ##########################################################
-print("\n====================================================")
-print("PROGRAM PENGOLAHAN CITRA MULTISPEKTRAL")
-print("====================================================")
+print("\n==========================================================================")
+print("================= PROGRAM PENGOLAHAN CITRA MULTISPEKTRAL =================")
+print("==========================================================================")
 
 t0 = time.perf_counter()
 # ---- MENENTUKAN FOLDER KERJA ----
@@ -84,7 +84,7 @@ for raster_file in lst_raster_input:
     # ---- PROSES EKSTRAKSI ----
     file_vertek = r"C:\Users\acer_\Documents\Shapefiles\verteks_poligon_rumpun_lahan_2.csv"  # File koordinat vertek poligon
     file_shp = r"C:\Users\acer_\Documents\Shapefiles\poligon_rumpun_lahan_2.shp" # File poligon rumpun
-    file_multipol = r"C:\Users\acer_\Documents\Shapefiles\multipoligon_rumpun_lahan_2.shp" # File multi poligon
+    file_multipol = r"C:\Users\acer_\Documents\Shapefiles\btr02_multipol_rumpun.shp" # File multi poligon
     # Mengekstrak piksel setiap band dari file terpisah berdasarkan koordinat verteks
     # ekstrak_piksel_dari_vertek(file_vertek, folder_hasil_masking, folder_hasil_ekstraksi, f"Hasil_Ekstraksi_{nf_raster}.csv")
     # Mengekstrak piksel dari tumpukan fitur
