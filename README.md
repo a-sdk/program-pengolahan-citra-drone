@@ -54,11 +54,13 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ## Struktur Proyek
 
     /program_pengolahan_citra_drone
+    ├── deteksi.py                      # Program utama deteksi penyakit tanaman padi.
     ├── ekstraksi.py                    # Program ekstrasi fitur citra.
-    ├── model_random_forest_0.joblib    # Model klasifikasi padi dan gulma.
-    ├── program.py                      # Program utama.
+    ├── klasifikasi.py                  # Program berisi fungsi pemisah gulma dan deteksi penyakit.
+    ├── model_random_forest.joblib      # Model pemisah padi dan gulma.
+    ├── program.py                      # Program utama pengolahan citra.
     ├── program_arogansi.py             # Program untuk keperluan percobaan.
-    ├── segmentasi_gulma.py             # Program menjalankan klasifikasi padi dan gulma.
+    ├── Scaler.joblib                   # Tugas normalisasi data.
     ├── transformasi.py                 # Program transformasi dan segmentasi.
     └── utils.py                        # Program berisi fungsi-fungsi utilitas.
 
@@ -66,10 +68,16 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ---
 
 ## Changelogs
+### Versi 1.4.8 - 13 Desember 2025
+* **Fitur Baru**:
+    * Membuat fungsi untuk mendeteksi penyakit tanaman padi.
+    * Membuat versi pertama untuk program deteksi penyakit di `deteksi.py`.
+* **Perbaikan Bug**:
+    * Memperbaiki kebocoran memori pada fungsi `clip_raster()`. 
 ### Versi 1.4.7 - 20 November 2025
 * **Fitur Baru**:
     * Membuat fungsi untuk mengekstrak rata-rata nilai piksel dari multi poligon.
-    
+  
 ### Versi 1.4.6 - 08 November 2025
 * **Fitur Baru**:
     * Membuat dukungan untuk melakukan batch processing.

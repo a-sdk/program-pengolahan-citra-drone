@@ -1,9 +1,10 @@
-from ekstraksi import clip_raster, mask_band_terpisah, mask_tumpukan_band, ekstrak_piksel_dari_vertek, ekstrak_tumpukan_fitur, ekstrak_rerata_piksel_multipol
+from ekstraksi import clip_raster_optimized, mask_tumpukan_band
+from klasifikasi import deteksi_penyakit_padi
 from transformasi import proses_segmentasi, proses_transformasi
-from utils import ambil_file, cek_ukuran_raster
-import rasterio as rio
-import os
+from utils import ambil_file
 import matplotlib.pyplot as plt
+import os
+import rasterio as rio
 import time
 
 ########################################################
@@ -12,7 +13,7 @@ import time
 #
 ##########################################################
 print("\n==========================================================================")
-print("================= PROGRAM PENGOLAHAN CITRA MULTISPEKTRAL =================")
+print("================= PROGRAM DETEKSI PENYAKIT TANAMAN PADI =================")
 print("==========================================================================")
 
 t0 = time.perf_counter()
@@ -40,15 +41,12 @@ for raster_file in lst_raster_input:
     folder_hasil_transformasi = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Transformasi"
     folder_hasil_segmentasi = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Segmentasi"
     folder_hasil_masking = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking"
-    folder_hasil_ekstraksi = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Ekstraksi"
     folder_hasil_deteksi = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Deteksi"
-    file_vertek = r"C:\Users\acer_\Documents\Shapefiles\verteks_poligon_rumpun_lahan_2.csv"  # File koordinat vertek poligon
-    file_shp = r"C:\Users\acer_\Documents\Shapefiles\poligon_rumpun_lahan_2.shp" # File poligon rumpun
-    file_multipoligon = r"C:\Users\acer_\Documents\Shapefiles\poligon_rumpun_lahan_2_intersection.shp" # File multi poligon
-
+    file_model_deteksi = "best_model_multioutput.keras" 
+    file_scaler = "Scaler.joblib"
     # ---- PROSES CLIPPING AWAL ----
     # Memotong petakan sawah berdasarkan poligon
-    clipped_raster = clip_raster(raster_file, shp_target, folder_hasil_clip, f"{nf_raster}_clip.tif")
+    clipped_raster = clip_raster_optimized(raster_file, shp_target, folder_hasil_clip, f"{nf_raster}_clip.tif")
     # Mengakses citra beserta band yang diperlukan 
     print("\nMembaca band yang diperlukan...")
     with rio.open(clipped_raster) as src_citra:
@@ -73,8 +71,8 @@ for raster_file in lst_raster_input:
 
     # ---- PROSES TRANSFORMASI ----
     lst_band = [red, green, blue, m_green, m_red, red_edge, nir]
-    gndvi, ndrei, ndvi, savi = proses_transformasi(lst_band, profile, folder_hasil_transformasi, nilai_nodata=nodata_asli, mode="")
-
+    gndvi, ndrei, ndvi, savi = proses_transformasi(lst_band, profile, folder_hasil_transformasi, nilai_nodata=nodata_asli, mode="")\
+    
     # ---- PROSES SEGMENTASI ----
     lst_fitur = [clipped_raster, gndvi, ndrei, ndvi, savi]
     threshold_padi = proses_segmentasi(lst_fitur, profile, folder_hasil_segmentasi, nilai_nodata=nodata_asli)
@@ -82,16 +80,11 @@ for raster_file in lst_raster_input:
 
     # ---- PROSES MASKING ----
     # Melakukan masking pada setiap band dan hasil transformasi
-    # mask_band_terpisah(folder_hasil_transformasi, threshold_padi, folder_hasil_masking, nilai_nodata=nodata_asli)
     mask_tumpukan_band(clipped_raster, threshold_padi, folder_hasil_masking, nilai_nodata=nodata_asli)
 
-    # ---- PROSES EKSTRAKSI ----
-    # Mengekstrak piksel setiap band dari file terpisah berdasarkan koordinat verteks
-    # ekstrak_piksel_dari_vertek(file_vertek, folder_hasil_masking, folder_hasil_ekstraksi, f"Hasil_Ekstraksi_{nf_raster}.csv")
-    # Mengekstrak piksel dari tumpukan fitur
-    # ekstrak_tumpukan_fitur(file_shp, folder_hasil_masking, folder_hasil_ekstraksi, f"{nf_raster}.csv")
-    # Mengekstrak rata rata nilai piksel dalam multi poligon
-    ekstrak_rerata_piksel_multipol(file_multipoligon, folder_hasil_masking, folder_hasil_ekstraksi, f"{nf_raster}_mean.csv")
+    # ---- PROSES DETEKSI ----
+    # Mendeteksi penyakit padi berdasarkan hasil masking vegetasi
+    deteksi_penyakit_padi(file_model_deteksi, file_scaler, folder_hasil_masking, folder_hasil_deteksi)
     
     # ---- PROSES TAMBAHAN ----
     # Menghitung ukuran raster 
@@ -117,4 +110,5 @@ else:
     ts = t % 60
     print(f"\nSelesai memproses {len(lst_raster_input)} file dalam {menit:d} menit {ts:3.2f} detik")
 
-print('aman aja 🗣')
+print("aman aja 🗣")
+

@@ -5,7 +5,7 @@ Modul untuk transformasi dan segmentasi.
 import numpy as np
 import rasterio as rio
 from utils import otsu_threshold, simpan_raster, tampilkan_histogram, tumpuk_fitur
-from segmentasi_gulma import pisahkan_gulma
+from klasifikasi import pisahkan_gulma
 
 def hitung_savi(nir_band, red_band, L):
     """
@@ -141,7 +141,7 @@ def proses_segmentasi(lst_fitur, profile, output_folder, nilai_nodata):
     Melakukan proses segmentasi untuk memisahkan tanaman padi.
 
     Args:
-        lst_fitur (list): List semua fitur yang digunakan.
+        lst_fitur (list): Fitur yang akan digunakan.
         profile (dict): Metadata raster dari file sumber.
         output_folder (str): Nama folder tempat hasil transformasi disimpan.
         nilai_nodata (float): Nilai nodata raster.
@@ -150,9 +150,9 @@ def proses_segmentasi(lst_fitur, profile, output_folder, nilai_nodata):
         str: threshold_file_path.
     """
     # Menumpuk fitur untuk segmentasi gulma
-    lokasi_tumpukan_band = tumpuk_fitur(lst_fitur, output_folder, "tumpukan_fitur.tif")
+    # lokasi_tumpukan_band = tumpuk_fitur(lst_fitur, output_folder, "tumpukan_fitur.tif")
     # Membuat peta segmentasi gulma dan padi
-    peta_segmentasi_gulma = pisahkan_gulma("model_random_forest_0.joblib", lokasi_tumpukan_band, output_folder, "segmentasi_gulma.tif", nilai_nodata)
+    peta_segmentasi_gulma = pisahkan_gulma("model_random_forest.joblib", lst_fitur[0], output_folder, "segmentasi_gulma.tif", nilai_nodata)
     print("Memuat file SAVI...")
     with rio.open(lst_fitur[4]) as src_savi, rio.open(peta_segmentasi_gulma) as src_gulma, rio.open(lst_fitur[2]) as src_ndrei:
         savi = src_savi.read(1).astype("float32")
@@ -176,6 +176,6 @@ def proses_segmentasi(lst_fitur, profile, output_folder, nilai_nodata):
     hasil_threshold_2 = mask_final_indeks.astype("float32")
     # Menyimpan hasil threshold
     threshold_file_path = simpan_raster(hasil_threshold, profile, output_folder, "hasil_threshold_model.tif", nilai_nodata)
-    threshold2_file_path = simpan_raster(hasil_threshold_2, profile, output_folder, "hasil_threshold_indeks.tif", nilai_nodata)
+    # threshold2_file_path = simpan_raster(hasil_threshold_2, profile, output_folder, "hasil_threshold_indeks.tif", nilai_nodata)
 
-    return lokasi_tumpukan_band, threshold_file_path
+    return threshold_file_path #, lokasi_tumpukan_band

@@ -8,3 +8,5 @@ pandas==2.3.2
 mahotas==1.4.18
 scikit-learn==1.7.2
 tqdm==4.67.1
+shapely==2.1.2
+tensorflow==2.20.0

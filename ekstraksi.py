@@ -34,9 +34,9 @@ def clip_raster(input_folder, shp_layer, output_folder, output_filename, nilai_n
     # Pastikan folder output ada, jika tidak, buat folder baru
     os.makedirs(output_folder, exist_ok=True)
     # Baca Shapefile Menggunakan GeoPandas
-    print("Membaca shapefile...")
+    print("Memuat shapefile...")
+    print("Mengkonversi citra...")
     mask_gdf = gpd.read_file(shp_layer)
-    print("Memotong raster berdasarkan shapefile...")
     with rio.open(input_folder) as src:
         data = src.read()
         profile = src.profile
@@ -54,6 +54,7 @@ def clip_raster(input_folder, shp_layer, output_folder, output_filename, nilai_n
         geometries = mask_gdf.geometry
         profile32 = src_32.profile
         # Melakukan masking
+        print("Memotong raster berdasarkan shapefile...")
         out_image, out_transform = mask(
             src_32,
             geometries, 
@@ -76,6 +77,85 @@ def clip_raster(input_folder, shp_layer, output_folder, output_filename, nilai_n
         dest.write(out_image)
     print(f"File {output_filename} berhasil disimpan di {output_folder}")
     os.remove(konversi_path)
+    return output_path
+
+# Fungsi memotong citra dengan penghematan memori 
+def clip_raster_optimized(input_folder, shp_layer, output_folder, output_filename, nilai_nodata=np.nan):
+    """
+    Memotong citra sesuai dengan shaepfile poligon yang dibuat, 
+    menggunakan pemrosesan berblok untuk menghemat RAM saat konversi uint16 -> float32.
+
+    Args:
+        input_folder (str): Lokasi file raster yang akan dipotong.
+        shp_layer (str): Lokasi shapefile yang menjadi acuan.
+        output_folder (str): Nama folder tempat hasil klip disimpan.
+        output_filename (str): Nama file output, termasuk ekstensi
+        
+    Returns:
+        str: Output path.
+    """
+    konversi_path = f"{output_folder}/raster_float32.tif"
+    output_path = os.path.join(output_folder, output_filename)
+    os.makedirs(output_folder, exist_ok=True)
+
+    print("Memuat shapefile...")
+    mask_gdf = gpd.read_file(shp_layer)
+
+    print("Mengkonversi citra...")
+    with rio.open(input_folder) as src:
+        profile = src.profile
+        profile.update(
+            dtype="float32",
+            BIGTIFF="YES",
+            nodata=nilai_nodata,
+            tiled=True,
+            blockxsize=256, 
+            blockysize=256
+        )
+        old_nodata = src.nodata
+
+        with rio.open(konversi_path, "w", **profile) as dest:
+            for ji, window in src.block_windows():
+                block = src.read(window=window, out_dtype=np.uint16)
+                
+                block_f32 = block.astype(np.float32)
+                if old_nodata is not None:
+                    block_f32[block_f32 == old_nodata] = np.nan
+            
+                dest.write(block_f32, window=window)
+
+    with rio.open(konversi_path) as src_32:
+        geometries = mask_gdf.geometry
+        profile32 = src_32.profile
+        
+        print("Memotong raster berdasarkan shapefile...")
+        out_image, out_transform = mask(
+            src_32,
+            geometries, 
+            crop=True,
+            filled=True,
+            nodata=nilai_nodata 
+        )
+        
+
+    profile32.update(
+        dtype="float32",
+        height=out_image.shape[1],
+        width=out_image.shape[2],
+        count=out_image.shape[0],
+        transform=out_transform,
+        BIGTIFF="YES",
+        nodata=nilai_nodata,
+        driver="GTiff"
+    )
+    
+    print("Menyimpan hasil clipping...")
+    with rio.open(output_path, "w", **profile32) as dest:
+        dest.write(out_image)
+
+    print(f"File {output_filename} berhasil disimpan di {output_folder}")
+    os.remove(konversi_path)
+    
     return output_path
 
 # Fungsi untuk melakukan masking pada setiap band terpisah
@@ -350,7 +430,7 @@ def ekstrak_rerata_piksel_multipol(shp_layer, input_folder, output_folder, outpu
     """
     file_ekstraksi = glob.glob(os.path.join(input_folder, "*tif"))
     gdf = gpd.read_file(shp_layer)
-    hasil_ekstraksi = gdf[["id_2"]].copy()
+    hasil_ekstraksi = gdf[["id"]].copy()
     nama_bands = [
         "RED",
         "GREEN",
@@ -386,7 +466,6 @@ def ekstrak_rerata_piksel_multipol(shp_layer, input_folder, output_folder, outpu
                 hasil_ekstraksi[nama_band] = mean_values
             
     df = pd.DataFrame(hasil_ekstraksi).dropna()
-    df = df.rename(columns={"id_2":"id"})
     df_urut = df.sort_values(by="id", ascending=True)
     os.makedirs(output_folder, exist_ok=True)
     output_path = os.path.join(output_folder, output_filename)
