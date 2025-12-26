@@ -4,7 +4,7 @@ import numpy as np
 import joblib
 import tensorflow as tf
 import glob
-def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, nilai_nodata=np.nan):
+def pisahkan_gulma(model_path, stack_path, output_folder, output_filename):
     """
     Menerapkan model terlatih ke seluruh tumpukan fitur untuk memisahkan padi dan gulma.
 
@@ -34,7 +34,7 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, nilai
         profile.update(
             dtype=rio.uint8,  
             count=1,               
-            nodata=0            
+            nodata=0           
         )
         
         print(f"Memisahkan padi dengan gulma...")
@@ -103,9 +103,9 @@ def deteksi_penyakit_padi(model_path, scaler_path, input_folder, output_folder):
     with rio.open(file_raster[0]) as src:
         base_profile = src.profile
         base_profile.update(
-            dtype=rio.float32, 
+            dtype=rio.uint8, 
             count=1,          
-            nodata=src.nodata
+            nodata=0
         )
         output_dests = {}
         for name in output_names:
@@ -160,4 +160,13 @@ def deteksi_penyakit_padi(model_path, scaler_path, input_folder, output_folder):
             dest.close()
                 
     print(f"\nKlasifikasi selesai! 4 peta segmentasi disimpan di folder: {output_folder}")
-    return
+
+
+
+
+if __name__ == "__main__":
+    file_model = "best_model_multioutput.keras"
+    file_scaler = "Scaler.joblib"
+    input_folder = r"C:\Users\acer_\Documents\Orthomosaic\Uji Coba Deteksi\Lahan Bu Fitri\Hasil\LAHAN PERCOBAAN_0_Files\Masking"
+    output_folder = r"C:\Users\acer_\Documents\Orthomosaic\Uji Coba Deteksi\Lahan Bu Fitri\Hasil\LAHAN PERCOBAAN_0_Files\Deteksi"    
+    deteksi_penyakit_padi(file_model, file_scaler, input_folder, output_folder)

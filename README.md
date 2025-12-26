@@ -68,12 +68,20 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ---
 
 ## Changelogs
+### Versi 1.4.9 - 26 Desember 2025
+* **Fitur Baru**:
+    * Menambahkan fungsi untuk mengolah label dan dataset di `utils.py`.
+* **Perbaikan Bug**:
+    * Memperbaiki kesalahan nilai nodata pada `klasifikasi.py`. 
+    * Memperbaiki kesalahan urutan komponen hasil ekstraksi pada fungsi `ekstrak_rerata_piksel()`.
+
 ### Versi 1.4.8 - 13 Desember 2025
 * **Fitur Baru**:
     * Membuat fungsi untuk mendeteksi penyakit tanaman padi.
     * Membuat versi pertama untuk program deteksi penyakit di `deteksi.py`.
 * **Perbaikan Bug**:
     * Memperbaiki kebocoran memori pada fungsi `clip_raster()`. 
+
 ### Versi 1.4.7 - 20 November 2025
 * **Fitur Baru**:
     * Membuat fungsi untuk mengekstrak rata-rata nilai piksel dari multi poligon.

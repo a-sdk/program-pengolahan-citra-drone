@@ -152,7 +152,7 @@ def proses_segmentasi(lst_fitur, profile, output_folder, nilai_nodata):
     # Menumpuk fitur untuk segmentasi gulma
     # lokasi_tumpukan_band = tumpuk_fitur(lst_fitur, output_folder, "tumpukan_fitur.tif")
     # Membuat peta segmentasi gulma dan padi
-    peta_segmentasi_gulma = pisahkan_gulma("model_random_forest.joblib", lst_fitur[0], output_folder, "segmentasi_gulma.tif", nilai_nodata)
+    peta_segmentasi_gulma = pisahkan_gulma("model_random_forest.joblib", lst_fitur[0], output_folder, "segmentasi_gulma.tif")
     print("Memuat file SAVI...")
     with rio.open(lst_fitur[4]) as src_savi, rio.open(peta_segmentasi_gulma) as src_gulma, rio.open(lst_fitur[2]) as src_ndrei:
         savi = src_savi.read(1).astype("float32")
