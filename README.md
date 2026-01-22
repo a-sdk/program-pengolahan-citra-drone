@@ -7,10 +7,16 @@ Proyek ini adalah program untuk mengolah citra udara yang ditangkap oleh drone s
 ## Fitur Utama
 
 1. Memotong citra berdasarkan poligon.
-2. Menghitung indeks vegetasi seperti SAVI, NDVI, NDRE, dan lainnya.
-3. Melakukan thresholding untuk memisahkan tanaman dan yang bukan tanaman.
-4. Melakukan masking untuk menghapus data raster yang bukan berupa tanaman.
-5. Memeriksa ukuran raster.
+2. Membuat multipoligon dari sebuah shapefile poligon.
+3. Mengekstrak koordinat vertek dari multipoligon.
+4. Menghitung indeks vegetasi seperti SAVI, NDVI, NDRE, dan lainnya.
+5. Melakukan segmentasi untuk memisahkan tanaman dan yang bukan tanaman.
+6. Melakukan masking untuk menghapus data raster yang bukan berupa tanaman.
+7. Mengekstrak nilai piksel citra dan atribut lainnya ke dalam file CSV.
+8. Memeriksa ukuran raster.
+9. Mendeteksi penyakit tanaman padi berdasarkan rumpun dan petak.
+10. Membuat peta sebaran penyakit tanaman pati berdasarkan rumpun dan petak.
+
 
 
 ## Panduan Instalasi dan Penggunaan
@@ -69,7 +75,7 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ---
 
 ## Changelogs
-### Versi 1.4.9 - 22 Januari 2026
+### Versi 1.4.10 - 22 Januari 2026
 * **Fitur Baru**:
     * Menambahkan fungsi untuk mengekstrak koordinat vertek di `ekstraksi.py`.
     * Menambahkan kolom koordinat X (longitude) dan Y (latitude) pada fungsi ekstraksi piksel.
