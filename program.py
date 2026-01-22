@@ -1,6 +1,14 @@
-from ekstraksi import clip_raster, mask_band_terpisah, mask_tumpukan_band, ekstrak_piksel_dari_vertek, ekstrak_tumpukan_fitur, ekstrak_rerata_piksel
+from ekstraksi import (
+    clip_raster_optimized, 
+    ekstrak_koordinat_vertek,
+    mask_band_terpisah, 
+    mask_tumpukan_band, 
+    ekstrak_piksel_dari_vertek, 
+    ekstrak_tumpukan_fitur, 
+    ekstrak_rerata_piksel
+)
 from transformasi import proses_segmentasi, proses_transformasi
-from utils import ambil_file, cek_ukuran_raster
+from utils import ambil_file, buat_multipoligon, tumpuk_fitur, cek_ukuran_raster
 import rasterio as rio
 import os
 import matplotlib.pyplot as plt
@@ -24,11 +32,9 @@ def main():
     # raster_idx = int(input(f"Pilih file .tif: "))
     # raster_target = lst_raster_input[raster_idx - 1]
     # Menentukan file .shp yang diproses berdasarkan input pengguna
-    shp_input, lokasi_folder_shp = ambil_file(".shp")
+    shp_petak, _ = ambil_file(".shp")
     shp_idx = int(input(f"Pilih file .shp untuk acuan klip: "))
-    shp_target = shp_input[shp_idx - 1]
-
-
+    shp_target = shp_petak[shp_idx - 1]
 
     for raster_file in lst_raster_input:
         t1 = time.perf_counter()   
@@ -37,19 +43,17 @@ def main():
         print(f"\nMemproses {nf_raster}...")
 
         # FOLDER OUTPUT
-        folder_hasil_clip = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Klip"
-        folder_hasil_transformasi = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Transformasi"
-        folder_hasil_segmentasi = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Segmentasi"
-        folder_hasil_masking = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Masking"
-        folder_hasil_ekstraksi = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Ekstraksi"
-        folder_hasil_deteksi = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Deteksi"
-        file_vertek = r"C:\Users\acer_\Documents\Shapefiles\verteks_poligon_rumpun_lahan_2.csv"  # File koordinat vertek poligon
-        file_shp = r"C:\Users\acer_\Documents\Shapefiles\poligon_rumpun_lahan_2.shp" # File poligon rumpun
-        file_multipoligon = r"C:\Users\acer_\Documents\Shapefiles\poligon_rumpun_lahan_2_intersection.shp" # File multi poligon
+        folder_hasil = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files"
+        folder_hasil_clip = rf"{folder_hasil}\Klip"
+        folder_hasil_transformasi = rf"{folder_hasil}\Transformasi"
+        folder_hasil_segmentasi = rf"{folder_hasil}\Segmentasi"
+        folder_hasil_masking = rf"{folder_hasil}\Masking"
+        folder_hasil_ekstraksi = rf"{folder_hasil}\Ekstraksi"
+        folder_koord_vertek = rf"{folder_hasil}\Koordinat Vertek"
 
         # ---- PROSES CLIPPING AWAL ----
         # Memotong petakan sawah berdasarkan poligon
-        clipped_raster = clip_raster(raster_file, shp_target, folder_hasil_clip, f"{nf_raster}_clip.tif")
+        clipped_raster = clip_raster_optimized(raster_file, shp_target, folder_hasil_clip, f"{nf_raster}_clip.tif")
         # Mengakses citra beserta band yang diperlukan 
         print("\nMembaca band yang diperlukan...")
         with rio.open(clipped_raster) as src_citra:
@@ -72,6 +76,12 @@ def main():
         plt.imshow(mask_citra, cmap='gray') 
         # plt.show()
 
+        # ---- EKSTRAK KOORDINAT VERTEK ----
+        jml_poly = int(input("Masukkan jumlah poligon: "))
+        jml_subpoly = int(input("Masukkan jumlah komponen per poligon: "))
+        file_multipoligon = buat_multipoligon(shp_target, jml_poly, jml_subpoly, folder_hasil)
+        ekstrak_koordinat_vertek(file_multipoligon, folder_koord_vertek)
+
         # ---- PROSES TRANSFORMASI ----
         lst_band = [red, green, blue, m_green, m_red, red_edge, nir]
         gndvi, ndrei, ndvi, savi = proses_transformasi(lst_band, profile, folder_hasil_transformasi, nilai_nodata=nodata_asli, mode="")
@@ -79,12 +89,13 @@ def main():
         # ---- PROSES SEGMENTASI ----
         lst_fitur = [clipped_raster, gndvi, ndrei, ndvi, savi]
         threshold_padi = proses_segmentasi(lst_fitur, profile, folder_hasil_segmentasi, nilai_nodata=nodata_asli)
-
+        # Menumpuk fitur untuk hasil 11 fitur
+        lokasi_tumpukan_band = tumpuk_fitur(lst_fitur, folder_hasil_transformasi, "tumpukan_fitur.tif")
 
         # ---- PROSES MASKING ----
         # Melakukan masking pada setiap band dan hasil transformasi
         # mask_band_terpisah(folder_hasil_transformasi, threshold_padi, folder_hasil_masking, nilai_nodata=nodata_asli)
-        mask_tumpukan_band(clipped_raster, threshold_padi, folder_hasil_masking, nilai_nodata=nodata_asli)
+        mask_tumpukan_band(lokasi_tumpukan_band, threshold_padi, folder_hasil_masking, nilai_nodata=nodata_asli)
 
         # ---- PROSES EKSTRAKSI ----
         # Mengekstrak piksel setiap band dari file terpisah berdasarkan koordinat verteks
@@ -118,7 +129,7 @@ def main():
         ts = t % 60
         print(f"\nSelesai memproses {len(lst_raster_input)} file dalam {menit:d} menit {ts:3.2f} detik")
 
-    print('aman aja 🗣')
+    print("aman aja 🗣")
 
 
 if __name__ == "__main__":

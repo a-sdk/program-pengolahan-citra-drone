@@ -11,7 +11,7 @@ def hitung_savi(nir_band, red_band, L):
     """
     Mentranformasi citra menggunakan Soil-Adjusted Vegetation Index.
     
-    Args:
+    Parameters:
         nir_band (np.ndarray): Array NumPy berisi kanal NIR.
         red_band (np.ndarray): Array NumPy berisi kanal Red.
         L (float): Faktor koreksi kecerahan tanah (0 - 1).
@@ -32,7 +32,7 @@ def hitung_ndvi(nir_band, red_band):
     """
     Mentranformasi citra menggunakan Normalized Difference Vegetation Index.
     
-    Args:
+    Parameters:
         nir_band (np.ndarray): Array NumPy berisi kanal NIR.
         red_band (np.ndarray): Array NumPy berisi kanal Red.
         
@@ -51,7 +51,7 @@ def hitung_gndvi(nir_band, green_band):
     """
     Mentranformasi citra menggunakan Green Normalized Difference Vegetation Index.
     
-    Args:
+    Parameters:
         nir_band (np.ndarray): Array NumPy berisi kanal NIR.
         green_band (np.ndarray): Array NumPy berisi kanal Green.
         
@@ -70,7 +70,7 @@ def hitung_ndrei(nir_band, red_edge_band):
     """
     Mentranformasi citra menggunakan Normalized Difference Red Edge Index.
     
-    Args:
+    Parameters:
         nir_band (np.ndarray): Array NumPy berisi kanal NIR.
         red_edge_band (np.ndarray): Array NumPy berisi kanal Red Edge.
     
@@ -90,7 +90,7 @@ def proses_transformasi(lst_band, profile, output_folder, nilai_nodata, mode="")
     """
     Melakukan proses transformasi indeks vegetasi.
     
-    Args:
+    Parameters:
         lst_band (list): List semua band yang digunakan.
         profile (dict): Metadata raster dari file sumber.
         output_folder (str): Nama folder tempat hasil transformasi disimpan.
@@ -140,7 +140,7 @@ def proses_segmentasi(lst_fitur, profile, output_folder, nilai_nodata):
     """
     Melakukan proses segmentasi untuk memisahkan tanaman padi.
 
-    Args:
+    Parameters:
         lst_fitur (list): Fitur yang akan digunakan.
         profile (dict): Metadata raster dari file sumber.
         output_folder (str): Nama folder tempat hasil transformasi disimpan.
@@ -149,10 +149,9 @@ def proses_segmentasi(lst_fitur, profile, output_folder, nilai_nodata):
     Returns:
         str: threshold_file_path.
     """
-    # Menumpuk fitur untuk segmentasi gulma
-    # lokasi_tumpukan_band = tumpuk_fitur(lst_fitur, output_folder, "tumpukan_fitur.tif")
+
     # Membuat peta segmentasi gulma dan padi
-    peta_segmentasi_gulma = pisahkan_gulma("model_random_forest.joblib", lst_fitur[0], output_folder, "segmentasi_gulma.tif")
+    peta_segmentasi_gulma = pisahkan_gulma("model_deteksi_gulma.joblib", lst_fitur[0], output_folder, "segmentasi_gulma.tif")
     print("Memuat file SAVI...")
     with rio.open(lst_fitur[4]) as src_savi, rio.open(peta_segmentasi_gulma) as src_gulma, rio.open(lst_fitur[2]) as src_ndrei:
         savi = src_savi.read(1).astype("float32")

@@ -4,12 +4,14 @@ import numpy as np
 import joblib
 import tensorflow as tf
 import glob
+import pandas as pd
+
 def pisahkan_gulma(model_path, stack_path, output_folder, output_filename):
     """
     Menerapkan model terlatih ke seluruh tumpukan fitur untuk memisahkan padi dan gulma.
 
-    Args:
-        model_path (str): Lokasi model klasifikasi.
+    Parameters:
+        model_path (str): Lokasi model deteksi gulma.
         stack_path (str): Lokasi tumpukan fitur.
         output_folder (str): Nama folder tempat file akan disimpan.
         output_filename (str): Nama file output, termasuk ekstensi. 
@@ -70,22 +72,21 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename):
                 result_chunk_2d = result_chunk.reshape(window.height, window.width)
                 dest.write(result_chunk_2d.astype(rio.uint8), window=window, indexes=1)
                 
-    print(f"Klasifikasi selesai! Peta segmentasi disimpan di: {output_folder}")
+    print(f"Pemisahan selesai! Peta segmentasi disimpan di: {output_folder}")
     return output_path
 
-def deteksi_penyakit_padi(model_path, scaler_path, input_folder, output_folder):
+def deteksi_penyakit_rumpun(model_path, scaler_path, input_folder, output_folder):
     """
-    Menerapkan model multi-output ke raster dan menghasilkan 4 peta klasifikasi terpisah.
+    Menerapkan model multi-output ke raster dan menghasilkan 4 peta sebaran terpisah.
 
-    Args:
-        model_path (str): Lokasi model klasifikasi.
-        input_folder (str): Lokasi raster.
+    Parameters:
+        model_path (str): Lokasi model deteksi penyakit.
+        scaler_path (str): Lokasi file scaler.
+        input_folder (str): Lokasi folder berisi file GeoTiff. 
         output_folder (str): Nama folder tempat file akan disimpan.
-        output_filename (str): Nama file output, termasuk ekstensi. 
-        nilai_nodata (float): Nilai nodata.
 
     Returns:
-        str: Output path.
+        None.
     """
     file_raster = glob.glob(os.path.join(input_folder, "*tif"))
     print(f"Memuat model dari {model_path}...")
@@ -108,8 +109,9 @@ def deteksi_penyakit_padi(model_path, scaler_path, input_folder, output_folder):
             nodata=0
         )
         output_dests = {}
+        output_folder = f"{output_folder}/Sebaran_Rumpun"
         for name in output_names:
-            output_path = os.path.join(output_folder, f"peta_klasifikasi_{name}.tif")
+            output_path = os.path.join(output_folder, f"peta_sebaran_penyakit_{name}.tif")
             os.makedirs(output_folder, exist_ok=True)
             
             output_profile = base_profile.copy()
@@ -159,14 +161,66 @@ def deteksi_penyakit_padi(model_path, scaler_path, input_folder, output_folder):
         for dest in output_dests.values():
             dest.close()
                 
-    print(f"\nKlasifikasi selesai! 4 peta segmentasi disimpan di folder: {output_folder}")
+    print(f"\nDeteksi selesai! 4 peta segmentasi disimpan di folder: {output_folder}")
 
+def deteksi_penyakit_petak(model_path, scaler_path, input_folder, output_folder):
+    """
+    Menerapkan model multi-output ke untuk memprediksi
+    penyakit dari dataset.
 
+    Parameters:
+        model_path (str): Lokasi model deteksi penyakit.
+        scaler_path (str): Lokasi scaler.
+        input_folder (str): Lokasi folder hasil ekstraksi nilai piksel.
+        output_folder (str): Nama folder tempat file akan disimpan.
+
+    Returns:
+        None.
+    """
+    # --- 1. Load Model & Scaler ---
+    print(f"Memuat model dari {model_path}...")
+    print(f"Memuat scaler dari {scaler_path}...")
+    try:
+        model = tf.keras.models.load_model(model_path) 
+        scaler = joblib.load(scaler_path)
+    except Exception as e:
+        print(f"ERROR: Gagal memuat: {e}")
+        return
+    file_csv = glob.glob(os.path.join(input_folder, "*.csv"))
+    # --- 2. Siapkan Data Baru ---
+    df_inference = pd.read_csv(file_csv[0])
+    fitur = ["RED", "GREEN", "BLUE", "M_GREEN", "M_RED", "RED_EDGE", "NIR"]
+    X_inf = df_inference[fitur]
+    X_inf_array = X_inf.values
+    # --- 3. Normalisasi ---
+    print("Menormalisasi data...")
+    X_inf_scaled = scaler.transform(X_inf_array)
+
+    # --- 4. Prediksi ---
+    print("Memprediksi penyakit...")
+    raw_preds = model.predict(X_inf_scaled)
+
+    # --- 5. Simpan Hasil ---
+    map_label = {0: "Sehat", 1: "Ringan", 2: "Agak parah", 3: "Parah"}
+    disease_names = ["Blas", "BLB", "BS", "NBS"]
+
+    for i, name in enumerate(disease_names):
+        # Ambil index kelas tertinggi
+        class_idx = np.argmax(raw_preds[i], axis=1)
+        # Masukkan ke dataframe
+        df_inference[f"Prediksi_{name}"] = [map_label[idx] for idx in class_idx]
+
+    # Simpan ke Excel
+    output_path = os.path.join(output_folder, "Hasil_Prediksi.xlsx")
+    print(f"Menyimpan hasil prediksi di {output_folder}")
+    df_inference.to_excel(output_path, index=False)
 
 
 if __name__ == "__main__":
-    file_model = "best_model_multioutput.keras"
+    file_model = "model_deteksi_penyakit.keras"
     file_scaler = "Scaler.joblib"
-    input_folder = r"C:\Users\acer_\Documents\Orthomosaic\Uji Coba Deteksi\Lahan Bu Fitri\Hasil\LAHAN PERCOBAAN_0_Files\Masking"
-    output_folder = r"C:\Users\acer_\Documents\Orthomosaic\Uji Coba Deteksi\Lahan Bu Fitri\Hasil\LAHAN PERCOBAAN_0_Files\Deteksi"    
-    deteksi_penyakit_padi(file_model, file_scaler, input_folder, output_folder)
+    input_folder = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\Klip"
+    input_csv = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\Ekstraksi"
+    output_folder = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\Deteksi"    
+    # deteksi_penyakit_rumpun(file_model, file_scaler, input_folder, output_folder)
+    deteksi_penyakit_petak(file_model, file_scaler, input_csv, output_folder)

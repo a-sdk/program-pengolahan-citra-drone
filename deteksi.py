@@ -1,5 +1,5 @@
 from ekstraksi import clip_raster_optimized, mask_tumpukan_band
-from klasifikasi import deteksi_penyakit_padi
+from klasifikasi import deteksi_penyakit_rumpun
 from transformasi import proses_segmentasi, proses_transformasi
 from utils import ambil_file
 import matplotlib.pyplot as plt
@@ -25,9 +25,9 @@ def main():
     # raster_idx = int(input(f"Pilih file .tif: "))
     # raster_target = lst_raster_input[raster_idx - 1]
     # Menentukan file .shp yang diproses berdasarkan input pengguna
-    shp_input, lokasi_folder_shp = ambil_file(".shp")
+    shp_petak, lokasi_folder_shp = ambil_file(".shp")
     shp_idx = int(input(f"Pilih file .shp untuk acuan klip: "))
-    shp_target = shp_input[shp_idx - 1]
+    shp_target = shp_petak[shp_idx - 1]
 
 
 
@@ -72,20 +72,19 @@ def main():
 
         # ---- PROSES TRANSFORMASI ----
         lst_band = [red, green, blue, m_green, m_red, red_edge, nir]
-        gndvi, ndrei, ndvi, savi = proses_transformasi(lst_band, profile, folder_hasil_transformasi, nilai_nodata=nodata_asli, mode="")\
+        gndvi, ndrei, ndvi, savi = proses_transformasi(lst_band, profile, folder_hasil_transformasi, nilai_nodata=nodata_asli, mode="")
         
         # ---- PROSES SEGMENTASI ----
         lst_fitur = [clipped_raster, gndvi, ndrei, ndvi, savi]
         threshold_padi = proses_segmentasi(lst_fitur, profile, folder_hasil_segmentasi, nilai_nodata=nodata_asli)
 
-
         # ---- PROSES MASKING ----
         # Melakukan masking pada setiap band dan hasil transformasi
-        mask_tumpukan_band(clipped_raster, threshold_padi, folder_hasil_masking, nilai_nodata=nodata_asli)
+        mask_tumpukan_band(clipped_raster, threshold_padi, folder_hasil_masking, nilai_nodata=nodata_asli) 
 
         # ---- PROSES DETEKSI ----
         # Mendeteksi penyakit padi berdasarkan hasil masking vegetasi
-        deteksi_penyakit_padi(file_model_deteksi, file_scaler, folder_hasil_masking, folder_hasil_deteksi)
+        deteksi_penyakit_rumpun(file_model_deteksi, file_scaler, folder_hasil_masking, folder_hasil_deteksi)
         
         # ---- PROSES TAMBAHAN ----
         # Menghitung ukuran raster 

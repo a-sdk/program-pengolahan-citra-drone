@@ -57,7 +57,8 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
     ├── deteksi.py                      # Program utama deteksi penyakit tanaman padi.
     ├── ekstraksi.py                    # Program ekstrasi fitur citra.
     ├── klasifikasi.py                  # Program berisi fungsi pemisah gulma dan deteksi penyakit.
-    ├── model_random_forest.joblib      # Model pemisah padi dan gulma.
+    ├── model_deteksi_gulma.joblib      # Model pemisah padi dan gulma.
+    ├── model_deteksi_penyakit.keras    # Model deteksi penyakit padi.
     ├── program.py                      # Program utama pengolahan citra.
     ├── program_arogansi.py             # Program untuk keperluan percobaan.
     ├── Scaler.joblib                   # Tugas normalisasi data.
@@ -68,13 +69,20 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ---
 
 ## Changelogs
+### Versi 1.4.9 - 22 Januari 2026
+* **Fitur Baru**:
+    * Menambahkan fungsi untuk mengekstrak koordinat vertek di `ekstraksi.py`.
+    * Menambahkan kolom koordinat X (longitude) dan Y (latitude) pada fungsi ekstraksi piksel.
+    * Menambahkan fungsi untuk membuat multipoligon.
+    * Menambahkan fungsi untuk mengekstrak koordinat verteks.
+    * Menambahkan fungsi untuk membuat petak sebaran penyakit.
+
 ### Versi 1.4.9 - 26 Desember 2025
 * **Fitur Baru**:
     * Menambahkan fungsi untuk mengolah label dan dataset di `utils.py`.
 * **Perbaikan Bug**:
     * Memperbaiki kesalahan nilai nodata pada `klasifikasi.py`. 
     * Memperbaiki kesalahan urutan komponen hasil ekstraksi pada fungsi `ekstrak_rerata_piksel()`.
-
 ### Versi 1.4.8 - 13 Desember 2025
 * **Fitur Baru**:
     * Membuat fungsi untuk mendeteksi penyakit tanaman padi.

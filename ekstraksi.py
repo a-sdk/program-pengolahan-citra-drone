@@ -19,7 +19,7 @@ def clip_raster(input_folder, shp_layer, output_folder, output_filename, nilai_n
     """
     Memotong citra sesuai dengan shaepfile poligon yang dibuat.
 
-    Args:
+    Parameters:
         input_folder (str): Lokasi file raster yang akan dipotong.
         shp_layer (str): Lokasi shapefile yang menjadi acuan.
         output_folder (str): Nama folder tempat hasil klip disimpan.
@@ -85,7 +85,7 @@ def clip_raster_optimized(input_folder, shp_layer, output_folder, output_filenam
     Memotong citra sesuai dengan shaepfile poligon yang dibuat, 
     menggunakan pemrosesan berblok untuk menghemat RAM saat konversi uint16 -> float32.
 
-    Args:
+    Parameters:
         input_folder (str): Lokasi file raster yang akan dipotong.
         shp_layer (str): Lokasi shapefile yang menjadi acuan.
         output_folder (str): Nama folder tempat hasil klip disimpan.
@@ -163,7 +163,7 @@ def mask_band_terpisah(input_folder, mask_path, output_folder, logika=lambda x: 
     """
     Menerapkan masking pada band berdasarkan mask boolean.
     
-    Args:
+    Parameters:
         input_folder (str): Lokasi folder raster yang akan di-mask.
         mask_path (str): Lokasi file mask.
         output_folder (str): Nama folder tempat hasil mask disimpan.
@@ -208,7 +208,7 @@ def mask_tumpukan_band(input_folder, mask_path, output_folder, logika=lambda x: 
     """
     Menerapkan masking pada tumpukan band berdasarkan mask boolean.
     
-    Args:
+    Parameters:
         input_folder (str): Lokasi folder tumpukan band yang akan di-mask.
         mask_path (str): Lokasi file mask.
         output_folder (str): Nama folder tempat hasil mask disimpan.
@@ -262,12 +262,60 @@ def render(poly):
     fill_polygon(newPoly, grid)
     return [(x + minx, y + miny) for (x, y) in zip(*np.nonzero(grid))]
 
+# Fungsi untuk mengekstrak koordinat verteks dari satu file multipoligon
+def ekstrak_koordinat_vertek(shp_layer, output_folder):
+    """
+    Mengekstrak koordinat vertek dari setiap komponen multipoligon
+    menjadi file .CSV terpisah
+
+    Parameters:
+        shp_layer (str): Lokasi shapefile yang menjadi acuan.
+        output_folder (str): Nama folder tempat file akan disimpan.
+
+    Returns:
+        str: None.
+    """
+   
+    os.makedirs(output_folder, exist_ok=True)
+
+    print(f"Membaca file: {shp_layer}...")
+    gdf = gpd.read_file(shp_layer)
+    gdf["no_urut"] = gdf.groupby("id").cumcount() + 1
+    total_rows = len(gdf)
+    
+    print(f"Ditemukan {total_rows} komponen poligon.")
+
+    for i, row in gdf.iterrows():
+        geometry = row.geometry
+        polygon_id = row["id"]
+        komponen_id = row["no_urut"]
+        polygon_index = i + 1
+        # Cek tipe geometri dan ambil koordinatnya
+        if geometry.geom_type == "Polygon":
+            coords = list(geometry.exterior.coords)
+        elif geometry.geom_type == "MultiPolygon":
+            coords = list(geometry.geoms[0].exterior.coords)
+        else:
+            continue
+
+        df = pd.DataFrame(coords, columns=["Longitude", "Latitude"])
+
+        csv_filename = f"Poligon {polygon_id} Komponen {komponen_id}.csv"
+        csv_filepath = os.path.join(output_folder, csv_filename)
+        
+        df.to_csv(csv_filepath, index=False)
+        
+        if polygon_index % 100 == 0:
+            print(f"Telah memproses {polygon_index}/{total_rows} poligon...")
+
+    print(f"\nSelesai! {total_rows} CSV telah disimpan di: {output_folder}")
+
 # Fungsi untuk mengekstrak nilai piksel berdasarkan koordinat verteks
 def ekstrak_piksel_dari_vertek(input_vertek, input_folder, output_folder, output_filename):
     """
     Mengekstrak seluruh nilai piksel dalam poligon berdasarkan koordinat verteks.
 
-    Args:
+    Parameters:
         input_vertek (str): Lokasi file koordinat vertek.
         input_folder (str): Lokasi folder raster yang akan diekstrak.
         output_folder (str): Nama folder tempat file akan disimpan.
@@ -351,83 +399,7 @@ def ekstrak_tumpukan_fitur(shp_layer, input_folder, output_folder, output_filena
     """
     Mengekstrak seluruh nilai piksel dalam poligon dari tumpukan fitur.
 
-    Args:
-        shp_layer (str): Lokasi shapefile yang menjadi acuan.
-        input_folder (str): Lokasi file tumpukan fitur.
-        output_folder (str): Nama folder tempat file akan disimpan.
-        output_filename (str): Nama file output, termasuk ekstensi.
-
-    Returns:
-        str: None.
-    """
-    file_ekstraksi = glob.glob(os.path.join(input_folder, "*tif"))  # Mengambil semua file .tif yang ingin diekstrak
-    X_data = [] # Untuk menyimpan fitur
-
-    gdf = gpd.read_file(shp_layer)
-    gdf["no_urut"] = gdf.groupby("id").cumcount() + 1
-    gdf["Nama"] = "Titik " + gdf["id"].astype(str) + " Komponen " + gdf["no_urut"].astype(str)
-    gdf = gdf.drop(columns=["no_urut"])
-
-    for file in file_ekstraksi:
-        with rio.open(file) as src:
-            for index, row in tqdm(gdf.iterrows(), desc="\nMengekstrak piksel", unit=" poligon", total=len(gdf)):
-
-                geometry = [row.geometry]
-                id_poligon = row["id"]
-                nama_titik = row["Nama"]
-                # Memotong tumpukan 11-band menggunakan poligon
-                out_image, _ = mask(src, geometry, crop=True, nodata=np.nan)
-                
-                # Menentukan piksel yang valid
-                valid_mask_2d = ~np.isnan(out_image[0])
-                
-                # Menyiapkan array kosong
-                ekstrak_piksel = []
-                for band_idx in range(src.count): 
-                    band_data = out_image[band_idx]
-                    piksel_valid = band_data[valid_mask_2d]
-                    ekstrak_piksel.append(piksel_valid)
-
-                # Transpose array
-                fitur_piksel = np.array(ekstrak_piksel).T # (jumlah_piksel, 11)
-                kolom_id = np.full(fitur_piksel.shape[0], id_poligon)
-                kolom_nama_titik = np.full(fitur_piksel.shape[0], nama_titik)
-                kolom_tambahan = np.column_stack((kolom_id, kolom_nama_titik))
-                fitur_lengkap = np.column_stack((kolom_tambahan, fitur_piksel))
-                X_data.append(fitur_lengkap)
-        
-        # Gabungkan semua data
-        X = np.concatenate(X_data, axis=0) # (total_piksel, 11 fitur)
-
-    nama_kolom = [
-        "id",
-        "Nama Lokasi",
-        "RED",
-        "GREEN",
-        "BLUE",
-        "M_GREEN",
-        "M_RED",
-        "RED_EDGE",
-        "NIR",
-        "GNDVI",
-        "NDREI",
-        "NDVI",
-        "SAVI"
-    ]
-    df = pd.DataFrame(X, columns=nama_kolom)
-    os.makedirs(output_folder, exist_ok=True)
-    output_path = os.path.join(output_folder, output_filename)
-    df.to_csv(output_path, index=False)
-    print(f"Ekstraksi selesai...")
-    print(f"Total piksel yang diekstrak: {X.shape[0]} piksel")
-    print(rf"File {output_filename} berhasil disimpan di {output_folder}")
-
-# Fungsi untuk mengekstrak rata-rata nilai piksel dalam sub poligon
-def ekstrak_rerata_piksel(shp_layer, input_folder, output_folder, output_filename):
-    """
-    Mengekstrak rata-rata piksel dalam poligon dari tumpukan fitur.
-
-    Args:
+    Parameters:
         shp_layer (str): Lokasi shapefile yang menjadi acuan.
         input_folder (str): Lokasi file tumpukan fitur.
         output_folder (str): Nama folder tempat file akan disimpan.
@@ -437,63 +409,148 @@ def ekstrak_rerata_piksel(shp_layer, input_folder, output_folder, output_filenam
         str: None.
     """
     file_ekstraksi = glob.glob(os.path.join(input_folder, "*tif"))
-    gdf = gpd.read_file(shp_layer)
-    gdf["no_urut"] = gdf.groupby("id_2").cumcount() + 1
-    gdf["Nama"] = "Titik " + gdf["id_2"].astype(str) + " Komponen " + gdf["no_urut"].astype(str)
-    
+    X_data = []
 
-    hasil_ekstraksi = gdf[["id_2", "no_urut", "Nama"]].copy()
-    nama_bands = [
-        "RED",
-        "GREEN",
-        "BLUE",
-        "M_GREEN",
-        "M_RED",
-        "RED_EDGE",
-        "NIR",
-        "GNDVI",
-        "NDREI",
-        "NDVI",
-        "SAVI"
-    ]
+    gdf = gpd.read_file(shp_layer)
+    gdf["no_urut"] = gdf.groupby("id").cumcount() + 1
+    gdf["Nama"] = "Titik " + gdf["id"].astype(str) + " Komponen " + gdf["no_urut"].astype(str)
 
     for file in file_ekstraksi:
         with rio.open(file) as src:
-            # Iterasi melalui band, membaca satu per satu
-            for i, nama_band in tqdm(enumerate(nama_bands), desc="\nMengekstrak piksel", unit=" band", total=len(nama_bands)):
-                # Membaca data band
+            for index, row in tqdm(gdf.iterrows(), desc="\nMengekstrak piksel", unit=" poligon", total=len(gdf)):
+                geometry = [row.geometry]
+                id_poligon = row["id"]
+                nama_titik = row["Nama"]
+
+                # 1. Dapatkan out_transform dari fungsi mask
+                out_image, out_transform = mask(src, geometry, crop=True, nodata=np.nan)
+                
+                # 2. Identifikasi baris dan kolom piksel yang valid (bukan NaN)
+                valid_mask_2d = ~np.isnan(out_image[0])
+                rows, cols = np.where(valid_mask_2d) # Mendapatkan index baris dan kolom
+
+                # 3. Konversi index baris/kolom menjadi koordinat X dan Y
+                # rio.transform.xy menghitung koordinat pusat piksel
+                xs, ys = rio.transform.xy(out_transform, rows, cols)
+
+                # 4. Ambil data band
+                ekstrak_piksel = []
+                # Sisipkan koordinat X dan Y di awal list fitur
+                ekstrak_piksel.append(xs)
+                ekstrak_piksel.append(ys)
+
+                for band_idx in range(src.count): 
+                    band_data = out_image[band_idx]
+                    piksel_valid = band_data[valid_mask_2d]
+                    ekstrak_piksel.append(piksel_valid)
+
+                # Transpose agar menjadi (jumlah_piksel, 2 + jumlah_band)
+                fitur_piksel = np.array(ekstrak_piksel).T 
+                
+                # Tambahkan ID dan Nama
+                kolom_id = np.full(fitur_piksel.shape[0], id_poligon)
+                kolom_nama_titik = np.full(fitur_piksel.shape[0], nama_titik)
+                
+                fitur_lengkap = np.column_stack((kolom_id, kolom_nama_titik, fitur_piksel))
+                X_data.append(fitur_lengkap)
+        
+    X = np.concatenate(X_data, axis=0)
+
+    # Sesuaikan nama kolom dengan urutan baru
+    nama_kolom = ["id", "Nama", "X", "Y", "RED", "GREEN", "BLUE", "M_GREEN", 
+                  "M_RED", "RED_EDGE", "NIR", "GNDVI", "NDREI", "NDVI", "SAVI"]
+    
+    df = pd.DataFrame(X, columns=nama_kolom)
+    os.makedirs(output_folder, exist_ok=True)
+    output_path = os.path.join(output_folder, output_filename)
+    df.to_csv(output_path, index=False)
+    
+    print(f"Ekstraksi selesai. Total: {X.shape[0]} piksel.")
+
+# Fungsi untuk mengekstrak rata-rata nilai piksel dalam sub poligon
+def ekstrak_rerata_piksel(shp_layer, input_folder, output_folder, output_filename):
+    """
+    Mengekstrak rata-rata piksel dalam poligon dari tumpukan fitur.
+
+    Parameters:
+        shp_layer (str): Lokasi shapefile yang menjadi acuan.
+        input_folder (str): Lokasi file tumpukan fitur.
+        output_folder (str): Nama folder tempat file akan disimpan.
+        output_filename (str): Nama file output, termasuk ekstensi.
+
+    Returns:
+        str: None.
+    """
+    file_ekstraksi = glob.glob(os.path.join(input_folder, "*tif"))
+
+    gdf = gpd.read_file(shp_layer)
+
+    # Menyiapkan kolom identitas
+    gdf["no_urut"] = gdf.groupby("id").cumcount() + 1
+    gdf["Nama"] = "Poligon " + gdf["id"].astype(str) + " Komponen " + gdf["no_urut"].astype(str)
+    
+    # Mengambil koordinat X dan Y dari centroid poligon
+    gdf["X"] = gdf.geometry.centroid.x
+    gdf["Y"] = gdf.geometry.centroid.y
+
+    # Menyiapkan DataFrame hasil dengan kolom koordinat awal
+    hasil_ekstraksi = gdf[["id", "no_urut", "Nama", "X", "Y"]].copy()
+    
+    nama_bands = [
+        "RED", "GREEN", "BLUE", "M_GREEN", "M_RED", 
+        "RED_EDGE", "NIR", "GNDVI", "NDREI", "NDVI", "SAVI"
+    ]
+
+    for file in file_ekstraksi:
+        nf = os.path.splitext(os.path.basename(file))[0]
+        print(f"Memuat hasil masking: {nf}")
+        with rio.open(file) as src:
+            for i, nama_band in tqdm(enumerate(nama_bands), desc="\nMengekstrak Rerata", unit=" band", total=len(nama_bands)):
                 band_data = src.read(i + 1)
-                # Melakukan Zonal Stats untuk band tersebut
+                
                 stats = zonal_stats(
                     vectors=gdf, 
                     raster=band_data, 
                     affine=src.transform, 
                     stats=["mean"], 
-                    nodata=src.nodata
+                    nodata=src.nodata,
+                    all_touched=True # Mengambil semua piksel yang bersentuhan
                 )
                 
-                # Mendapatkan nilai rata-rata
                 mean_values = [s.get("mean", np.nan) for s in stats]
-                
-                # Menambahkan kolom ke DataFrame hasil
                 hasil_ekstraksi[nama_band] = mean_values
-   
+
+    # Cek baris yang mengandung NaN sebelum dihapus
+    df_lengkap = pd.DataFrame(hasil_ekstraksi)
+    nan_rows = df_lengkap[df_lengkap.isna().any(axis=1)]
+    
+    if not nan_rows.empty:
+        print(f"\n⚠️ PERHATIAN: Ditemukan {len(nan_rows)} poligon dengan nilai piksel tidak valid (NaN).")
+        print(f"ID yang bermasalah: {nan_rows['Nama'].tolist()}")
+    # ------------------------
+    # Pembersihan dan pengurutan data
     df = pd.DataFrame(hasil_ekstraksi).dropna()
-    df_urut = df.sort_values(by=["id_2", "no_urut"], ascending=True)
-    df_urut.rename(columns={"id_2": "id"}, inplace=True)
+    df_urut = df.sort_values(by=["id", "no_urut"], ascending=True)
+    df_urut.rename(columns={"id": "id"}, inplace=True)
+    
+    # Menghapus no_urut agar hasil akhir rapi
     df_urut = df_urut.drop(columns=["no_urut"])
+    
+    # Simpan file
     os.makedirs(output_folder, exist_ok=True)
     output_path = os.path.join(output_folder, output_filename)
     df_urut.to_csv(output_path, index=False)
+    
     print(f"Ekstraksi selesai...")
-    print(f"Total rata-rata piksel yang diekstrak: {df_urut.shape[0]} piksel")
-    print(rf"File {output_filename} berhasil disimpan di {output_folder}")
+    print(f"Total baris yang diekstrak: {df_urut.shape[0]}")
+    print(rf"File {output_filename} berhasil disimpan di {output_folder}")              
 
 
 if __name__ == "__main__":
-    file_shp_multipoligon = r"C:\Users\acer_\Documents\Shapefiles\multipoligon_rumpun_lahan_2.shp"
-    # file_vertek = r"C:\Users\acer_\Documents\Shapefiles\verteks_poligon_rumpun_lahan_2.csv"
-    input_folder = r"C:\Users\acer_\Documents\Orthomosaic\Cikembar\Hasil\HST 29 36_PAGI_30_Files\Masking" 
-    output_folder = r"C:\Users\acer_\Documents\Hasil_Ekstraksi\rev1"
-    output_filename = r"HST 29_mean.csv"
-    ekstrak_rerata_piksel(file_shp_multipoligon, input_folder, output_folder, output_filename)
+    file_shp_multipoligon = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\lahan uji_intersection.shp" 
+    # input_folder = r"C:\Users\acer_\Documents\Orthomosaic\Cikembar\Hasil\HST 59 66_PAGI_30_Files\Masking" 
+    output_folder = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\Koordinat Vertek"
+    output_filename = r"HST 60_mean.csv"
+    # ekstrak_rerata_piksel(file_shp_multipoligon, input_folder, output_folder, output_filename)
+    # ekstrak_tumpukan_fitur(file_shp_multipoligon, input_folder, output_folder, output_filename)
+    ekstrak_koordinat_vertek(file_shp_multipoligon, output_folder)
