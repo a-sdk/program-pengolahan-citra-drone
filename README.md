@@ -75,6 +75,11 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ---
 
 ## Changelogs
+### Versi 1.4.11 - 31 Januari 2026
+* **Perbaikan Bug**:
+    * Menghilangkan proses membangun ulang citra berformat `float32`.
+    * Mengkombinasikan 7 kanal spektral dan 4 hasil transformasi dengan workflow lebih efisien
+
 ### Versi 1.4.10 - 22 Januari 2026
 * **Fitur Baru**:
     * Menambahkan fungsi untuk mengekstrak koordinat vertek di `ekstraksi.py`.
@@ -89,6 +94,7 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 * **Perbaikan Bug**:
     * Memperbaiki kesalahan nilai nodata pada `klasifikasi.py`. 
     * Memperbaiki kesalahan urutan komponen hasil ekstraksi pada fungsi `ekstrak_rerata_piksel()`.
+
 ### Versi 1.4.8 - 13 Desember 2025
 * **Fitur Baru**:
     * Membuat fungsi untuk mendeteksi penyakit tanaman padi.

@@ -15,7 +15,7 @@ from mahotas.polygon import fill_polygon
 from tqdm import tqdm
 
 # Fungsi untuk memotong citra bedasarkan shapefile poligon
-def clip_raster(input_folder, shp_layer, output_folder, output_filename, nilai_nodata=np.nan):
+def clip_raster(input_folder, shp_layer, output_folder, output_filename, nilai_nodata=0):
     """
     Memotong citra sesuai dengan shaepfile poligon yang dibuat.
 
@@ -28,118 +28,29 @@ def clip_raster(input_folder, shp_layer, output_folder, output_filename, nilai_n
     Returns:
         str: Output path.
     """
-    konversi_path = f"{output_folder}/raster_float32.tif"
     # Tentukan lokasi hasil clip
     output_path = os.path.join(output_folder, output_filename)
     # Pastikan folder output ada, jika tidak, buat folder baru
     os.makedirs(output_folder, exist_ok=True)
     # Baca Shapefile Menggunakan GeoPandas
     print("Memuat shapefile...")
-    print("Mengkonversi citra...")
     mask_gdf = gpd.read_file(shp_layer)
     with rio.open(input_folder) as src:
         data = src.read()
         profile = src.profile
-    profile.update(
-        dtype="float32",
-        BIGTIFF="YES",
-        nodata=nilai_nodata
-        )
-    # Mengkonversi ke format float32
-    with rio.open(konversi_path, "w", **profile) as dest:
-        dest.write(data.astype("float32"))
-
-    # Membuka raster float32
-    with rio.open(konversi_path) as src_32:
         geometries = mask_gdf.geometry
-        profile32 = src_32.profile
         # Melakukan masking
         print("Memotong raster berdasarkan shapefile...")
         out_image, out_transform = mask(
-            src_32,
-            geometries, 
-            crop=True,
-            filled=True
-            )
-    # Perbarui metadata dengan informasi dari hasil clip
-    profile32.update(
-        dtype="float32",
-        height=out_image.shape[1],
-        width=out_image.shape[2],
-        count=out_image.shape[0],
-        transform=out_transform,
-        BIGTIFF="YES",
-        nodata=nilai_nodata,
-        driver="GTiff"
-    )
-    print("Menyimpan hasil clipping...")
-    with rio.open(output_path, "w", **profile32) as dest:
-        dest.write(out_image)
-    print(f"File {output_filename} berhasil disimpan di {output_folder}")
-    os.remove(konversi_path)
-    return output_path
-
-# Fungsi memotong citra dengan penghematan memori 
-def clip_raster_optimized(input_folder, shp_layer, output_folder, output_filename, nilai_nodata=np.nan):
-    """
-    Memotong citra sesuai dengan shaepfile poligon yang dibuat, 
-    menggunakan pemrosesan berblok untuk menghemat RAM saat konversi uint16 -> float32.
-
-    Parameters:
-        input_folder (str): Lokasi file raster yang akan dipotong.
-        shp_layer (str): Lokasi shapefile yang menjadi acuan.
-        output_folder (str): Nama folder tempat hasil klip disimpan.
-        output_filename (str): Nama file output, termasuk ekstensi
-        
-    Returns:
-        str: Output path.
-    """
-    konversi_path = f"{output_folder}/raster_float32.tif"
-    output_path = os.path.join(output_folder, output_filename)
-    os.makedirs(output_folder, exist_ok=True)
-
-    print("Memuat shapefile...")
-    mask_gdf = gpd.read_file(shp_layer)
-
-    print("Mengkonversi citra...")
-    with rio.open(input_folder) as src:
-        profile = src.profile
-        profile.update(
-            dtype="float32",
-            BIGTIFF="YES",
-            nodata=nilai_nodata,
-            tiled=True,
-            blockxsize=256, 
-            blockysize=256
-        )
-        old_nodata = src.nodata
-
-        with rio.open(konversi_path, "w", **profile) as dest:
-            for ji, window in src.block_windows():
-                block = src.read(window=window, out_dtype=np.uint16)
-                
-                block_f32 = block.astype(np.float32)
-                if old_nodata is not None:
-                    block_f32[block_f32 == old_nodata] = np.nan
-            
-                dest.write(block_f32, window=window)
-
-    with rio.open(konversi_path) as src_32:
-        geometries = mask_gdf.geometry
-        profile32 = src_32.profile
-        
-        print("Memotong raster berdasarkan shapefile...")
-        out_image, out_transform = mask(
-            src_32,
+            src,
             geometries, 
             crop=True,
             filled=True,
-            nodata=nilai_nodata 
-        )
-        
-
-    profile32.update(
-        dtype="float32",
+            nodata=nilai_nodata
+            )
+    # Perbarui metadata dengan informasi dari hasil clip
+    profile.update(
+        dtype="uint16",
         height=out_image.shape[1],
         width=out_image.shape[2],
         count=out_image.shape[0],
@@ -148,14 +59,10 @@ def clip_raster_optimized(input_folder, shp_layer, output_folder, output_filenam
         nodata=nilai_nodata,
         driver="GTiff"
     )
-    
     print("Menyimpan hasil clipping...")
-    with rio.open(output_path, "w", **profile32) as dest:
+    with rio.open(output_path, "w", **profile) as dest:
         dest.write(out_image)
-
     print(f"File {output_filename} berhasil disimpan di {output_folder}")
-    os.remove(konversi_path)
-    
     return output_path
 
 # Fungsi untuk melakukan masking pada setiap band terpisah
@@ -248,7 +155,7 @@ def mask_tumpukan_band(input_folder, mask_path, output_folder, logika=lambda x: 
             dest.write(data_stack)
     print(f"File {nf}_masked.tif berhasil disimpan di {output_folder}")
 
-# Fungsi untuk membuat polygon sebagai grid titik
+# Fungsi untuk membuat polygon sebagai grid titik (mmuhaemin)
 def render(poly):
     """
     Membuat grid titik dari poligon berdasarkan koordinat piksel.
@@ -262,7 +169,7 @@ def render(poly):
     fill_polygon(newPoly, grid)
     return [(x + minx, y + miny) for (x, y) in zip(*np.nonzero(grid))]
 
-# Fungsi untuk mengekstrak koordinat verteks dari satu file multipoligon
+# Fungsi untuk mengekstrak koordinat verteks dari satu file multipoligon (nurrohman)
 def ekstrak_koordinat_vertek(shp_layer, output_folder):
     """
     Mengekstrak koordinat vertek dari setiap komponen multipoligon
@@ -308,7 +215,7 @@ def ekstrak_koordinat_vertek(shp_layer, output_folder):
         if polygon_index % 100 == 0:
             print(f"Telah memproses {polygon_index}/{total_rows} poligon...")
 
-    print(f"\nSelesai! {total_rows} CSV telah disimpan di: {output_folder}")
+    print(f"Selesai! {total_rows} CSV telah disimpan di: {output_folder}")
 
 # Fungsi untuk mengekstrak nilai piksel berdasarkan koordinat verteks
 def ekstrak_piksel_dari_vertek(input_vertek, input_folder, output_folder, output_filename):
@@ -328,7 +235,7 @@ def ekstrak_piksel_dari_vertek(input_vertek, input_folder, output_folder, output
     # Membaca file verteks
     df = pd.read_csv(input_vertek)
     df["no_urut"] = df.groupby("id").cumcount() + 1
-    df["Nama"] = "Titik " + df["id"].astype(str) # + " Komponen " + df["no_urut"].astype(str)
+    df["Nama"] = "Poligon " + df["id"].astype(str) # + " Komponen " + df["no_urut"].astype(str)
 
     grup = df.groupby("id")
     hasil_gabungan_band = None 
@@ -413,7 +320,7 @@ def ekstrak_tumpukan_fitur(shp_layer, input_folder, output_folder, output_filena
 
     gdf = gpd.read_file(shp_layer)
     gdf["no_urut"] = gdf.groupby("id").cumcount() + 1
-    gdf["Nama"] = "Titik " + gdf["id"].astype(str) + " Komponen " + gdf["no_urut"].astype(str)
+    gdf["Nama"] = "Poligon " + gdf["id"].astype(str) + " Komponen " + gdf["no_urut"].astype(str)
 
     for file in file_ekstraksi:
         with rio.open(file) as src:
@@ -422,18 +329,17 @@ def ekstrak_tumpukan_fitur(shp_layer, input_folder, output_folder, output_filena
                 id_poligon = row["id"]
                 nama_titik = row["Nama"]
 
-                # 1. Dapatkan out_transform dari fungsi mask
-                out_image, out_transform = mask(src, geometry, crop=True, nodata=np.nan)
+                # Mendapatkan out_transform dari fungsi mask
+                out_image, out_transform = mask(src, geometry, crop=True, nodata=0)
                 
-                # 2. Identifikasi baris dan kolom piksel yang valid (bukan NaN)
+                # Menentukan piksel yang valid
                 valid_mask_2d = ~np.isnan(out_image[0])
                 rows, cols = np.where(valid_mask_2d) # Mendapatkan index baris dan kolom
 
-                # 3. Konversi index baris/kolom menjadi koordinat X dan Y
+                # Mengonversi index baris/kolom menjadi koordinat X dan Y
                 # rio.transform.xy menghitung koordinat pusat piksel
                 xs, ys = rio.transform.xy(out_transform, rows, cols)
 
-                # 4. Ambil data band
                 ekstrak_piksel = []
                 # Sisipkan koordinat X dan Y di awal list fitur
                 ekstrak_piksel.append(xs)
@@ -526,9 +432,10 @@ def ekstrak_rerata_piksel(shp_layer, input_folder, output_folder, output_filenam
     
     if not nan_rows.empty:
         print(f"\n⚠️ PERHATIAN: Ditemukan {len(nan_rows)} poligon dengan nilai piksel tidak valid (NaN).")
-        print(f"ID yang bermasalah: {nan_rows['Nama'].tolist()}")
+        print(f"Poligon yang bermasalah: {nan_rows['Nama'].tolist()}")
     # ------------------------
     # Pembersihan dan pengurutan data
+    print(f"Membersihkan hasil ekstraksi...")
     df = pd.DataFrame(hasil_ekstraksi).dropna()
     df_urut = df.sort_values(by=["id", "no_urut"], ascending=True)
     df_urut.rename(columns={"id": "id"}, inplace=True)

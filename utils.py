@@ -71,7 +71,7 @@ def ambil_file(ekstensi):
                 c += 1
             return file_target, lokasi_folder
 
-# Fungsi untuk membuat multipoligon
+# Fungsi untuk membuat multipoligon (shahiban)
 def buat_multipoligon(shp_layer, jml_poligon, jml_komponen,  output_folder):
     """
     Membuat multipoligon dari shapefile poligon.
@@ -90,9 +90,7 @@ def buat_multipoligon(shp_layer, jml_poligon, jml_komponen,  output_folder):
     jml_cluster = jml_poligon * jml_komponen
     os.makedirs(output_folder, exist_ok=True)
     filename = os.path.splitext(os.path.basename(shp_layer))[0]
-    print("=" * 30)
     print(f"Memproses file: {filename}.shp")
-    print("=" * 30)
     output_intersection = os.path.join(output_folder, f"{filename}_intersection.shp")
     # ========================================
     # Tahap 1: Membaca & Konversi CRS
@@ -340,9 +338,12 @@ def tumpuk_fitur(lst_fitur, output_folder, output_filename):
         with rio.open(fitur) as src:
             if profile is None:
                 profile = src.profile
-            
+                profile.update(
+                    dtype="float32",
+                    nodata=np.nan
+                ) 
             # Baca semua band dari file ini
-            feature_stack.append(src.read())
+            feature_stack.append(src.read().astype("float32"))
 
     # Gabungkan semua data menjadi satu array NumPy besar
     full_stack_array = np.vstack(feature_stack)

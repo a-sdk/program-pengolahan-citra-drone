@@ -19,12 +19,10 @@ def hitung_savi(nir_band, red_band, L):
     Returns:
         np.ndarray: Array NumPy SAVI.
     """
-    # Normalisasi nilai piksel
-    nir_band_norm = nir_band / np.float32(65535.0)
-    red_band_norm = red_band / np.float32(65535.0)
+
     # Hindari pembagian dengan nol
     with np.errstate(divide='ignore', invalid='ignore'):
-        savi = ((nir_band_norm.astype("float32") - red_band_norm.astype("float32")) * (1 + L)) / (nir_band_norm.astype("float32") + red_band_norm.astype("float32") + L) 
+        savi = ((nir_band.astype("float32") - red_band.astype("float32")) * (1 + L)) / (nir_band.astype("float32") + red_band.astype("float32") + L) 
         # savi = np.nan_to_num(savi, nan = 0) # Mengganti nilai NaN dengan 0 atau nilai lain
     return savi
 
@@ -39,11 +37,10 @@ def hitung_ndvi(nir_band, red_band):
     Returns:
         np.ndarray: Array NumPy NDVI.
     """
-    nir_band_norm = nir_band / np.float32(65535.0)
-    red_band_norm = red_band / np.float32(65535.0)
+
     # Hindari pembagian dengan nol
     with np.errstate(divide='ignore', invalid='ignore'):
-        ndvi = (nir_band_norm.astype("float32") - red_band_norm.astype("float32")) / (nir_band_norm.astype("float32") + red_band_norm.astype("float32"))
+        ndvi = (nir_band.astype("float32") - red_band.astype("float32")) / (nir_band.astype("float32") + red_band.astype("float32"))
         # ndvi = np.nan_to_num(ndvi, nan = 0) # Mengganti nilai NaN dengan 0 atau nilai lain
     return ndvi
 
@@ -58,15 +55,14 @@ def hitung_gndvi(nir_band, green_band):
     Returns:
         np.ndarray: Array NumPy GNDVI.
     """
-    nir_band_norm = nir_band / np.float32(65535.0)
-    green_band_norm = green_band / np.float32(65535.0)
+ 
     # Hindari pembagian dengan nol
     with np.errstate(divide='ignore', invalid='ignore'):
-        gndvi = (nir_band_norm.astype("float32") - green_band_norm.astype("float32")) / (nir_band_norm.astype("float32") + green_band_norm.astype("float32"))
+        gndvi = (nir_band.astype("float32") - green_band.astype("float32")) / (nir_band.astype("float32") + green_band.astype("float32"))
         # gndvi = np.nan_to_num(gndvi, nan = 0) # Mengganti nilai NaN dengan 0 atau nilai lain
     return gndvi
 
-def hitung_ndrei(nir_band, red_edge_band):
+def hitung_ndre(nir_band, red_edge_band):
     """
     Mentranformasi citra menggunakan Normalized Difference Red Edge Index.
     
@@ -77,11 +73,10 @@ def hitung_ndrei(nir_band, red_edge_band):
     Returns:
         np.ndarray: Array NumPy NDRE.
     """
-    nir_band_norm = nir_band / np.float32(65535.0)
-    red_edge_band_norm = red_edge_band / np.float32(65535.0)
+
     # Hindari pembagian dengan nol
     with np.errstate(divide='ignore', invalid='ignore'):
-        ndre = (nir_band_norm.astype("float32") - red_edge_band_norm.astype("float32")) / (nir_band_norm.astype("float32") + red_edge_band_norm.astype("float32"))
+        ndre = (nir_band.astype("float32") - red_edge_band.astype("float32")) / (nir_band.astype("float32") + red_edge_band.astype("float32"))
         # ndre = np.nan_to_num(ndre, nan = 0) # Mengganti nilai NaN dengan 0 atau nilai lain
     return ndre
 
@@ -108,14 +103,14 @@ def proses_transformasi(lst_band, profile, output_folder, nilai_nodata, mode="")
     m_red = lst_band[4]
     red_edge = lst_band[5]
     nir = lst_band[6]
-    print("Menghitung transformasi indeks vegetasi...")
+    print("\nMenghitung transformasi indeks vegetasi...")
     profile.update(
         dtype="float32",
         count=1
     )
     # Mentransformasi citra
     transform_savi = hitung_savi(nir, m_red, L=0.5)
-    transform_ndrei = hitung_ndrei(nir, red_edge)
+    transform_ndrei = hitung_ndre(nir, red_edge)
     transform_ndvi = hitung_ndvi(nir, m_red)
     transform_gndvi = hitung_gndvi(nir, m_green)
     # Menyimpan setiap band dan hasil transformasi ke dalam file GeoTIFF
@@ -152,27 +147,34 @@ def proses_segmentasi(lst_fitur, profile, output_folder, nilai_nodata):
 
     # Membuat peta segmentasi gulma dan padi
     peta_segmentasi_gulma = pisahkan_gulma("model_deteksi_gulma.joblib", lst_fitur[0], output_folder, "segmentasi_gulma.tif")
-    print("Memuat file SAVI...")
-    with rio.open(lst_fitur[4]) as src_savi, rio.open(peta_segmentasi_gulma) as src_gulma, rio.open(lst_fitur[2]) as src_ndrei:
+    print("Memuat file hasil transformasi...")
+    with rio.open(lst_fitur[2]) as src_ndre, rio.open(lst_fitur[3]) as src_ndvi, rio.open(lst_fitur[4]) as src_savi, rio.open(peta_segmentasi_gulma) as src_gulma:
+        ndre = src_ndre.read(1).astype("float32")
+        ndvi = src_ndvi.read(1).astype("float32")
         savi = src_savi.read(1).astype("float32")
-        ndrei = src_ndrei.read(1).astype("float32")
         mask_padi = src_gulma.read(1).astype("float32") < 2
-    # Membaca SAVI dan NDREI lalu menampilkan histogram
-    savi_1d = savi.ravel() 
-    ndrei_1d = ndrei.ravel()    
-    # Menampilkan histogram SAVI
-    t_savi = otsu_threshold(savi, jumlah_bin=256, rentang_nilai=(-1, 1))
-    t_ndrei = -0.05
-    # tampilkan_histogram("SAVI", savi_1d, t_savi)
-    # tampilkan_histogram("NDREI", ndrei_1d, t_ndrei)
 
+    ndre_1d = ndre.ravel()    
+    ndvi_1d = ndvi.ravel()    
+    savi_1d = savi.ravel() 
+    # Menampilkan histogram
+    t_ndre = otsu_threshold(ndre, jumlah_bin=256, rentang_nilai=(-1, 1))
+    t_ndvi = otsu_threshold(ndvi, jumlah_bin=256, rentang_nilai=(-1, 1))
+    t_savi = otsu_threshold(savi, jumlah_bin=256, rentang_nilai=(-1, 1))
+    # tampilkan_histogram("NDRE", ndre_1d, t_ndre)
+    # tampilkan_histogram("NDVI", ndre_1d, t_ndvi)
+    # tampilkan_histogram("SAVI", savi_1d, t_savi)
+
+    mask_ndre = ndre > t_ndre
+    mask_ndvi = ndvi > t_ndvi
     mask_savi = savi > t_savi
-    mask_ndrei = ndrei > t_ndrei
-    mask_final = mask_savi & mask_padi
-    mask_final_indeks = mask_savi & mask_ndrei
-    print(f"Melakukan thresholding SAVI dengan batas {t_savi}...")
+    mask_final = mask_ndre & mask_padi # mask_ndvi & mask_padi # mask_savi & mask_padi
+    # mask_final_indeks = mask_savi & mask_ndre
+    print(f"Melakukan thresholding NDRE dengan batas {t_ndre}...")
+    # print(f"Melakukan thresholding NDVI dengan batas {t_ndvi}...")
+    # print(f"Melakukan thresholding SAVI dengan batas {t_savi}...")
     hasil_threshold = mask_final.astype("float32")
-    hasil_threshold_2 = mask_final_indeks.astype("float32")
+    # hasil_threshold_2 = mask_final_indeks.astype("float32")
     # Menyimpan hasil threshold
     threshold_file_path = simpan_raster(hasil_threshold, profile, output_folder, "hasil_threshold_model.tif", nilai_nodata)
     # threshold2_file_path = simpan_raster(hasil_threshold_2, profile, output_folder, "hasil_threshold_indeks.tif", nilai_nodata)

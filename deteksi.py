@@ -1,4 +1,4 @@
-from ekstraksi import clip_raster_optimized, mask_tumpukan_band
+from ekstraksi import clip_raster, mask_tumpukan_band
 from klasifikasi import deteksi_penyakit_rumpun
 from transformasi import proses_segmentasi, proses_transformasi
 from utils import ambil_file
@@ -47,7 +47,7 @@ def main():
         file_scaler = "Scaler.joblib"
         # ---- PROSES CLIPPING AWAL ----
         # Memotong petakan sawah berdasarkan poligon
-        clipped_raster = clip_raster_optimized(raster_file, shp_target, folder_hasil_clip, f"{nf_raster}_clip.tif")
+        clipped_raster = clip_raster(raster_file, shp_target, folder_hasil_clip, f"{nf_raster}_clip.tif")
         # Mengakses citra beserta band yang diperlukan 
         print("\nMembaca band yang diperlukan...")
         with rio.open(clipped_raster) as src_citra:

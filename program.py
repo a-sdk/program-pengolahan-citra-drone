@@ -1,5 +1,5 @@
 from ekstraksi import (
-    clip_raster_optimized, 
+    clip_raster, 
     ekstrak_koordinat_vertek,
     mask_band_terpisah, 
     mask_tumpukan_band, 
@@ -11,6 +11,7 @@ from transformasi import proses_segmentasi, proses_transformasi
 from utils import ambil_file, buat_multipoligon, tumpuk_fitur, cek_ukuran_raster
 import rasterio as rio
 import os
+import numpy as np
 import matplotlib.pyplot as plt
 import time
 
@@ -39,7 +40,7 @@ def main():
     for raster_file in lst_raster_input:
         t1 = time.perf_counter()   
         nf_raster = os.path.splitext(os.path.basename(raster_file))[0]
-        print("\n====================================================")
+        print("="*50)
         print(f"\nMemproses {nf_raster}...")
 
         # FOLDER OUTPUT
@@ -50,10 +51,10 @@ def main():
         folder_hasil_masking = rf"{folder_hasil}\Masking"
         folder_hasil_ekstraksi = rf"{folder_hasil}\Ekstraksi"
         folder_koord_vertek = rf"{folder_hasil}\Koordinat Vertek"
-
+        file_poligon_rumpun = r"C:\Users\acer_\Documents\Shapefiles\cikembar\rumpun\poligon_rumpun_lahan_2_30.shp"
         # ---- PROSES CLIPPING AWAL ----
         # Memotong petakan sawah berdasarkan poligon
-        clipped_raster = clip_raster_optimized(raster_file, shp_target, folder_hasil_clip, f"{nf_raster}_clip.tif")
+        clipped_raster = clip_raster(raster_file, shp_target, folder_hasil_clip, f"{nf_raster}_clip.tif")
         # Mengakses citra beserta band yang diperlukan 
         print("\nMembaca band yang diperlukan...")
         with rio.open(clipped_raster) as src_citra:
@@ -65,11 +66,11 @@ def main():
             m_red = src_citra.read(5)
             red_edge = src_citra.read(6)
             nir = src_citra.read(7)
-            nodata_asli = src_citra.nodata
+            src_nodata = src_citra.nodata
             # Memisahkan bagian yang tidak valid
             mask_citra = src_citra.read_masks(1)
             # Membuat metadata profile
-            profile = src_citra.profile
+            src_profile = src_citra.profile
         # Menampilkan mask citra hasil clipping
         plt.figure(figsize=(8, 6)) # Tambahkan ini untuk ukuran plot yang lebih baik
         plt.title("Tampilan Mask Hasil Clipping")
@@ -77,25 +78,28 @@ def main():
         # plt.show()
 
         # ---- EKSTRAK KOORDINAT VERTEK ----
+        print("="*30)
+        print("Pembuatan Komponen Poligon")
+        print("="*30)
         jml_poly = int(input("Masukkan jumlah poligon: "))
         jml_subpoly = int(input("Masukkan jumlah komponen per poligon: "))
-        file_multipoligon = buat_multipoligon(shp_target, jml_poly, jml_subpoly, folder_hasil)
+        file_multipoligon = buat_multipoligon(file_poligon_rumpun, jml_poly, jml_subpoly, folder_hasil)
         ekstrak_koordinat_vertek(file_multipoligon, folder_koord_vertek)
 
         # ---- PROSES TRANSFORMASI ----
-        lst_band = [red, green, blue, m_green, m_red, red_edge, nir]
-        gndvi, ndrei, ndvi, savi = proses_transformasi(lst_band, profile, folder_hasil_transformasi, nilai_nodata=nodata_asli, mode="")
+        list_band = [red, green, blue, m_green, m_red, red_edge, nir]
+        gndvi, ndre, ndvi, savi = proses_transformasi(list_band, src_profile, folder_hasil_transformasi, nilai_nodata=np.nan, mode="")
 
         # ---- PROSES SEGMENTASI ----
-        lst_fitur = [clipped_raster, gndvi, ndrei, ndvi, savi]
-        threshold_padi = proses_segmentasi(lst_fitur, profile, folder_hasil_segmentasi, nilai_nodata=nodata_asli)
+        list_fitur = [clipped_raster, gndvi, ndre, ndvi, savi]
+        threshold_padi = proses_segmentasi(list_fitur, src_profile, folder_hasil_segmentasi, nilai_nodata=np.nan)
         # Menumpuk fitur untuk hasil 11 fitur
-        lokasi_tumpukan_band = tumpuk_fitur(lst_fitur, folder_hasil_transformasi, "tumpukan_fitur.tif")
+        lokasi_tumpukan_band = tumpuk_fitur(list_fitur, folder_hasil_transformasi, "tumpukan_fitur.tif")
 
         # ---- PROSES MASKING ----
         # Melakukan masking pada setiap band dan hasil transformasi
         # mask_band_terpisah(folder_hasil_transformasi, threshold_padi, folder_hasil_masking, nilai_nodata=nodata_asli)
-        mask_tumpukan_band(lokasi_tumpukan_band, threshold_padi, folder_hasil_masking, nilai_nodata=nodata_asli)
+        mask_tumpukan_band(lokasi_tumpukan_band, threshold_padi, folder_hasil_masking, nilai_nodata=np.nan)
 
         # ---- PROSES EKSTRAKSI ----
         # Mengekstrak piksel setiap band dari file terpisah berdasarkan koordinat verteks
