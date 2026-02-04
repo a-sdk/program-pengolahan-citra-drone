@@ -60,7 +60,7 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ## Struktur Proyek
 
     /program_pengolahan_citra_drone
-    /core 
+    └──core/
         ├── deteksi.py                      # Program utama deteksi penyakit tanaman padi.
         ├── ekstraksi.py                    # Program ekstrasi fitur citra.
         ├── klasifikasi.py                  # Program berisi fungsi pemisah gulma dan deteksi penyakit.
