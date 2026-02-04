@@ -60,16 +60,16 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 ## Struktur Proyek
 
     /program_pengolahan_citra_drone
-    ├── deteksi.py                      # Program utama deteksi penyakit tanaman padi.
-    ├── ekstraksi.py                    # Program ekstrasi fitur citra.
-    ├── klasifikasi.py                  # Program berisi fungsi pemisah gulma dan deteksi penyakit.
-    ├── model_deteksi_gulma.joblib      # Model pemisah padi dan gulma.
-    ├── model_deteksi_penyakit.keras    # Model deteksi penyakit padi.
-    ├── program.py                      # Program utama pengolahan citra.
-    ├── program_arogansi.py             # Program untuk keperluan percobaan.
-    ├── Scaler.joblib                   # Tugas normalisasi data.
-    ├── transformasi.py                 # Program transformasi dan segmentasi.
-    └── utils.py                        # Program berisi fungsi-fungsi utilitas.
+    /core 
+        ├── deteksi.py                      # Program utama deteksi penyakit tanaman padi.
+        ├── ekstraksi.py                    # Program ekstrasi fitur citra.
+        ├── klasifikasi.py                  # Program berisi fungsi pemisah gulma dan deteksi penyakit.
+        ├── model_deteksi_gulma.joblib      # Model pemisah padi dan gulma.
+        ├── model_deteksi_penyakit.keras    # Model deteksi penyakit padi.
+        ├── program.py                      # Program utama pengolahan citra.
+        ├── Scaler.joblib                   # Tugas normalisasi data.
+        ├── transformasi.py                 # Program transformasi dan segmentasi.
+        └── utils.py                        # Program berisi fungsi-fungsi utilitas.
 
 
 ---
