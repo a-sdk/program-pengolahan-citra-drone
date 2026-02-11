@@ -146,7 +146,7 @@ def proses_segmentasi(lst_fitur, profile, output_folder, nilai_nodata):
     """
 
     # Membuat peta segmentasi gulma dan padi
-    peta_segmentasi_gulma = pisahkan_gulma("model_deteksi_gulma.joblib", lst_fitur[0], output_folder, "segmentasi_gulma.tif")
+    peta_segmentasi_gulma = pisahkan_gulma(r"core\model_deteksi_gulma.joblib", lst_fitur[0], output_folder, "segmentasi_gulma.tif")
     print("Memuat file hasil transformasi...")
     with rio.open(lst_fitur[2]) as src_ndre, rio.open(lst_fitur[3]) as src_ndvi, rio.open(lst_fitur[4]) as src_savi, rio.open(peta_segmentasi_gulma) as src_gulma:
         ndre = src_ndre.read(1).astype("float32")
@@ -168,10 +168,10 @@ def proses_segmentasi(lst_fitur, profile, output_folder, nilai_nodata):
     mask_ndre = ndre > t_ndre
     mask_ndvi = ndvi > t_ndvi
     mask_savi = savi > t_savi
-    mask_final = mask_ndre & mask_padi # mask_ndvi & mask_padi # mask_savi & mask_padi
+    mask_final = mask_ndvi & mask_padi # mask_savi & mask_padi # mask_ndre & mask_padi
     # mask_final_indeks = mask_savi & mask_ndre
-    print(f"Melakukan thresholding NDRE dengan batas {t_ndre}...")
-    # print(f"Melakukan thresholding NDVI dengan batas {t_ndvi}...")
+    # print(f"Melakukan thresholding NDRE dengan batas {t_ndre}...")
+    print(f"Melakukan thresholding NDVI dengan batas {t_ndvi}...")
     # print(f"Melakukan thresholding SAVI dengan batas {t_savi}...")
     hasil_threshold = mask_final.astype("float32")
     # hasil_threshold_2 = mask_final_indeks.astype("float32")

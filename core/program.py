@@ -3,7 +3,7 @@ from ekstraksi import (
     ekstrak_koordinat_vertek,
     mask_band_terpisah, 
     mask_tumpukan_band, 
-    ekstrak_piksel_dari_vertek, 
+    ekstrak_piksel_setiap_koordinat, 
     ekstrak_tumpukan_fitur, 
     ekstrak_rerata_piksel
 )
@@ -20,7 +20,7 @@ import time
 #            PROGRAM UTAMA
 #
 ##########################################################
-def main():
+def main(mode_operasi="", mode_ekstraksi="mean"):
     print("\n==========================================================================")
     print("================= PROGRAM PENGOLAHAN CITRA MULTISPEKTRAL =================")
     print("==========================================================================")
@@ -41,7 +41,7 @@ def main():
         t1 = time.perf_counter()   
         nf_raster = os.path.splitext(os.path.basename(raster_file))[0]
         print("="*50)
-        print(f"\nMemproses {nf_raster}...")
+        print(f"\nMemproses file: {nf_raster}.tif")
 
         # FOLDER OUTPUT
         folder_hasil = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files"
@@ -51,7 +51,7 @@ def main():
         folder_hasil_masking = rf"{folder_hasil}\Masking"
         folder_hasil_ekstraksi = rf"{folder_hasil}\Ekstraksi"
         folder_koord_vertek = rf"{folder_hasil}\Koordinat Vertek"
-        file_poligon_rumpun = r"C:\Users\acer_\Documents\Shapefiles\cikembar\rumpun\poligon_rumpun_lahan_2_30.shp"
+        # file_poligon_rumpun = r"C:\Users\acer_\Documents\Shapefiles\cikembar\rumpun\poligon_rumpun_lahan_2_30.shp"
         # ---- PROSES CLIPPING AWAL ----
         # Memotong petakan sawah berdasarkan poligon
         clipped_raster = clip_raster(raster_file, shp_target, folder_hasil_clip, f"{nf_raster}_clip.tif")
@@ -83,31 +83,83 @@ def main():
         print("="*30)
         jml_poly = int(input("Masukkan jumlah poligon: "))
         jml_subpoly = int(input("Masukkan jumlah komponen per poligon: "))
-        file_multipoligon = buat_multipoligon(file_poligon_rumpun, jml_poly, jml_subpoly, folder_hasil)
+        file_multipoligon = buat_multipoligon(shp_target, jml_poly, jml_subpoly, folder_hasil)
         ekstrak_koordinat_vertek(file_multipoligon, folder_koord_vertek)
 
         # ---- PROSES TRANSFORMASI ----
         list_band = [red, green, blue, m_green, m_red, red_edge, nir]
-        gndvi, ndre, ndvi, savi = proses_transformasi(list_band, src_profile, folder_hasil_transformasi, nilai_nodata=np.nan, mode="")
+        if mode_operasi != "pisah":
+            gndvi, ndre, ndvi, savi = proses_transformasi(
+                list_band, 
+                src_profile, 
+                folder_hasil_transformasi, 
+                nilai_nodata=np.nan, 
+                mode=""
+            )
+        elif mode_operasi == "pisah":
+            gndvi, ndre, ndvi, savi = proses_transformasi(
+                list_band, 
+                src_profile, 
+                folder_hasil_transformasi, 
+                nilai_nodata=np.nan, 
+                mode="pisah"
+            )
 
         # ---- PROSES SEGMENTASI ----
         list_fitur = [clipped_raster, gndvi, ndre, ndvi, savi]
         threshold_padi = proses_segmentasi(list_fitur, src_profile, folder_hasil_segmentasi, nilai_nodata=np.nan)
         # Menumpuk fitur untuk hasil 11 fitur
-        lokasi_tumpukan_band = tumpuk_fitur(list_fitur, folder_hasil_transformasi, "tumpukan_fitur.tif")
+        if mode_operasi != "pisah":
+            lokasi_tumpukan_band = tumpuk_fitur(list_fitur, folder_hasil_transformasi, "tumpukan_fitur.tif")
 
         # ---- PROSES MASKING ----
         # Melakukan masking pada setiap band dan hasil transformasi
-        # mask_band_terpisah(folder_hasil_transformasi, threshold_padi, folder_hasil_masking, nilai_nodata=nodata_asli)
-        mask_tumpukan_band(lokasi_tumpukan_band, threshold_padi, folder_hasil_masking, nilai_nodata=np.nan)
+        if mode_operasi != "pisah":
+            mask_tumpukan_band(
+                lokasi_tumpukan_band, 
+                threshold_padi, 
+                folder_hasil_masking, 
+                nilai_nodata=np.nan
+            )
+        elif mode_operasi == "pisah":
+            mask_band_terpisah(
+                folder_hasil_transformasi, 
+                threshold_padi, 
+                folder_hasil_masking, 
+                nilai_nodata=np.nan
+            )
 
         # ---- PROSES EKSTRAKSI ----
         # Mengekstrak piksel setiap band dari file terpisah berdasarkan koordinat verteks
-        # ekstrak_piksel_dari_vertek(file_vertek, folder_hasil_masking, folder_hasil_ekstraksi, f"Hasil_Ekstraksi_{nf_raster}.csv")
+        if mode_operasi == "pisah" and mode_ekstraksi == "all":
+            ekstrak_piksel_setiap_koordinat(
+                folder_koord_vertek, 
+                folder_hasil_masking, 
+                f"{folder_hasil_ekstraksi}/Pisah"
+            )
         # Mengekstrak piksel dari tumpukan fitur
-        # ekstrak_tumpukan_fitur(file_shp, folder_hasil_masking, folder_hasil_ekstraksi, f"{nf_raster}.csv")
+        elif mode_operasi != "pisah" and mode_ekstraksi == "all":
+            ekstrak_tumpukan_fitur(
+                file_multipoligon, 
+                folder_hasil_masking, 
+                f"{folder_hasil_ekstraksi}/Tumpuk", 
+                f"Hasil_Ekstraksi_{nf_raster}.csv"
+            )
+        elif mode_operasi == "pisah" and mode_ekstraksi == "mean":
+                ekstrak_rerata_piksel(
+                file_multipoligon, 
+                folder_hasil_masking, 
+                f"{folder_hasil_ekstraksi}/Pisah", 
+                f"Hasil_Ekstraksi_{nf_raster}_mean.csv"
+            )   
         # Mengekstrak rata rata nilai piksel dalam multi poligon
-        ekstrak_rerata_piksel(file_multipoligon, folder_hasil_masking, folder_hasil_ekstraksi, f"{nf_raster}_mean.csv")
+        elif mode_operasi != "pisah" and mode_operasi == "mean":
+            ekstrak_rerata_piksel(
+                file_multipoligon, 
+                folder_hasil_masking, 
+                f"{folder_hasil_ekstraksi}/Tumpuk", 
+                f"Hasil_Ekstraksi_{nf_raster}_mean.csv"
+            )
         
         # ---- PROSES TAMBAHAN ----
         # Menghitung ukuran raster 
@@ -137,4 +189,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    operasi = "" # "pisah" atau kosongkan
+    ekstrak_mode = "all" # untuk rata rata piksel atau "all" untuk semua piksel
+    main(mode_operasi=operasi, mode_ekstraksi=ekstrak_mode)

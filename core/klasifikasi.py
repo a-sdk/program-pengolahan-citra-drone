@@ -98,7 +98,7 @@ def deteksi_penyakit_rumpun(model_path, scaler_path, input_folder, output_folder
         print(f"ERROR: Gagal memuat: {e}")
         return
 
-    output_names = ["BLAS", "BLB", "BS", "NBS"] 
+    output_names = ["Blas", "HDB", "Bercak Cokelat", "Bercak Sempit"] 
 
     print(f"Memprediksi citra...")
     with rio.open(file_raster[0]) as src:

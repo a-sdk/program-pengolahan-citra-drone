@@ -226,8 +226,7 @@ def simpan_raster(input_raster, profile, output_folder, output_filename, nilai_n
     os.makedirs(output_folder, exist_ok=True)
 
     # Perbarui profil untuk file output
-    profile.update(
-        dtype=input_raster.dtype,  
+    profile.update(  
         count=1,
         driver="GTiff"
     )
