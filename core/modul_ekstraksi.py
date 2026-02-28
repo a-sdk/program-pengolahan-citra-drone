@@ -390,26 +390,25 @@ def ekstrak_tumpukan_fitur(shp_layer, input_folder, output_folder, output_filena
             out_image = src.read(window=window).astype("float32")
             window_transform = src.window_transform(window)
 
-            # 3. Buat mask untuk poligon di dalam window tersebut
-            # Ini memastikan kita hanya mengambil piksel di dalam poligon, bukan kotak window-nya
+            # Membuat mask poligon dalam window
             mask_poligon = geometry_mask([geom], 
                                          out_shape=(out_image.shape[1], out_image.shape[2]), 
                                          transform=window_transform, 
                                          invert=True)
 
-            # 4. Ambil indeks piksel yang berada di dalam poligon
+            # Mengmbil indeks piksel yang berada di dalam poligon
             rows, cols = np.where(mask_poligon)
             
             if len(rows) == 0:
                 continue
 
-            # Dapatkan nilai piksel untuk semua band sekaligus
+            # Mendapatkan nilai piksel untuk semua band sekaligus
             nilai_bands = out_image[:, rows, cols] # Shape: (jumlah_band, jumlah_piksel)
 
-            # Dapatkan koordinat X dan Y spasial
+            # Mendapatkan koordinat X dan Y spasial
             xs, ys = rio.transform.xy(window_transform, rows, cols)
 
-            # 5. Susun data secara horizontal
+            # Menyusun data secara horizontal
             # Koordinat + Nilai Band
             data_piksel = np.vstack([np.array(xs), np.array(ys), nilai_bands]).T
             
@@ -438,6 +437,18 @@ def ekstrak_tumpukan_fitur(shp_layer, input_folder, output_folder, output_filena
 
 # Fungsi untuk mengekstrak tumpukan fitur (band) dengan lebih sedikit RAM
 def ekstrak_tumpukan_fitur_optimized(shp_layer, input_folder, output_folder, output_filename):
+    """
+    Mengekstrak seluruh nilai piksel dalam poligon dari tumpukan fitur.
+
+    Parameters:
+        shp_layer (str): Lokasi shapefile yang menjadi acuan.
+        input_folder (str): Lokasi file tumpukan fitur.
+        output_folder (str): Nama folder tempat file akan disimpan.
+        output_filename (str): Nama file output, termasuk ekstensi.
+
+    Returns:
+        None.
+    """
     file_ekstraksi = glob.glob(os.path.join(input_folder, "*.tif"))
     if not file_ekstraksi: 
         print("File .tif tidak ditemukan!")
@@ -461,7 +472,7 @@ def ekstrak_tumpukan_fitur_optimized(shp_layer, input_folder, output_folder, out
         for index, row in tqdm(gdf.iterrows(), desc="Mengekstrak piksel", total=len(gdf)):
             geom = row.geometry
 
-            # 1. Windowed Reading (Hanya bagian kecil citra)
+            # Windowed Reading (Hanya bagian kecil citra)
             left, bottom, right, top = geom.bounds
             window = from_bounds(left, bottom, right, top, src.transform).round_offsets().round_lengths()
             
@@ -471,7 +482,7 @@ def ekstrak_tumpukan_fitur_optimized(shp_layer, input_folder, output_folder, out
             out_image = src.read(window=window).astype("float32")
             window_transform = src.window_transform(window)
 
-            # 2. Masking
+            # Membuat mask poligon dalam window
             mask_poligon = geometry_mask([geom], 
                                          out_shape=(out_image.shape[1], out_image.shape[2]), 
                                          transform=window_transform, 
@@ -480,7 +491,7 @@ def ekstrak_tumpukan_fitur_optimized(shp_layer, input_folder, output_folder, out
             rows, cols = np.where(mask_poligon)
 
 
-            # 3. Ekstraksi Nilai
+            # Mengekstrak nilai piksel
             nilai_bands = out_image[:, rows, cols]
             mask_valid_piksel = (nilai_bands[6] != src.nodata) & (~np.isnan(nilai_bands[6]))
             nilai_bands = nilai_bands[:, mask_valid_piksel]
@@ -490,7 +501,7 @@ def ekstrak_tumpukan_fitur_optimized(shp_layer, input_folder, output_folder, out
             jml_piksel_poligon = len(rows_valid)
             total_jml_piksel += jml_piksel_poligon
             xs, ys = rio.transform.xy(window_transform, rows_valid, cols_valid)
-            # 4. Susun Data Poligon Ini
+            # Menyusun data poligon
             data_piksel = np.vstack([np.array(xs), np.array(ys), nilai_bands]).T
             id_col = np.full((data_piksel.shape[0], 1), row["id"], dtype=object)
             nama_col = np.full((data_piksel.shape[0], 1), row["Nama"], dtype=object)

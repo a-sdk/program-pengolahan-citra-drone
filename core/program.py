@@ -1,4 +1,4 @@
-from ekstraksi import (
+from modul_ekstraksi import (
     clip_raster, 
     ekstrak_koordinat_vertek,
     mask_band_terpisah, 
@@ -7,8 +7,16 @@ from ekstraksi import (
     ekstrak_tumpukan_fitur, 
     ekstrak_rerata_piksel
 )
-from transformasi import proses_segmentasi, proses_transformasi
-from utils import ambil_file, buat_multipoligon, tumpuk_fitur, cek_ukuran_raster
+from modul_transformasi import (
+    proses_segmentasi, 
+    proses_transformasi
+)
+from utils import (
+    ambil_file, 
+    buat_multipoligon, 
+    tumpuk_fitur, 
+    cek_ukuran_raster
+)
 import rasterio as rio
 import os
 import numpy as np

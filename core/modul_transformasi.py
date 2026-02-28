@@ -5,7 +5,7 @@ Modul untuk transformasi dan segmentasi.
 import numpy as np
 import rasterio as rio
 from utils import otsu_threshold, simpan_raster, tampilkan_histogram, tumpuk_fitur
-from klasifikasi import pisahkan_gulma
+from modul_klasifikasi import pisahkan_gulma
 
 def hitung_savi(nir_band, red_band, L):
     """
@@ -22,7 +22,7 @@ def hitung_savi(nir_band, red_band, L):
 
     # Hindari pembagian dengan nol
     with np.errstate(divide='ignore', invalid='ignore'):
-        savi = ((nir_band.astype("float32") - red_band.astype("float32")) * (1 + L)) / (nir_band.astype("float32") + red_band.astype("float32") + L) 
+        savi = ((nir_band.astype(float) - red_band.astype(float)) * (1 + L)) / (nir_band.astype(float) + red_band.astype(float) + L) 
         # savi = np.nan_to_num(savi, nan = 0) # Mengganti nilai NaN dengan 0 atau nilai lain
     return savi
 
@@ -40,7 +40,7 @@ def hitung_ndvi(nir_band, red_band):
 
     # Hindari pembagian dengan nol
     with np.errstate(divide='ignore', invalid='ignore'):
-        ndvi = (nir_band.astype("float32") - red_band.astype("float32")) / (nir_band.astype("float32") + red_band.astype("float32"))
+        ndvi = (nir_band.astype(float) - red_band.astype(float)) / (nir_band.astype(float) + red_band.astype(float))
         # ndvi = np.nan_to_num(ndvi, nan = 0) # Mengganti nilai NaN dengan 0 atau nilai lain
     return ndvi
 
@@ -58,7 +58,7 @@ def hitung_gndvi(nir_band, green_band):
  
     # Hindari pembagian dengan nol
     with np.errstate(divide='ignore', invalid='ignore'):
-        gndvi = (nir_band.astype("float32") - green_band.astype("float32")) / (nir_band.astype("float32") + green_band.astype("float32"))
+        gndvi = (nir_band.astype(float) - green_band.astype(float)) / (nir_band.astype(float) + green_band.astype(float))
         # gndvi = np.nan_to_num(gndvi, nan = 0) # Mengganti nilai NaN dengan 0 atau nilai lain
     return gndvi
 
@@ -76,7 +76,7 @@ def hitung_ndre(nir_band, red_edge_band):
 
     # Hindari pembagian dengan nol
     with np.errstate(divide='ignore', invalid='ignore'):
-        ndre = (nir_band.astype("float32") - red_edge_band.astype("float32")) / (nir_band.astype("float32") + red_edge_band.astype("float32"))
+        ndre = (nir_band.astype(float) - red_edge_band.astype(float)) / (nir_band.astype(float) + red_edge_band.astype(float))
         # ndre = np.nan_to_num(ndre, nan = 0) # Mengganti nilai NaN dengan 0 atau nilai lain
     return ndre
 
@@ -149,10 +149,10 @@ def proses_segmentasi(lst_fitur, profile, output_folder, nilai_nodata):
     peta_segmentasi_gulma = pisahkan_gulma(r"core\model_deteksi_gulma.joblib", lst_fitur[0], output_folder, "segmentasi_gulma.tif")
     print("Memuat file hasil transformasi...")
     with rio.open(lst_fitur[2]) as src_ndre, rio.open(lst_fitur[3]) as src_ndvi, rio.open(lst_fitur[4]) as src_savi, rio.open(peta_segmentasi_gulma) as src_gulma:
-        ndre = src_ndre.read(1).astype("float32")
-        ndvi = src_ndvi.read(1).astype("float32")
-        savi = src_savi.read(1).astype("float32")
-        mask_padi = src_gulma.read(1).astype("float32") < 2
+        ndre = src_ndre.read(1).astype(float)
+        ndvi = src_ndvi.read(1).astype(float)
+        savi = src_savi.read(1).astype(float)
+        mask_padi = src_gulma.read(1).astype(float) < 2
 
     ndre_1d = ndre.ravel()    
     ndvi_1d = ndvi.ravel()    
@@ -173,8 +173,8 @@ def proses_segmentasi(lst_fitur, profile, output_folder, nilai_nodata):
     # print(f"Melakukan thresholding NDRE dengan batas {t_ndre}...")
     print(f"Melakukan thresholding NDVI dengan batas {t_ndvi}...")
     # print(f"Melakukan thresholding SAVI dengan batas {t_savi}...")
-    hasil_threshold = mask_final.astype("float32")
-    # hasil_threshold_2 = mask_final_indeks.astype("float32")
+    hasil_threshold = mask_final.astype(float)
+    # hasil_threshold_2 = mask_final_indeks.astype(float)
     # Menyimpan hasil threshold
     threshold_file_path = simpan_raster(hasil_threshold, profile, output_folder, "hasil_threshold_model.tif", nilai_nodata)
     # threshold2_file_path = simpan_raster(hasil_threshold_2, profile, output_folder, "hasil_threshold_indeks.tif", nilai_nodata)

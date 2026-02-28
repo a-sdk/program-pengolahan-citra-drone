@@ -1,6 +1,6 @@
-from ekstraksi import clip_raster, mask_tumpukan_band
-from klasifikasi import deteksi_penyakit_rumpun
-from transformasi import proses_segmentasi, proses_transformasi
+from modul_ekstraksi import clip_raster, mask_tumpukan_band
+from modul_klasifikasi import deteksi_penyakit_rumpun
+from modul_transformasi import proses_segmentasi, proses_transformasi
 from utils import ambil_file
 import matplotlib.pyplot as plt
 import os
@@ -37,7 +37,7 @@ def main():
         print("\n====================================================")
         print(f"\nMemproses {nf_raster}...")
 
-        # FOLDER OUTPUT
+        # FOLDER
         folder_hasil_clip = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Klip"
         folder_hasil_transformasi = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Transformasi"
         folder_hasil_segmentasi = rf"{lokasi_folder_raster}\Hasil\{nf_raster}_Files\Segmentasi"
