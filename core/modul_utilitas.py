@@ -15,6 +15,8 @@ from pyproj.aoi import AreaOfInterest
 from rasterio.features import rasterize
 import shapely.ops as ops
 from sklearn.cluster import KMeans
+import matplotlib.colors as mcolor
+import matplotlib.patches as mpatch
 
 # Fungsi bantu pembuatan multipoligon 
 def lonlat_to_utm_epsg(lon, lat):
@@ -703,6 +705,37 @@ def buat_petak_sebaran(input_geotiff, file_metadata, folder_verteks, output_fold
 
     print(f"\nBerhasil membuat {len(penyakit)} peta sebaran penyakit.")
 
+# Fungsi menampilkan hasil prediksi model
+def tampilkan_penyakit(input_folder, penyakit):
+    """
+    Menampilkan peta sebaran pada grafik.
+    
+    Parameters:
+        input_folder (str): Lokasi file GeoTIFF hasil prediksi model.
+        penyakit (str): Nama penyakit.
+
+    Returns:
+        None.
+    """
+    alpha = "#00000000"
+    hg = "#008000ff"
+    ht = "#90ee90ff"
+    kuning = "#ffff74ff"
+    merah = "#d7191cff"
+    warna = [alpha, hg, ht, kuning, merah]
+    cmaps = mcolor.ListedColormap(warna)
+    bounds = np.arange(-0.5, 5, 1)
+    norms = mcolor.BoundaryNorm(bounds, 5)
+    patch_hg = mpatch.Patch(color=hg, label="Sehat", ec="black")
+    patch_ht = mpatch.Patch(color=ht, label="Ringan", ec="black")
+    patch_k = mpatch.Patch(color=kuning, label="Sedang", ec="black")
+    patch_m = mpatch.Patch(color=merah, label="Parah", ec="black")
+    plt.legend(handles=[patch_hg, patch_ht, patch_k, patch_m], bbox_to_anchor=(1.05, 1), loc="lower left")
+    plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}")
+    with rio.open(input_folder) as src:
+        data = src.read(1) 
+        plt.imshow(data, cmap=cmaps, norm=norms) 
+        plt.show()
 
 if __name__ == "__main__":
     geotiff_file = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\Klip\Lahan Uji_clip.tif"

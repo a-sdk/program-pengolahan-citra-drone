@@ -8,16 +8,13 @@ from modul_transformasi import (
     proses_transformasi
 )
 from modul_utilitas import ( 
-    buat_multipoligon
+    buat_multipoligon,
+    tampilkan_penyakit
 )
 from modul_klasifikasi import deteksi_penyakit_rumpun
 
 import rasterio as rio
 import os
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolor
-import matplotlib.patches as mpatch
 import time
 
 ########################################################
@@ -77,23 +74,10 @@ def main(input_folder, poligon, model, scaler):
         print(f"\nSelesai memproses dalam {menit:d} menit {ts:3.2f} detik")
 
     print("Menampilkan hasil...")
-    alpha = "#00000000"
-    hg = "#008000ff"
-    ht = "#90ee90ff"
-    kuning = "#ffff74ff"
-    merah = "#d7191cff"
-    warna = [alpha, hg, ht, kuning, merah]
-    cmaps = mcolor.ListedColormap(warna)
-    patch_hg = mpatch.Patch(color=hg, label="Sehat", ec="black")
-    patch_ht = mpatch.Patch(color=ht, label="Ringan", ec="black")
-    patch_k = mpatch.Patch(color=kuning, label="Sedang", ec="black")
-    patch_m = mpatch.Patch(color=merah, label="Parah", ec="black")
-    plt.legend(handles=[patch_hg, patch_ht, patch_k, patch_m], bbox_to_anchor=(1.05, 1), loc="best")
-    plt.title("Hasil Deteksi Serangan Penyakit Blas")
-    with rio.open(blas) as src:
-        data = src.read(1) 
-        plt.imshow(data, cmap=cmaps) 
-        plt.show()
+    tampilkan_penyakit(input_folder=blas, penyakit="blas")
+    tampilkan_penyakit(input_folder=blb, penyakit="hawar daun bakteri")
+    tampilkan_penyakit(input_folder=bs, penyakit="bercak cokelat")
+    tampilkan_penyakit(input_folder=nbs, penyakit="bercak sempit")
 
 
 if __name__ == "__main__":
