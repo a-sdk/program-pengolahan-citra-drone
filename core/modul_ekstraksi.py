@@ -18,9 +18,9 @@ from mahotas.polygon import fill_polygon
 from tqdm import tqdm
 
 # Fungsi untuk memotong citra bedasarkan shapefile poligon
-def clip_raster(input_folder, shp_layer, output_folder, output_filename, nilai_nodata=0):
+def potong_raster(input_folder, shp_layer, output_folder, output_filename, nilai_nodata=0):
     """
-    Memotong citra sesuai dengan shaepfile poligon yang dibuat.
+    Memotong citra sesuai dengan shapefile poligon yang dibuat.
 
     Parameters:
         input_folder (str): Lokasi file raster yang akan dipotong.
@@ -36,8 +36,9 @@ def clip_raster(input_folder, shp_layer, output_folder, output_filename, nilai_n
     # Pastikan folder output ada, jika tidak, buat folder baru
     os.makedirs(output_folder, exist_ok=True)
     # Baca Shapefile Menggunakan GeoPandas
-    print("Memuat shapefile...")
+    print("\nMemuat shapefile...")
     mask_gdf = gpd.read_file(shp_layer)
+    print("Memuat citra...")
     with rio.open(input_folder) as src:
         data = src.read()
         profile = src.profile
@@ -69,7 +70,7 @@ def clip_raster(input_folder, shp_layer, output_folder, output_filename, nilai_n
     return output_path
 
 # Fungsi untuk melakukan masking pada setiap band terpisah
-def mask_band_terpisah(input_folder, mask_path, output_folder, logika=lambda x: x==1, nilai_nodata=np.nan):
+def mask_band_terpisah(input_folder, mask_path, output_folder, logika=lambda x: x==1, nilai_nodata=0):
     """
     Menerapkan masking pada band berdasarkan mask boolean.
     
@@ -113,13 +114,13 @@ def mask_band_terpisah(input_folder, mask_path, output_folder, logika=lambda x: 
             dest.write(data, indexes=1)
         print(f"File {nf} berhasil disimpan di {output_folder}")
 
-# Fungsi untuk melakukan masking pada tumpukan band
-def mask_tumpukan_band(input_folder, mask_path, output_folder, logika=lambda x: x==1, nilai_nodata=np.nan):
+# Fungsi untuk melakukan masking pada tumpukan fitur
+def mask_tumpukan_fitur(input_folder, mask_path, output_folder, logika=lambda x: x==1, nilai_nodata=0):
     """
-    Menerapkan masking pada tumpukan band berdasarkan mask boolean.
+    Menerapkan masking pada tumpukan fitur berdasarkan mask boolean.
     
     Parameters:
-        input_folder (str): Lokasi folder tumpukan band yang akan di-mask.
+        input_folder (str): Lokasi folder tumpukan fitur yang akan di-mask.
         mask_path (str): Lokasi file mask.
         output_folder (str): Nama folder tempat hasil mask disimpan.
         logika (function): Fungsi lambda sebagai acuan mask.
@@ -134,17 +135,17 @@ def mask_tumpukan_band(input_folder, mask_path, output_folder, logika=lambda x: 
     # Membuat boolean mask
     mask_valid = logika(mask_data)
     # Mengecualikan nilai nodata
-    mask_valid[np.isnan(mask_data)] = False           
+    mask_valid[mask_data == nilai_nodata] = False           
     print(f"Mask boolean berhasil dibuat. Total piksel valid: {np.sum(mask_valid)}")
-    print(f"Membuka tumpukan band...")
+    print(f"Membuka tumpukan fitur...")
     nf = os.path.splitext(os.path.basename(input_folder))[0]
     os.makedirs(output_folder, exist_ok=True)
     output_path = os.path.join(output_folder, f"{nf}_masked.tif")
     with rio.open(input_folder) as src_data:
-        # Membaca band sekaligus
+        # Membaca fitur sekaligus
         data_stack = src_data.read()
         profile = src_data.profile
-        print("Menerapkan mask ke semua band...")
+        print("Menerapkan mask ke semua fitur...")
         data_stack[:, ~mask_valid] = nilai_nodata
         
         # Perbarui profile untuk file output agar konsisten
@@ -357,20 +358,13 @@ def ekstrak_tumpukan_fitur(shp_layer, input_folder, output_folder, output_filena
     Returns:
         None.
     """
-    # Cari file .tif (asumsi hanya ada 1 file stack atau proses file pertama)
-    file_ekstraksi = glob.glob(os.path.join(input_folder, "*.tif"))
-    if not file_ekstraksi:
-        print("File .tif tidak ditemukan!")
-        return
-
-    file_stack = file_ekstraksi[0] 
     X_data = []
 
     gdf = gpd.read_file(shp_layer)
     gdf["no_urut"] = gdf.groupby("id").cumcount() + 1
     gdf["Nama"] = "Poligon " + gdf["id"].astype(str) + " Komponen " + gdf["no_urut"].astype(str)
 
-    with rio.open(file_stack) as src:
+    with rio.open(input_folder) as src:
         nodata_val = src.nodata if src.nodata is not None else np.nan
         
         for index, row in tqdm(gdf.iterrows(), desc="Mengekstrak piksel", total=len(gdf)):
@@ -449,12 +443,7 @@ def ekstrak_tumpukan_fitur_optimized(shp_layer, input_folder, output_folder, out
     Returns:
         None.
     """
-    file_ekstraksi = glob.glob(os.path.join(input_folder, "*.tif"))
-    if not file_ekstraksi: 
-        print("File .tif tidak ditemukan!")
-        return
 
-    file_stack = file_ekstraksi[0] 
     output_path = os.path.join(output_folder, output_filename)
     os.makedirs(output_folder, exist_ok=True)
 
@@ -465,8 +454,8 @@ def ekstrak_tumpukan_fitur_optimized(shp_layer, input_folder, output_folder, out
     nama_kolom = ["id", "Nama", "X", "Y", "RED", "GREEN", "BLUE", "M_GREEN", 
                   "M_RED", "RED_EDGE", "NIR", "GNDVI", "NDREI", "NDVI", "SAVI"]
     total_jml_piksel = 0
-    with rio.open(file_stack) as src:
-        # Menulis header CSV sekali saja di awal
+    with rio.open(input_folder) as src:
+        # Menulis header CSV sekali
         pd.DataFrame(columns=nama_kolom).to_csv(output_path, index=False)
         
         for index, row in tqdm(gdf.iterrows(), desc="Mengekstrak piksel", total=len(gdf)):
@@ -546,14 +535,23 @@ def ekstrak_rerata_piksel(shp_layer, input_folder, output_folder, output_filenam
     # Menyiapkan DataFrame hasil dengan kolom koordinat awal
     hasil_ekstraksi = gdf[["id", "no_urut", "Nama", "X", "Y"]].copy()
     
-    nama_bands = [
-        "RED", "GREEN", "BLUE", "M_GREEN", "M_RED", 
-        "RED_EDGE", "NIR", "GNDVI", "NDREI", "NDVI", "SAVI"
-    ]
+    with rio.open(file_ekstraksi[0]) as info:
+        count = info.count
+    
+    if count > 7:
+        nama_bands = [
+            "RED", "GREEN", "BLUE", "M_GREEN", "M_RED", 
+            "RED_EDGE", "NIR", "GNDVI", "NDREI", "NDVI", "SAVI"
+        ]
+    else:
+        nama_bands = [
+            "RED", "GREEN", "BLUE", "M_GREEN", "M_RED", 
+            "RED_EDGE", "NIR"
+        ]
 
     for file in file_ekstraksi:
         nf = os.path.splitext(os.path.basename(file))[0]
-        print(f"Memuat hasil masking: {nf}")
+        print(f"\nMemuat hasil masking: {nf}")
         with rio.open(file) as src:
             for i, nama_band in tqdm(enumerate(nama_bands), desc="Mengekstrak rerata piksel", unit=" band", total=len(nama_bands)):
                 band_data = src.read(i + 1)
@@ -567,7 +565,7 @@ def ekstrak_rerata_piksel(shp_layer, input_folder, output_folder, output_filenam
                     all_touched=True # Mengambil semua piksel yang bersentuhan
                 )
                 
-                mean_values = [s.get("mean", np.nan) for s in stats]
+                mean_values = [s.get("mean", src.nodata) for s in stats]
                 hasil_ekstraksi[nama_band] = mean_values
 
     # Cek baris yang mengandung NaN sebelum dihapus
@@ -595,13 +593,3 @@ def ekstrak_rerata_piksel(shp_layer, input_folder, output_folder, output_filenam
     print(f"Ekstraksi selesai...")
     print(f"Total baris yang diekstrak: {df_urut.shape[0]}")
     print(rf"File {output_filename} berhasil disimpan di {output_folder}")              
-
-
-if __name__ == "__main__":
-    file_shp_multipoligon = r"C:\Users\acer_\Documents\Orthomosaic\uji coba program utama 4 kombinasi\Pengujian\Hasil\Lahan Uji_Files\tumpuk all\lahan uji_intersection.shp" 
-    input_folder = r"C:\Users\acer_\Documents\Orthomosaic\uji coba program utama 4 kombinasi\Pengujian\Hasil\Lahan Uji_Files\tumpuk all\Masking" 
-    output_folder = r"C:\Users\acer_\Documents\Orthomosaic\uji coba program utama 4 kombinasi\Pengujian\Hasil\Lahan Uji_Files\tumpuk all\Ekstraksi\Tumpuk"
-    output_filename = r"Hasil_Ekstraksi_Lahan Uji_mean.csv"
-    ekstrak_rerata_piksel(file_shp_multipoligon, input_folder, output_folder, output_filename)
-    # ekstrak_tumpukan_fitur_optimized(file_shp_multipoligon, input_folder, output_folder, output_filename)
-    # ekstrak_koordinat_vertek(file_shp_multipoligon, output_folder)

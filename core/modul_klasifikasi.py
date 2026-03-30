@@ -15,14 +15,13 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename):
         stack_path (str): Lokasi tumpukan fitur.
         output_folder (str): Nama folder tempat file akan disimpan.
         output_filename (str): Nama file output, termasuk ekstensi. 
-        nilai_nodata (float): Nilai nodata.
 
     Returns:
         str: Output path.
     """
     output_path = os.path.join(output_folder, output_filename)
     os.makedirs(output_folder, exist_ok=True)
-    print(f"Memuat model dari {model_path}...")
+    print(f"Memuat model...")
     try:
         model = joblib.load(model_path)
     except FileNotFoundError:
@@ -33,6 +32,7 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename):
     with rio.open(stack_path) as src:
         # Dapatkan metadata untuk file output
         profile = src.profile
+        nodata = src.nodata
         profile.update(
             dtype=rio.uint8,  
             count=1,               
@@ -54,8 +54,8 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename):
                 # Ratakan: (rows*cols, bands)
                 pixels_flat = img_reshaped.reshape(-1, src.count)
                 
-                # Cari piksel yang valid (bukan NoData di band pertama)
-                valid_mask = ~np.isnan(pixels_flat[:, 0])
+                # Cari piksel yang valid (bukan NoData)
+                valid_mask = pixels_flat[:, 6] != nodata
                 pixels_valid = pixels_flat[valid_mask]
                 
                 # Siapkan kanvas hasil untuk potongan ini
@@ -99,7 +99,7 @@ def deteksi_penyakit_rumpun(model_path, scaler_path, input_folder, output_folder
         return
 
     output_names = ["Blas", "HDB", "Bercak Cokelat", "Bercak Sempit"] 
-
+    path_hasil = []
     print(f"Memprediksi citra...")
     with rio.open(file_raster[0]) as src:
         base_profile = src.profile
@@ -110,10 +110,11 @@ def deteksi_penyakit_rumpun(model_path, scaler_path, input_folder, output_folder
         )
         output_dests = {}
         output_folder = f"{output_folder}/Sebaran_Rumpun"
+        os.makedirs(output_folder, exist_ok=True)
         for name in output_names:
             output_path = os.path.join(output_folder, f"peta_sebaran_penyakit_{name}.tif")
-            os.makedirs(output_folder, exist_ok=True)
-            
+            path_hasil.append(output_path)
+
             output_profile = base_profile.copy()
             mode = 'r+' if os.path.exists(output_path) else 'w'
             output_dests[name] = rio.open(output_path, mode, **output_profile)
@@ -130,7 +131,7 @@ def deteksi_penyakit_rumpun(model_path, scaler_path, input_folder, output_folder
             pixels_flat = img_reshaped.reshape(-1, src.count)
             
             # Menentukan piksel yang valid
-            valid_mask = ~np.isnan(pixels_flat[:, 0])
+            valid_mask = (pixels_flat[:, 0] != src.nodata)
             pixels_valid = pixels_flat[valid_mask]
             
             # Memprediksi piksel 
@@ -162,6 +163,7 @@ def deteksi_penyakit_rumpun(model_path, scaler_path, input_folder, output_folder
             dest.close()
                 
     print(f"\nDeteksi selesai! 4 peta segmentasi disimpan di folder: {output_folder}")
+    return path_hasil
 
 def deteksi_penyakit_petak(model_path, scaler_path, input_folder, output_folder):
     """
@@ -201,7 +203,7 @@ def deteksi_penyakit_petak(model_path, scaler_path, input_folder, output_folder)
     raw_preds = model.predict(X_inf_scaled)
 
     # --- 5. Simpan Hasil ---
-    map_label = {0: "Sehat", 1: "Ringan", 2: "Agak parah", 3: "Parah"}
+    map_label = {0: "Sehat", 1: "Ringan", 2: "Sedang", 3: "Parah"}
     disease_names = ["Blas", "BLB", "BS", "NBS"]
 
     for i, name in enumerate(disease_names):

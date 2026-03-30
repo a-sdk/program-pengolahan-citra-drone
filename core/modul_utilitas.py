@@ -10,14 +10,25 @@ import matplotlib.pyplot as plt
 import rasterio as rio
 import geopandas as gpd
 from shapely.geometry import Point, MultiPoint, Polygon
+from pyproj import database
+from pyproj.aoi import AreaOfInterest
 from rasterio.features import rasterize
 import shapely.ops as ops
 from sklearn.cluster import KMeans
 
 # Fungsi bantu pembuatan multipoligon 
 def lonlat_to_utm_epsg(lon, lat):
-    zone = int((lon + 180) / 6) + 1
-    return 32600 + zone if lat >= 0 else 32700 + zone
+    utm_crs_list = database.query_utm_crs_info(
+        datum_name="WGS 84",
+        area_of_interest=AreaOfInterest(
+            west_lon_degree=lon,
+            south_lat_degree=lat,
+            east_lon_degree=lon,
+            north_lat_degree=lat,
+        ),
+    )
+    # Mengambil kode EPSG dari hasil pertama yang ditemukan
+    return int(utm_crs_list[0].code)
 
 def generate_grid_points(polygon, target_count):
     bounds = polygon.bounds # (minx, miny, maxx, maxy)
@@ -91,21 +102,23 @@ def buat_multipoligon(shp_layer, jml_poligon, jml_komponen,  output_folder):
     os.makedirs(output_folder, exist_ok=True)
     filename = os.path.splitext(os.path.basename(shp_layer))[0]
     print(f"Memproses file: {filename}.shp")
-    output_intersection = os.path.join(output_folder, f"{filename}_intersection.shp")
+    output_intersection = os.path.join(output_folder, f"{filename}_{jml_cluster}_komponen.shp")
     # ========================================
     # Tahap 1: Membaca & Konversi CRS
     # ========================================
     polygons = gpd.read_file(shp_layer)
+    crs_asal = polygons.crs.to_string()
     if polygons.crs is None:
         raise ValueError(f"File {filename} tidak memiliki CRS. Harap periksa file.")
 
     if polygons.crs.is_geographic:
-        centroid = polygons.union_all.centroid
+        overall_geometry = polygons.union_all()
+        centroid = overall_geometry.centroid
         epsg_code = lonlat_to_utm_epsg(centroid.x, centroid.y)
         polygons = polygons.to_crs(epsg=epsg_code)
-        print(f"➡ CRS diubah ke UTM (EPSG:{epsg_code})")
+        print(f"CRS diubah dari {crs_asal} ke UTM (EPSG:{epsg_code})")
     else:
-        print(f"➡ CRS sudah proyeksi: {polygons.crs}")
+        print(f"CRS sudah proyeksi: {polygons.crs}")
 
     # ========================================
     # Tahap 2: Generate Random Points
@@ -173,7 +186,7 @@ def buat_multipoligon(shp_layer, jml_poligon, jml_komponen,  output_folder):
     # ========================================
     if polygons.crs != gdf_voronoi.crs:
         gdf_voronoi = gdf_voronoi.to_crs(polygons.crs)
-        print("⚠ CRS berbeda, disamakan dulu.")
+        print("CRS berbeda, disamakan dulu.")
 
     gdf_inter = gpd.overlay(polygons, gdf_voronoi, how="intersection")
     gdf_inter = gdf_inter[
@@ -184,7 +197,7 @@ def buat_multipoligon(shp_layer, jml_poligon, jml_komponen,  output_folder):
     # === Simpan langsung ke folder utama tanpa subfolder ===
     gdf_inter.to_file(output_intersection, driver="ESRI Shapefile")
 
-    print(f"Intersection selesai → {output_intersection}\n")
+    print(f"Intersection selesai")
 
     return output_intersection
 
@@ -314,7 +327,7 @@ def tampilkan_histogram(nama, data, nilai_threshold):
     plt.show()
 
 # Fungsi menumpuk semua fitur (band)
-def tumpuk_fitur(lst_fitur, output_folder, output_filename):
+def tumpuk_fitur(lst_fitur, output_folder, output_filename, nilai_nodata=0):
     """
     Menumpuk seluruh band atau fitur menjadi array Numpy besar.
 
@@ -322,6 +335,7 @@ def tumpuk_fitur(lst_fitur, output_folder, output_filename):
         lst_fitur (list): List fitur-fitur yang akan ditumpuk.
         output_folder (str): Nama folder tempat file akan disimpan.
         output_filename (str): Nama file output, termasuk ekstensi.
+        nilai_nodata (float): Nilai nodata raster.
 
     Returns:
         str: Output path.
@@ -331,7 +345,7 @@ def tumpuk_fitur(lst_fitur, output_folder, output_filename):
     os.makedirs(output_folder, exist_ok=True)
     # Baca semua file dan kumpulkan datanya
     feature_stack = []
-    profile = None # Kita akan ambil metadata dari file pertama
+    profile = None 
 
     for fitur in lst_fitur:
         with rio.open(fitur) as src:
@@ -339,7 +353,7 @@ def tumpuk_fitur(lst_fitur, output_folder, output_filename):
                 profile = src.profile
                 profile.update(
                     dtype="float32",
-                    nodata=np.nan
+                    nodata=nilai_nodata
                 ) 
             # Baca semua band dari file ini
             feature_stack.append(src.read().astype("float32"))
@@ -349,7 +363,7 @@ def tumpuk_fitur(lst_fitur, output_folder, output_filename):
 
     # Perbarui profile untuk file stack baru
     total_bands = full_stack_array.shape[0]
-    profile.update(count=total_bands, nodata=np.nan) 
+    profile.update(count=total_bands, nodata=nilai_nodata) 
 
     # Tulis ke file stack baru
     with rio.open(output_path, 'w', **profile) as dst:
@@ -361,101 +375,115 @@ def tumpuk_fitur(lst_fitur, output_folder, output_filename):
 # Fungsi untuk mengolah label penyakit 
 def olah_label(input_folder, output_folder, N, z):
     """
-    Mengolah label skor penyakit hasil pengamatan
-    untuk memperoleh intensitas penyakit dan indeks penyakit.
-    Pastikan nama file label seperti contoh "hst 50.csv"
+    Mengolah label skala penyakit dengan rentang status yang berbeda tiap penyakit.
 
     Parameters:
-        input_folder (str): Lokasi folder skor penyakit.
+        input folder (str): Lokasi file label masing-masing HST.
         output_folder (str): Nama folder tempat file akan disimpan.
         N (int): Jumlah rumpun yang diamati.
-        z (int): Skala maksimal skor penyakit.
+        z (int): Skala maksimum yang digunakan.
+
+
 
     Returns:
-        None.
+        str: Output path.
     """
+    
+    config_penyakit = {
+        "blas": {
+            "ringan": 2,
+            "sedang": 15,
+        },
+        "blb": {
+            "ringan": 19,
+            "sedang": 35,
+        },
+        "bs": {
+            "ringan": 2,
+            "sedang": 15,
+        },
+        "nbs": {
+            "ringan": 5,
+            "sedang": 20,
+        }
+    }
+
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+
     files = glob.glob(os.path.join(input_folder, "*.csv"))
+    
     for file in files:
         nf = os.path.splitext(os.path.basename(file))[0]
         print(f"\nMemproses file {nf}...")
-        umur = nf.split(r" ")[1]
-        # Membaca setiap file
+        
+        try:
+            umur = nf.split(r" ")[1]
+        except IndexError:
+            umur = "unknown"
+
         df = pd.read_csv(file)
         grup = df.groupby("id") 
         lst_skor = []
 
-        print("Menghitung intensitas penyakit...")
         for id_titik, data in grup:
             baris = {"id": id_titik, "hst": umur}
-            penyakit_dict = {
-                "blas": data["blas"],
-                "blb": data["blb"],
-                "bs": data["bs"],
-                "nbs": data["nbs"]
-            }
-            for nama_penyakit, penyakit in penyakit_dict.items():
+            penyakit_list = ["blas", "blb", "bs", "nbs"]
+            
+            for nama_penyakit in penyakit_list:
+                if nama_penyakit not in data.columns:
+                    continue
+                
+                penyakit = data[nama_penyakit]
                 skor = penyakit.value_counts(dropna=False)
-                skor_max = penyakit.max() # Nilai maks sbg worst case
-                skor_mode = penyakit.mode(dropna=False).iloc[0] # Nilai modus sebagai gambaran umum
-                n1 = skor.get(1,0)
-                n3 = skor.get(3,0)
-                n5 = skor.get(5,0)
-                n7 = skor.get(7,0)
-                n9 = skor.get(9,0)
-                sum_nv = n1 * 1 + n3 * 3 + n5 * 5 + n7 * 7 + n9 * 9
+                
+                # Perhitungan IP (Intensitas Penyakit)
+                sum_nv = (skor.get(1,0)*1 + skor.get(3,0)*3 + skor.get(5,0)*5 + 
+                          skor.get(7,0)*7 + skor.get(9,0)*9)
                 hitung_ip = round((sum_nv / (N * z)) * 100, 2)
-                hitung_di = round((n3 + n5 + n7 + n9) / N, 2)
-                # Nilai berdasarkan intensitas penyakit
+                
+                # Perhitungan DI (Disease Index)
+                hitung_di = round((skor.get(3,0) + skor.get(5,0) + 
+                                   skor.get(7,0) + skor.get(9,0)) / N, 2)
+
+                # LOGIKA PENENTUAN STATUS BERDASARKAN RENTANG KHUSUS
+                threshold = config_penyakit[nama_penyakit]
+                
                 if hitung_ip == 0:
                     status = "sehat"
-                elif 0 < hitung_ip <= 30:
+                elif hitung_ip <= threshold["ringan"]:
                     status = "ringan"
-                elif 30 < hitung_ip <= 50:
-                    status = "agak parah"
+                elif hitung_ip <= threshold["sedang"]:
+                    status = "sedang"
                 else:
                     status = "parah"
-                # Nilai berdasarkan disease index (DI)
+
+                # Penentuan Index DI (Bisa juga disesuaikan jika perlu)
                 if hitung_di == 0:
                     idx = "sehat"
-                elif 0 < hitung_di <= 3:
+                elif hitung_di <= 3:
                     idx = "tahan"
-                elif 3 < hitung_di <= 6:
+                elif hitung_di <= 6:
                     idx = "rentan"
                 else: 
                     idx = "sangat rentan"
+
                 baris[f"{nama_penyakit}"] = status
                 baris[f"{nama_penyakit}_ip"] = hitung_ip
                 baris[f"{nama_penyakit}_di"] = idx
-                print(f"Titik {id_titik} - DI {nama_penyakit}: {idx} ({hitung_di})")
-                print(f"Titik {id_titik} - IP {nama_penyakit}: {hitung_ip:.2f} %, status={status}")
-                print(f"Titik {id_titik} - Skor Terparah {nama_penyakit}: {skor_max}")
-                print(f"Titik {id_titik} - Skor Umum {nama_penyakit}: {skor_mode}")
                 
             lst_skor.append(baris)
-            print()
 
+        # Simpan Hasil
         df_hasil = pd.DataFrame(lst_skor)
-        lst_kolom = [
-            "id",
-            "hst",
-            "blas",
-            "blb",
-            "bs",
-            "nbs",
-            "blas_ip",
-            "blb_ip",
-            "bs_ip",
-            "nbs_ip",
-            "blas_di",
-            "blb_di",
-            "bs_di",
-            "nbs_di"
-        ]
-        # Menyimpan file ke csv
-        print(f"Menyimpan _{nf}.csv")
-        df_hasil = df_hasil[lst_kolom]
-        df_hasil.to_csv(rf"{output_folder}\_{nf}.csv", index=False) 
-        print(f"Selesai memproses {len(files)} file .csv")
+        lst_kolom = ["id", "hst", "blas", "blb", "bs", "nbs", 
+                     "blas_ip", "blb_ip", "bs_ip", "nbs_ip",
+                     "blas_di", "blb_di", "bs_di", "nbs_di"]
+        
+        df_hasil = df_hasil[[c for c in lst_kolom if c in df_hasil.columns]]
+        output_path = os.path.join(output_folder, f"_{nf}.csv")
+        df_hasil.to_csv(output_path, index=False)
+        print(f"Selesai menyimpan {output_path}")
 
 # Fungsi untuk menggabungkan label penyakit
 def gabung_label(input_folder, output_folder, output_filename):
@@ -541,7 +569,7 @@ def olah_dataset(dataset_folder, label_folder, output_folder, output_filename):
     print(f"File {output_filename} disimpan di:\n{output_folder}")
     df_lengkap.to_csv(output_path, index=False)
 
-# Fungsi untuk membuat peta sebaran mengacu pada koordinat verteks petakan
+# Fungsi untuk membuat peta sebaran mengacu pada koordinat verteks petakan (nurohman pupuk N)
 def buat_petak_sebaran(input_geotiff, file_metadata, folder_verteks, output_folder):
     """
     Membuat peta sebaran mengacu pada koordinat verteks petakan.
