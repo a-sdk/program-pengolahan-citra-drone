@@ -1,6 +1,6 @@
-'''
+"""
 Modul untuk transformasi dan segmentasi.
-'''
+"""
 
 import numpy as np
 import rasterio as rio
@@ -80,90 +80,145 @@ def hitung_ndre(nir_band, red_edge_band):
     ndre = np.nan_to_num(ndre, nan=0.0, posinf=0.0, neginf=0.0)
     return ndre
 
-# Fungsi untuk melakukan proses transformasi
-def proses_transformasi(lst_band, profile, output_folder, nilai_nodata=0):
+class Transformer:
     """
-    Melakukan proses transformasi indeks vegetasi.
-    
-    Parameters:
-        lst_band (list): List semua band (kanal) yang digunakan.
-        profile (dict): Metadata raster dari file sumber.
-        output_folder (str): Nama folder tempat hasil transformasi disimpan.
-        nilai_nodata (float): Nilai nodata raster.
-        mode (str): Mode oprasi.
-    
-    Returns:
-        str: gndvi_file_path, ndre_file_path, ndvi_file_path, savi_file_path.
+    Kelas untuk mentransformasi citra.
     """
-    # Memuat band
-    m_green = lst_band[0]
-    m_red = lst_band[1]
-    red_edge = lst_band[2]
-    nir = lst_band[3]
-    print("\nMenghitung transformasi indeks vegetasi...")
-    profile.update(
-        dtype="float32",
-        count=1
-    )
-    # Mentransformasi citra
-    # transform_savi = hitung_savi(nir, m_red, L=0.5)
-    # transform_ndre = hitung_ndre(nir, red_edge)
-    # transform_gndvi = hitung_gndvi(nir, m_green)
-    transform_ndvi = hitung_ndvi(nir, m_red)
-    # Menyimpan setiap band dan hasil transformasi ke dalam file GeoTIFF
-    # savi_file_path = simpan_raster(transform_savi, profile, output_folder, "SAVI.tif", nilai_nodata)
-    # ndre_file_path = simpan_raster(transform_ndre, profile, output_folder, "ndre.tif", nilai_nodata)
-    # gndvi_file_path = simpan_raster(transform_gndvi, profile, output_folder, "GNDVI.tif", nilai_nodata)
-    ndvi_file_path = simpan_raster(transform_ndvi, profile, output_folder, "NDVI.tif", nilai_nodata)
+    def __init__(self):
+        self.status = "Idle"
+        self.last_result = None
     
-    return ndvi_file_path # gndvi_file_path, ndre_file_path,  savi_file_path
+    def run(self, lst_band, profile, output_folder):
+        self.status = "Processing"
+        print(f"\nDEBUG: Memulai proses transformasi...") 
+        try:
+            self.last_result = self.proses_transformasi(lst_band, profile, output_folder) 
+            self.status = "Done"
+            return self.last_result
+        except Exception as e:
+            self.status = "Error"
+            print(f"\nERROR: {e}")
+            return None
+        
+    # Fungsi untuk melakukan proses transformasi
+    def proses_transformasi(self, lst_band, profile, output_folder, nilai_nodata=0):
+        """
+        Melakukan proses transformasi indeks vegetasi.
+        
+        Parameters:
+            lst_band (list): List semua band (kanal) yang digunakan.
+            profile (dict): Metadata raster dari file sumber.
+            output_folder (str): Nama folder tempat hasil transformasi disimpan.
+            nilai_nodata (float): Nilai nodata raster.
+            mode (str): Mode oprasi.
+        
+        Returns:
+            str: gndvi_file_path, ndre_file_path, ndvi_file_path, savi_file_path.
+        """
+        # Memuat band
+        m_red = lst_band[0]
+        nir = lst_band[1]
+        print("\nMenghitung transformasi indeks vegetasi...")
+        profile.update(
+            dtype="float32",
+            count=1
+        )
+        # Mentransformasi citra
+        # transform_savi = hitung_savi(nir, m_red, L=0.5)
+        # transform_ndre = hitung_ndre(nir, red_edge)
+        # transform_gndvi = hitung_gndvi(nir, m_green)
+        transform_ndvi = hitung_ndvi(nir, m_red)
+        # Menyimpan setiap band dan hasil transformasi ke dalam file GeoTIFF
+        # savi_file_path = simpan_raster(transform_savi, profile, output_folder, "SAVI.tif", nilai_nodata)
+        # ndre_file_path = simpan_raster(transform_ndre, profile, output_folder, "ndre.tif", nilai_nodata)
+        # gndvi_file_path = simpan_raster(transform_gndvi, profile, output_folder, "GNDVI.tif", nilai_nodata)
+        ndvi_file_path = simpan_raster(transform_ndvi, profile, output_folder, "NDVI.tif", nilai_nodata)
+        
+        return ndvi_file_path # gndvi_file_path, ndre_file_path,  savi_file_path
 
-
-# Fungsi untuk melakukan proses segmentasi
-def proses_segmentasi(lst_fitur, profile, output_folder, nilai_nodata=0):
+class Segmenter:
     """
-    Melakukan proses segmentasi untuk memisahkan tanaman padi.
-
-    Parameters:
-        lst_fitur (list): Fitur yang akan digunakan.
-        profile (dict): Metadata raster dari file sumber.
-        output_folder (str): Nama folder tempat hasil transformasi disimpan.
-        nilai_nodata (float): Nilai nodata raster.
-
-    Returns:
-        str: threshold_file_path.
+    Kelas untuk segmentasi citra.
     """
+    def __init__(self):
+        self.status = "Idle"
+        self.last_result = None
 
-    # Membuat peta segmentasi gulma dan padi
-    peta_segmentasi_gulma = pisahkan_gulma(r"core\models\model_deteksi_gulma.joblib", lst_fitur[0], output_folder, "segmentasi_gulma.tif")
-    print("Memuat file hasil transformasi...")
-    with (
-        rio.open(lst_fitur[1]) as src_ndvi, 
-        rio.open(peta_segmentasi_gulma) as src_gulma
-    ):
-        ndvi = src_ndvi.read(1).astype(float)
-        mask_padi = src_gulma.read(1).astype(float) == 1
-    
-    # Menghitung threshold indeks vegetasi
-    # t_ndre = otsu_threshold(ndre, jumlah_bin=256, rentang_nilai=(-1, 1))
-    t_ndvi = otsu_threshold(ndvi, jumlah_bin=256, rentang_nilai=(-1, 1))
-    # t_savi = otsu_threshold(savi, jumlah_bin=256, rentang_nilai=(-1, 1))
+    def run(self, lst_fitur, profile, output_folder):
+        self.status = "Processing"
+        print(f"\nDEBUG: Memulai proses segmentasi...") 
+        try:
+            self.last_result = self.proses_segmentasi(lst_fitur, profile, output_folder) 
+            self.status = "Done"
+            return self.last_result
+        except Exception as e:
+            self.status = "Error"
+            print(f"\nERROR: {e}")
+            return None
+        
+    # Fungsi untuk melakukan proses segmentasi
+    def proses_segmentasi(self, lst_fitur, profile, output_folder, nilai_nodata=0):
+        """
+        Melakukan proses segmentasi untuk memisahkan tanaman padi.
 
-    # Menampilkan histogram (opsional)
-    # ndre_1d = ndre.ravel()    
-    # ndvi_1d = ndvi.ravel()    
-    # savi_1d = savi.ravel() 
-    # tampilkan_histogram("NDRE", ndre_1d, t_ndre)
-    # tampilkan_histogram("NDVI", ndre_1d, t_ndvi)
-    # tampilkan_histogram("SAVI", savi_1d, t_savi)
+        Parameters:
+            lst_fitur (list): Fitur yang akan digunakan.
+            profile (dict): Metadata raster dari file sumber.
+            output_folder (str): Nama folder tempat hasil transformasi disimpan.
+            nilai_nodata (float): Nilai nodata raster.
 
-    # Thresholding
-    mask_ndvi = ndvi > t_ndvi
-    mask_final = mask_ndvi & mask_padi
-    print(f"Menghitung ambang NDVI dengan batas {t_ndvi}...")
-    hasil_threshold = mask_final.astype(float)
+        Returns:
+            str: threshold_file_path.
+        """
 
-    # Menyimpan hasil threshold
-    threshold_file_path = simpan_raster(hasil_threshold, profile, output_folder, "hasil_threshold_model.tif", nilai_nodata)
+        # Membuat peta segmentasi gulma dan padi
+        peta_segmentasi_gulma = pisahkan_gulma(r"core\models\model_deteksi_gulma.joblib", lst_fitur[0], output_folder, "segmentasi_gulma.tif")
+        print("Memuat file hasil transformasi...")
+        with (
+            rio.open(lst_fitur[1]) as src_ndvi, 
+            rio.open(peta_segmentasi_gulma) as src_gulma
+        ):
+            ndvi = src_ndvi.read(1).astype(float)
+            mask_padi = src_gulma.read(1).astype(float) == 1
+        
+        # Menghitung threshold indeks vegetasi
+        # t_ndre = otsu_threshold(ndre, jumlah_bin=256, rentang_nilai=(-1, 1))
+        t_ndvi = otsu_threshold(ndvi, jumlah_bin=256, rentang_nilai=(-1, 1))
+        # t_savi = otsu_threshold(savi, jumlah_bin=256, rentang_nilai=(-1, 1))
 
-    return threshold_file_path
+        # Menampilkan histogram (opsional)
+        # ndre_1d = ndre.ravel()    
+        # ndvi_1d = ndvi.ravel()    
+        # savi_1d = savi.ravel() 
+        # tampilkan_histogram("NDRE", ndre_1d, t_ndre)
+        # tampilkan_histogram("NDVI", ndre_1d, t_ndvi)
+        # tampilkan_histogram("SAVI", savi_1d, t_savi)
+
+        # Thresholding
+        mask_ndvi = ndvi > t_ndvi
+        mask_final = mask_ndvi & mask_padi
+        print(f"Menghitung ambang NDVI dengan batas {t_ndvi}...")
+        hasil_threshold = mask_final.astype(float)
+
+        # Menyimpan hasil threshold
+        threshold_file_path = simpan_raster(hasil_threshold, profile, output_folder, "hasil_threshold_model.tif", nilai_nodata)
+
+        return threshold_file_path
+
+
+
+if __name__ == "__main__":
+    path_hasil = r"C:\Users\acer_\Documents\Orthomosaic\tes program skripsi\hasil_trf2"
+    path_tif = r"C:\Users\acer_\Documents\Orthomosaic\tes program skripsi\klip\hasil_potong.tif"
+    path_poly = r"C:\Users\acer_\Documents\Shapefiles\cikembar\Lahan 2_0.shp"
+    with rio.open(path_tif) as src:
+        m_red = src.read(5)
+        nir = src.read(7)
+        src_nodata = src.nodata
+        src_profile = src.profile
+    channels = [m_red, nir]
+    transform = Transformer()
+    segment = Segmenter()
+    ndvi = transform.run(channels, src_profile, path_hasil)
+    fiturs = [path_tif, ndvi]
+    threshold = segment.run(fiturs, src_profile, path_hasil)

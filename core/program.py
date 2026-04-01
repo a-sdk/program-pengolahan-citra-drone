@@ -1,17 +1,16 @@
-from modul_ekstraksi import (
-    potong_raster, 
-    mask_tumpukan_fitur, 
-    ekstrak_rerata_piksel
-)
-from modul_transformasi import (
+from core.modul_klip import potong_raster
+from core.modul_mask import mask_tumpukan_fitur
+from core.modul_ekstraksi import ekstrak_rerata_piksel
+from core.modul_transformasi import (
     proses_segmentasi, 
     proses_transformasi
 )
-from modul_utilitas import ( 
+from core.modul_utilitas import ( 
     buat_multipoligon,
-    tampilkan_penyakit
+    tampilkan_penyakit,
+    hitung_sebaran
 )
-from modul_klasifikasi import deteksi_penyakit_rumpun
+from core.modul_klasifikasi import deteksi_penyakit_rumpun
 
 import rasterio as rio
 import os
@@ -73,11 +72,14 @@ def main(input_folder, poligon, model, scaler):
         ts = t % 60
         print(f"\nSelesai memproses dalam {menit:d} menit {ts:3.2f} detik")
 
-    print("Menampilkan hasil...")
     tampilkan_penyakit(input_folder=blas, penyakit="blas")
     tampilkan_penyakit(input_folder=blb, penyakit="hawar daun bakteri")
     tampilkan_penyakit(input_folder=bs, penyakit="bercak cokelat")
     tampilkan_penyakit(input_folder=nbs, penyakit="bercak sempit")
+    hitung_sebaran(input_folder=blas, penyakit="blas")
+    hitung_sebaran(input_folder=blb, penyakit="hawar daun bakteri")
+    hitung_sebaran(input_folder=bs, penyakit="bercak cokelat")
+    hitung_sebaran(input_folder=nbs, penyakit="bercak sempit")
 
 
 if __name__ == "__main__":

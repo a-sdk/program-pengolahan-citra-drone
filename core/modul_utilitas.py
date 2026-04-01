@@ -84,124 +84,144 @@ def ambil_file(ekstensi):
                 c += 1
             return file_target, lokasi_folder
 
-# Fungsi untuk membuat multipoligon (shahiban)
-def buat_multipoligon(shp_layer, jml_poligon, jml_komponen,  output_folder):
+class Splitter:
     """
-    Membuat multipoligon dari shapefile poligon.
+    Kelas untuk memecah poligon.
+    """
+    def __init__(self):
+        self.status = "Idle"
+        self.last_result = None
 
-    Parameters:
-        shp_layer (str): Lokasi shapefile yang menjadi acuan.
-        jml_poligon (int): Jumlah poligon dalam satu shapefile.
-        jml_komponen (int): Jumlah komponen/pecahan per poligon.
-        output_folder (str): Nama folder tempat hasil klip disimpan.
+    def run(self, shp_path, jml_poligon, jml_komponen, output_folder):
+        self.status = "Processing"
+        print(f"\nDEBUG: Memulai pembuatan multipoligon...") 
+        try:
+            self.last_result = self.buat_multipoligon(shp_path, jml_poligon, jml_komponen, output_folder) 
+            self.status = "Done"
+            return self.last_result
+        except Exception as e:
+            self.status = "Error"
+            print(f"\nERROR: {e}")
+            return None
         
-    Returns:
-        None.
-    """
+    # Fungsi untuk membuat multipoligon (shahiban)
+    def buat_multipoligon(self, shp_path, jml_poligon, jml_komponen,  output_folder):
+        """
+        Membuat multipoligon dari shapefile poligon.
 
-    print("\nMembuat multipoligon...")
-    jml_cluster = jml_poligon * jml_komponen
-    os.makedirs(output_folder, exist_ok=True)
-    filename = os.path.splitext(os.path.basename(shp_layer))[0]
-    print(f"Memproses file: {filename}.shp")
-    output_intersection = os.path.join(output_folder, f"{filename}_{jml_cluster}_komponen.shp")
-    # ========================================
-    # Tahap 1: Membaca & Konversi CRS
-    # ========================================
-    polygons = gpd.read_file(shp_layer)
-    crs_asal = polygons.crs.to_string()
-    if polygons.crs is None:
-        raise ValueError(f"File {filename} tidak memiliki CRS. Harap periksa file.")
+        Parameters:
+            shp_path (str): Lokasi shapefile yang menjadi acuan.
+            jml_poligon (int): Jumlah poligon dalam satu shapefile.
+            jml_komponen (int): Jumlah komponen/pecahan per poligon.
+            output_folder (str): Nama folder tempat hasil klip disimpan.
+            
+        Returns:
+            str: Output path.
+        """
 
-    if polygons.crs.is_geographic:
-        overall_geometry = polygons.union_all()
-        centroid = overall_geometry.centroid
-        epsg_code = lonlat_to_utm_epsg(centroid.x, centroid.y)
-        polygons = polygons.to_crs(epsg=epsg_code)
-        print(f"CRS diubah dari {crs_asal} ke UTM (EPSG:{epsg_code})")
-    else:
-        print(f"CRS sudah proyeksi: {polygons.crs}")
+        print("\nMembuat multipoligon...")
+        jml_cluster = jml_poligon * jml_komponen
+        os.makedirs(output_folder, exist_ok=True)
+        filename = os.path.splitext(os.path.basename(shp_path))[0]
+        print(f"Memproses file: {filename}.shp")
+        output_intersection = os.path.join(output_folder, f"{filename}_{jml_cluster}_komponen.shp")
+        # ========================================
+        # Tahap 1: Membaca & Konversi CRS
+        # ========================================
+        polygons = gpd.read_file(shp_path)
+        crs_asal = polygons.crs.to_string()
+        if polygons.crs is None:
+            raise ValueError(f"File {filename} tidak memiliki CRS. Harap periksa file.")
 
-    # ========================================
-    # Tahap 2: Generate Random Points
-    # ========================================
-    point_count = jml_cluster * 5
-    areas = polygons.area
-    total_area = areas.sum()
-    proportions = (areas / total_area) * point_count
+        if polygons.crs.is_geographic:
+            overall_geometry = polygons.union_all()
+            centroid = overall_geometry.centroid
+            epsg_code = lonlat_to_utm_epsg(centroid.x, centroid.y)
+            polygons = polygons.to_crs(epsg=epsg_code)
+            print(f"CRS diubah dari {crs_asal} ke UTM (EPSG:{epsg_code})")
+        else:
+            print(f"CRS sudah proyeksi: {polygons.crs}")
 
-    int_parts = proportions.astype(int)
-    residuals = proportions - int_parts
-    remaining = point_count - int_parts.sum()
-    extra_idx = residuals.nlargest(remaining).index
+        # ========================================
+        # Tahap 2: Generate Random Points
+        # ========================================
+        point_count = jml_cluster * 5
+        areas = polygons.area
+        total_area = areas.sum()
+        proportions = (areas / total_area) * point_count
 
-    int_parts.loc[extra_idx] += 1
+        int_parts = proportions.astype(int)
+        residuals = proportions - int_parts
+        remaining = point_count - int_parts.sum()
+        extra_idx = residuals.nlargest(remaining).index
 
-    all_points = []
-    for idx, row in polygons.iterrows():
-        pts = generate_grid_points(row.geometry, int_parts[idx])
-        all_points.extend(pts)
+        int_parts.loc[extra_idx] += 1
 
-    gdf_points = gpd.GeoDataFrame(geometry=all_points, crs=polygons.crs)
-    print(f"{len(gdf_points)} titik acak dihasilkan")
+        all_points = []
+        for idx, row in polygons.iterrows():
+            pts = generate_grid_points(row.geometry, int_parts[idx])
+            all_points.extend(pts)
 
-    # ========================================
-    # Tahap 3: K-Means Clustering
-    # ========================================
-    coords = [(p.x, p.y) for p in gdf_points.geometry]
-    kmeans = KMeans(n_clusters=jml_cluster, random_state=42, n_init=20)
-    gdf_points["CLUSTER_ID"] = kmeans.fit_predict(coords)
-    print("K-Means clustering selesai")
+        gdf_points = gpd.GeoDataFrame(geometry=all_points, crs=polygons.crs)
+        print(f"{len(gdf_points)} titik acak dihasilkan")
 
-    # ========================================
-    # Tahap 4: Aggregate per Cluster
-    # ========================================
-    agg = gdf_points.dissolve(by="CLUSTER_ID", aggfunc="first").reset_index()
-    print("Aggregate selesai")
+        # ========================================
+        # Tahap 3: K-Means Clustering
+        # ========================================
+        coords = [(p.x, p.y) for p in gdf_points.geometry]
+        kmeans = KMeans(n_clusters=jml_cluster, random_state=42, n_init=20)
+        gdf_points["CLUSTER_ID"] = kmeans.fit_predict(coords)
+        print("K-Means clustering selesai")
 
-    # ========================================
-    # Tahap 5: Hitung Centroid
-    # ========================================
-    agg["geometry"] = agg.geometry.centroid
-    centroids = agg.copy()
-    print(f"{len(centroids)} centroid dihasilkan")
+        # ========================================
+        # Tahap 4: Aggregate per Cluster
+        # ========================================
+        agg = gdf_points.dissolve(by="CLUSTER_ID", aggfunc="first").reset_index()
+        print("Aggregate selesai")
 
-    # ========================================
-    # Tahap 6: Voronoi Polygon
-    # ========================================
-    points = MultiPoint(list(centroids.geometry))
-    buffer_union = centroids.buffer(100).union_all()
-    boundary = buffer_union.convex_hull
+        # ========================================
+        # Tahap 5: Hitung Centroid
+        # ========================================
+        agg["geometry"] = agg.geometry.centroid
+        centroids = agg.copy()
+        print(f"{len(centroids)} centroid dihasilkan")
 
-    vor = ops.voronoi_diagram(points, envelope=boundary, tolerance=0)
-    polys = [poly for poly in vor.geoms if poly.is_valid]
+        # ========================================
+        # Tahap 6: Voronoi Polygon
+        # ========================================
+        points = MultiPoint(list(centroids.geometry))
+        buffer_union = centroids.buffer(100).union_all()
+        boundary = buffer_union.convex_hull
 
-    gdf_voronoi = gpd.GeoDataFrame(geometry=polys, crs=centroids.crs)
-    gdf_voronoi = gpd.sjoin_nearest(
-        gdf_voronoi, centroids, how="left", distance_col="dist"
-    )
+        vor = ops.voronoi_diagram(points, envelope=boundary, tolerance=0)
+        polys = [poly for poly in vor.geoms if poly.is_valid]
 
-    print("Voronoi polygons selesai")
+        gdf_voronoi = gpd.GeoDataFrame(geometry=polys, crs=centroids.crs)
+        gdf_voronoi = gpd.sjoin_nearest(
+            gdf_voronoi, centroids, how="left", distance_col="dist"
+        )
 
-    # ========================================
-    # Tahap 7: Intersection
-    # ========================================
-    if polygons.crs != gdf_voronoi.crs:
-        gdf_voronoi = gdf_voronoi.to_crs(polygons.crs)
-        print("CRS berbeda, disamakan dulu.")
+        print("Voronoi polygons selesai")
 
-    gdf_inter = gpd.overlay(polygons, gdf_voronoi, how="intersection")
-    gdf_inter = gdf_inter[
-        ~gdf_inter.geometry.is_empty & gdf_inter.geometry.is_valid
-    ]
-    gdf_inter = gdf_inter.drop(columns=['index_right'])
+        # ========================================
+        # Tahap 7: Intersection
+        # ========================================
+        if polygons.crs != gdf_voronoi.crs:
+            gdf_voronoi = gdf_voronoi.to_crs(polygons.crs)
+            print("CRS berbeda, disamakan dulu.")
 
-    # === Simpan langsung ke folder utama tanpa subfolder ===
-    gdf_inter.to_file(output_intersection, driver="ESRI Shapefile")
+        gdf_inter = gpd.overlay(polygons, gdf_voronoi, how="intersection")
+        gdf_inter = gdf_inter[
+            ~gdf_inter.geometry.is_empty & gdf_inter.geometry.is_valid
+        ]
+        gdf_inter = gdf_inter.drop(columns=['index_right'])
 
-    print(f"Intersection selesai")
+        # === Simpan langsung ke folder utama tanpa subfolder ===
+        gdf_inter.to_file(output_intersection, driver="ESRI Shapefile")
 
-    return output_intersection
+        print(f"Intersection selesai")
+
+        return output_intersection
 
 # Fungsi untuk memeriksa ukuran raster
 def cek_ukuran_raster(input_raster):
@@ -717,6 +737,8 @@ def tampilkan_penyakit(input_folder, penyakit):
     Returns:
         None.
     """
+
+    print(f"\nMenampilkan peta sebaran penyakit {penyakit.title()}...")
     alpha = "#00000000"
     hg = "#008000ff"
     ht = "#90ee90ff"
@@ -737,6 +759,48 @@ def tampilkan_penyakit(input_folder, penyakit):
         plt.imshow(data, cmap=cmaps, norm=norms) 
         plt.show()
 
+def hitung_sebaran(input_folder, penyakit):
+    """
+    Menghitung sebaran penyakit.
+    
+    Parameters:
+        input_folder (str): Lokasi file GeoTIFF hasil prediksi model.
+        penyakit (str): Nama penyakit.
+
+    Returns:
+        None.
+    """
+    print(f"\nMenghitung sebaran penyakit {penyakit.title()}...")
+    with rio.open(input_folder) as src:
+        data = src.read(1)
+        nodata = src.nodata
+    # Mengecualikan nodata
+    mask_valid = (data != nodata)
+    valid_data = data[mask_valid]
+    # Menghitung total piksel valid
+    jml_data_valid = valid_data.size
+    # Mengambil semua nilai unik
+    counts = {k: v for k, v in zip(*np.unique(data, return_counts=True))}
+    # Menghitung persentase
+    persen = {i: round((counts.get(i, 0) / jml_data_valid) * 100, 2) for i in range(1, 5)}
+    # Mencetak hasil
+    labels = ["sehat", "ringan", "sedang", "parah"]
+    for i, label in enumerate(labels, 1):
+        print(f"Persentase tanaman {label}: {persen[i]}%")
+    #Mengambil nilai persentase untuk logika
+    p_sehat = persen[1]
+    p_ringan = persen[2]
+    p_parah_total = persen[3] + persen[4] # Gabungan sedang dan parah
+    # Logika Rekomendasi
+    print("-" * 30)
+    if p_parah_total > p_sehat or p_parah_total > p_ringan: 
+        print("Rekomendasi: Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!")
+    elif p_ringan > p_sehat:    
+        print("Rekomendasi: Lakukan pemantauan rutin dan tindakan pencegahan.")
+    else:
+        print("Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat.")
+
+        
 if __name__ == "__main__":
     geotiff_file = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\Klip\Lahan Uji_clip.tif"
     koords_verteks = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\Koordinat Vertek"
