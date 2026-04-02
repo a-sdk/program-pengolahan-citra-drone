@@ -121,6 +121,7 @@ class Splitter:
 
         print("\nMembuat multipoligon...")
         jml_cluster = jml_poligon * jml_komponen
+        output_folder = f"{output_folder}/multipoligon"
         os.makedirs(output_folder, exist_ok=True)
         filename = os.path.splitext(os.path.basename(shp_path))[0]
         print(f"Memproses file: {filename}.shp")
@@ -215,7 +216,12 @@ class Splitter:
             ~gdf_inter.geometry.is_empty & gdf_inter.geometry.is_valid
         ]
         gdf_inter = gdf_inter.drop(columns=['index_right'])
-
+        # Menyiapkan kolom untuk prediksi model
+        gdf_inter["no_urut"] = gdf_inter.groupby("id").cumcount() + 1
+        gdf_inter["blas"] = None
+        gdf_inter["blb"] = None
+        gdf_inter["bs"] = None
+        gdf_inter["nbs"] = None
         # === Simpan langsung ke folder utama tanpa subfolder ===
         gdf_inter.to_file(output_intersection, driver="ESRI Shapefile")
 
@@ -725,82 +731,245 @@ def buat_petak_sebaran(input_geotiff, file_metadata, folder_verteks, output_fold
 
     print(f"\nBerhasil membuat {len(penyakit)} peta sebaran penyakit.")
 
-# Fungsi menampilkan hasil prediksi model
-def tampilkan_penyakit(input_folder, penyakit):
+class PlantDiseaseAnalyzer:
     """
-    Menampilkan peta sebaran pada grafik.
-    
-    Parameters:
-        input_folder (str): Lokasi file GeoTIFF hasil prediksi model.
-        penyakit (str): Nama penyakit.
+    Kelas untuk memunculkan hasil analisis per rumpun.
+    """ 
+    def __init__(self):
+        self.status = "Idle"
+        self.last_result = None
 
-    Returns:
-        None.
-    """
-
-    print(f"\nMenampilkan peta sebaran penyakit {penyakit.title()}...")
-    alpha = "#00000000"
-    hg = "#008000ff"
-    ht = "#90ee90ff"
-    kuning = "#ffff74ff"
-    merah = "#d7191cff"
-    warna = [alpha, hg, ht, kuning, merah]
-    cmaps = mcolor.ListedColormap(warna)
-    bounds = np.arange(-0.5, 5, 1)
-    norms = mcolor.BoundaryNorm(bounds, 5)
-    patch_hg = mpatch.Patch(color=hg, label="Sehat", ec="black")
-    patch_ht = mpatch.Patch(color=ht, label="Ringan", ec="black")
-    patch_k = mpatch.Patch(color=kuning, label="Sedang", ec="black")
-    patch_m = mpatch.Patch(color=merah, label="Parah", ec="black")
-    plt.legend(handles=[patch_hg, patch_ht, patch_k, patch_m], bbox_to_anchor=(1.05, 1), loc="lower left")
-    plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}")
-    with rio.open(input_folder) as src:
-        data = src.read(1) 
-        plt.imshow(data, cmap=cmaps, norm=norms) 
-        plt.show()
-
-def hitung_sebaran(input_folder, penyakit):
-    """
-    Menghitung sebaran penyakit.
-    
-    Parameters:
-        input_folder (str): Lokasi file GeoTIFF hasil prediksi model.
-        penyakit (str): Nama penyakit.
-
-    Returns:
-        None.
-    """
-    print(f"\nMenghitung sebaran penyakit {penyakit.title()}...")
-    with rio.open(input_folder) as src:
-        data = src.read(1)
-        nodata = src.nodata
-    # Mengecualikan nodata
-    mask_valid = (data != nodata)
-    valid_data = data[mask_valid]
-    # Menghitung total piksel valid
-    jml_data_valid = valid_data.size
-    # Mengambil semua nilai unik
-    counts = {k: v for k, v in zip(*np.unique(data, return_counts=True))}
-    # Menghitung persentase
-    persen = {i: round((counts.get(i, 0) / jml_data_valid) * 100, 2) for i in range(1, 5)}
-    # Mencetak hasil
-    labels = ["sehat", "ringan", "sedang", "parah"]
-    for i, label in enumerate(labels, 1):
-        print(f"Persentase tanaman {label}: {persen[i]}%")
-    #Mengambil nilai persentase untuk logika
-    p_sehat = persen[1]
-    p_ringan = persen[2]
-    p_parah_total = persen[3] + persen[4] # Gabungan sedang dan parah
-    # Logika Rekomendasi
-    print("-" * 30)
-    if p_parah_total > p_sehat or p_parah_total > p_ringan: 
-        print("Rekomendasi: Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!")
-    elif p_ringan > p_sehat:    
-        print("Rekomendasi: Lakukan pemantauan rutin dan tindakan pencegahan.")
-    else:
-        print("Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat.")
-
+    def run(self, input_folder, output_folder):
+        self.status = "Processing"
+        print(f"\nDEBUG: Menghitung sebaran dan memunculkan hasil...") 
+        try:
+            self.tampilkan_penyakit_rumpun(input_folder, output_folder)
+            self.last_result = self.hitung_sebaran_rumpun(input_folder) 
+            self.status = "Done"
+            return self.last_result
+        except Exception as e:
+            self.status = "Error"
+            print(f"\nERROR: {e}")
+            return None 
         
+    # Fungsi menampilkan hasil prediksi model per rumpun
+    def tampilkan_penyakit_rumpun(self, input_folder, output_folder):
+        """
+        Menampilkan peta sebaran pada grafik.
+        
+        Parameters:
+            input_folder (str): Lokasi file GeoTIFF hasil prediksi model.
+            penyakit (str): Nama penyakit.
+
+        Returns:
+            None.
+        """
+        nf = os.path.splitext(os.path.basename(input_folder))[0]
+        penyakit = nf.split("_")[-1]
+        print(f"\nMenampilkan peta sebaran penyakit {penyakit.title()}...")
+        os.makedirs(output_folder, exist_ok=True)
+        alpha = "#00000000"
+        hg = "#008000ff"
+        ht = "#90ee90ff"
+        kuning = "#ffff74ff"
+        merah = "#d7191cff"
+        warna = [alpha, hg, ht, kuning, merah]
+        cmaps = mcolor.ListedColormap(warna)
+
+        bounds = np.arange(-0.5, 5, 1)
+        norms = mcolor.BoundaryNorm(bounds, 5)
+        patches = [
+            mpatch.Patch(color=hg, label="Sehat", ec="black"),
+            mpatch.Patch(color=ht, label="Ringan", ec="black"),
+            mpatch.Patch(color=kuning, label="Sedang", ec="black"),
+            mpatch.Patch(color=merah, label="Parah", ec="black")
+        ]
+        fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+        ax.legend(handles=patches, loc="lower right", bbox_to_anchor=(1, 1), title="Tingkat Kerusakan")
+        plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}", fontsize=14)
+        with rio.open(input_folder) as src:
+            data = src.read(1) 
+            plt.imshow(data, cmap=cmaps, norm=norms) 
+            plt.show() 
+            # plt.savefig(os.path.join(output_folder, f"sebaran_{penyakit}.png"))
+        return None
+
+    # Fungsi untuk menghitung sebaran penyakit per rumpun
+    def hitung_sebaran_rumpun(self, input_folder):
+        """
+        Menghitung sebaran penyakit.
+        
+        Parameters:
+            input_folder (str): Lokasi file GeoTIFF hasil prediksi model.
+            penyakit (str): Nama penyakit.
+
+        Returns:
+            None.
+        """
+        nf = os.path.splitext(os.path.basename(input_folder))[0]
+        penyakit = nf.split("_")[-1]
+        print(f"\nMenghitung sebaran penyakit {penyakit.title()}...")
+        with rio.open(input_folder) as src:
+            data = src.read(1)
+            nodata = src.nodata
+        # Mengecualikan nodata
+        mask_valid = (data != nodata)
+        valid_data = data[mask_valid]
+        # Menghitung total piksel valid
+        jml_data_valid = valid_data.size
+        # Mengambil semua nilai unik
+        counts = {k: v for k, v in zip(*np.unique(data, return_counts=True))}
+        # Menghitung persentase
+        persen = {i: round((counts.get(i, 0) / jml_data_valid) * 100, 2) for i in range(1, 5)}
+        # Mencetak hasil
+        labels = ["sehat", "ringan", "sedang", "parah"]
+        for i, label in enumerate(labels, 1):
+            print(f"Persentase tanaman {label}: {persen[i]}%")
+        #Mengambil nilai persentase untuk logika
+        p_sehat = persen[1]
+        p_ringan = persen[2]
+        p_sedang = persen[3]
+        p_parah = persen[4]
+        p_parah_total = p_sedang + p_parah # Gabungan sedang dan parah
+        # Logika Rekomendasi
+        print("-" * 30)
+        if p_parah_total > p_sehat or p_parah_total > p_ringan:
+            recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
+            print(f"Rekomendasi: {recom}")
+        elif p_ringan > p_sehat:  
+            recom = "Lakukan pemantauan rutin dan tindakan pencegahan."  
+            print(f"Rekomendasi: {recom}")
+        else:
+            recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
+            print(f"{recom}")
+
+        persen["rekomendasi"] = recom
+        return persen
+
+
+class PlotDiseaseAnalyzer:
+    """
+    Kelas untuk memunculkan hasil analisis per plot/petak.
+    """ 
+    def __init__(self):
+        self.status = "Idle"
+        self.last_result = None
+
+    def run(self, shp_path, penyakit, output_folder):
+        self.status = "Processing"
+        print(f"\nDEBUG: Menghitung sebaran dan memunculkan hasil...") 
+        try:
+            self.tampilkan_penyakit_petak(shp_path, penyakit, output_folder)
+            self.last_result = self.hitung_sebaran_petak(shp_path, penyakit) 
+            self.status = "Done"
+            return self.last_result
+        except Exception as e:
+            self.status = "Error"
+            print(f"\nERROR: {e}")
+            return None 
+        
+    # Fungsi menampilkan hasil prediksi model per petak 
+    def tampilkan_penyakit_petak(self, shp_path, penyakit, output_folder):
+        """
+        Menampilkan peta sebaran pada grafik.
+        
+        Parameters:
+            shp_path (str): Lokasi shapefile hasil prediksi model.
+            penyakit (str): Nama penyakit.
+            output_folder (str): Nama folder tempat file akan disimpan.
+
+        Returns:
+            None.
+        """
+
+        print(f"\nMenampilkan peta sebaran penyakit {penyakit.title()}...")
+        os.makedirs(output_folder, exist_ok=True)
+        alpha = "#00000000"
+        hg = "#008000ff"
+        ht = "#90ee90ff"
+        kuning = "#ffff74ff"
+        merah = "#d7191cff"
+        warna = [alpha, hg, ht, kuning, merah]
+        cmaps = mcolor.ListedColormap(warna)
+
+        bounds = np.arange(-0.5, 5, 1)
+        norms = mcolor.BoundaryNorm(bounds, 5)
+
+        gdf = gpd.read_file(shp_path)
+        fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+
+        gdf.plot(
+            column=penyakit,  
+            cmap=cmaps, 
+            norm=norms,
+            ax=ax,
+            edgecolor='black', 
+            linewidth=0.3
+            )
+        
+        patches = [
+            mpatch.Patch(color=hg, label="Sehat", ec="black"),
+            mpatch.Patch(color=ht, label="Ringan", ec="black"),
+            mpatch.Patch(color=kuning, label="Sedang", ec="black"),
+            mpatch.Patch(color=merah, label="Parah", ec="black")
+        ]
+        ax.legend(handles=patches, loc="lower right", bbox_to_anchor=(1, 1), title="Tingkat Kerusakan")
+        plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}", fontsize=14)
+        plt.show()
+        # plt.savefig(os.path.join(output_folder, f"sebaran_petak_{penyakit}.png"))
+        return None
+        
+    # Fungsi untuk menghitung sebaran penyakit per petak
+    def hitung_sebaran_petak(self, shp_path, penyakit):
+        """
+        Menghitung sebaran penyakit.
+        
+        Parameters:
+            shp_path (str): Lokasi shapefile hasil prediksi model.
+            penyakit (str): Nama penyakit.
+
+        Returns:
+            dict: Hasil analisis.
+        """
+        print(f"\nMenghitung sebaran penyakit {penyakit.title()}...")
+        gdf = gpd.read_file(shp_path)
+        data = gdf[penyakit]
+
+        # Menghitung jumlah data
+        jml_data = np.count_nonzero(data)
+        # Mengambil semua nilai unik
+        counts = data.value_counts()
+
+        # Mencetak hasil
+        labels = ["sehat", "ringan", "sedang", "parah"]
+        persen = {}
+        for i, label in enumerate(labels, 1):
+            jumlah_spesifik = counts.get(i, 0)
+            hasil_persen = round((jumlah_spesifik / jml_data) * 100, 2)
+            persen[i] = hasil_persen
+            print(f"Persentase tanaman {label}: {persen[i]}%")
+        #Mengambil nilai persentase untuk logika
+        p_sehat = persen[1]
+        p_ringan = persen[2]
+        p_sedang = persen[3]
+        p_parah = persen[4]
+        p_parah_total = p_sedang + p_parah # Gabungan sedang dan parah
+        # Logika Rekomendasi
+        print("-" * 30)
+        if p_parah_total > p_sehat or p_parah_total > p_ringan:
+            recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
+            print(f"Rekomendasi: {recom}")
+        elif p_ringan > p_sehat:  
+            recom = "Lakukan pemantauan rutin dan tindakan pencegahan."  
+            print(f"Rekomendasi: {recom}")
+        else:
+            recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
+            print(f"{recom}")
+
+        persen["rekomendasi"] = recom
+        return persen
+    
+
 if __name__ == "__main__":
     geotiff_file = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\Klip\Lahan Uji_clip.tif"
     koords_verteks = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\Koordinat Vertek"

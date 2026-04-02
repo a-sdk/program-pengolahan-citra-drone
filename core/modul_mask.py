@@ -132,4 +132,4 @@ if __name__ == "__main__":
     extract = Extractor()
     multipoligon = split.run(path_poly, 1, 1500, path_multipoly)
     hasil = mask.run(path_tif, threshold_path, path_hasil)
-    extract.run(multipoligon, hasil, path_hasil)
+    ekstrak = extract.run(multipoligon, hasil, path_hasil)

@@ -395,13 +395,13 @@ class Extractor:
             output_filename (str): Nama file output, termasuk ekstensi.
 
         Returns:
-            None.
+            str: Output path.
         """
 
         gdf = gpd.read_file(shp_path)
 
         # Menyiapkan kolom identitas
-        gdf["no_urut"] = gdf.groupby("id").cumcount() + 1
+        # gdf["no_urut"] = gdf.groupby("id").cumcount() + 1
         gdf["Nama"] = "Poligon " + gdf["id"].astype(str) + " Komponen " + gdf["no_urut"].astype(str)
         
         # Mengambil koordinat X dan Y dari centroid poligon
@@ -455,10 +455,8 @@ class Extractor:
         print(f"Membersihkan hasil ekstraksi...")
         df = pd.DataFrame(hasil_ekstraksi).dropna()
         df_urut = df.sort_values(by=["id", "no_urut"], ascending=True)
-        df_urut.rename(columns={"id": "id"}, inplace=True)
-        
-        # Menghapus no_urut agar hasil akhir rapi
-        df_urut = df_urut.drop(columns=["no_urut"])
+        df_urut = df_urut.drop(columns=["id"])
+        df_urut.rename(columns={"no_urut": "id"}, inplace=True)
         
         # Simpan file
         os.makedirs(output_folder, exist_ok=True)
@@ -468,4 +466,4 @@ class Extractor:
         print(f"Ekstraksi selesai...")
         print(f"Total baris yang diekstrak: {df_urut.shape[0]}")
         print(rf"File {output_filename} berhasil disimpan di {output_folder}")    
-        return None          
+        return output_path          

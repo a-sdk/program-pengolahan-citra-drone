@@ -72,14 +72,6 @@ def main(input_folder, poligon, model, scaler):
         ts = t % 60
         print(f"\nSelesai memproses dalam {menit:d} menit {ts:3.2f} detik")
 
-    tampilkan_penyakit(input_folder=blas, penyakit="blas")
-    tampilkan_penyakit(input_folder=blb, penyakit="hawar daun bakteri")
-    tampilkan_penyakit(input_folder=bs, penyakit="bercak cokelat")
-    tampilkan_penyakit(input_folder=nbs, penyakit="bercak sempit")
-    hitung_sebaran(input_folder=blas, penyakit="blas")
-    hitung_sebaran(input_folder=blb, penyakit="hawar daun bakteri")
-    hitung_sebaran(input_folder=bs, penyakit="bercak cokelat")
-    hitung_sebaran(input_folder=nbs, penyakit="bercak sempit")
 
 
 if __name__ == "__main__":
