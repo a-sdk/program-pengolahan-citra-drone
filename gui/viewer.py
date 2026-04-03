@@ -1,9 +1,12 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene
-from PyQt5.QtGui import QPixmap, QImage, QPainter
-from PyQt5.QtCore import Qt, pyqtSignal
-
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, QGraphicsPolygonItem
+from PyQt5.QtGui import QPixmap, QImage, QPainter, QPolygonF, QPen, QColor
+from PyQt5.QtCore import Qt, pyqtSignal, QPointF
 import rasterio as rio
+import geopandas as gpd
 import numpy as np
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Viewer(QWidget):
     mouseMoved = pyqtSignal(float, float)
@@ -18,37 +21,64 @@ class Viewer(QWidget):
         self.view.setMouseTracking(True)
         self.view.setScene(self.scene)
         self.view.setRenderHint(QPainter.Antialiasing)
-        self.view.setRenderHint(QPainter.SmoothPixmapTransform)
+        # self.view.setRenderHint(QPainter.SmoothPixmapTransform)
         self.view.setDragMode(QGraphicsView.ScrollHandDrag)
         self.layout.addWidget(self.view)
         self.zoom = 0
 
     def add_raster(self, path):
+        logger.info("Membuka raster")
         if path.lower().endswith((".png", ".jpg", ".jpeg")):
             pixmap = QPixmap(path)
-
-        else:  # geotiff
+        else:  # GeoTIFF Logic
             with rio.open(path) as src:
+                # Baca data dan paksa ke float32 untuk perhitungan percentile
+                dtype = src.dtypes[0]
                 bands = src.read().astype(np.float32)
                 count = src.count
+
+                img_max = bands.max()
+                
+                # Normalisasi per band (Robust untuk uint16/float32)
                 for i in range(count):
                     b = bands[i]
-                    p2, p98 = np.percentile(b, (2, 98))
-                    bands[i] = np.clip((b - p2) / (p98 - p2), 0, 1)
+                    
+                    if img_max > 0:
+                        if img_max <= 5:
+                            bands[i] = np.clip(b / img_max, 0, 1)
+                        elif dtype == 'uint8':
+                            bands[i] = np.clip(b / 255.0, 0, 1)
+                        elif dtype == 'uint16':
+                            bands[i] = np.clip(b / 65535.0, 0, 1)
+                    else:
+                        bands[i] = np.clip(b, 0, 1)
 
-                img = (np.transpose(bands, (1, 2, 0)) * 255).astype(np.uint8)
-
-                h, w, ch = img.shape
-                qimg = QImage(img.data, w, h, ch*w, QImage.Format_RGB888)
+                # Penanganan Channel (RGB vs Grayscale)
+                if count >= 3:
+                    # Ambil 3 band pertama saja untuk visualisasi RGB
+                    img_data = bands[:3]
+                    img = (np.transpose(img_data, (1, 2, 0)) * 255).astype(np.uint8)
+                    format_qimg = QImage.Format_RGB888
+                    h, w, ch = img.shape
+                else:
+                    # Jika hanya 1 atau 2 band, tampilkan sebagai grayscale 
+                    img = (bands[0] * 255).astype(np.uint8)
+                    format_qimg = QImage.Format_Grayscale8
+                    h, w = img.shape
+                    ch = 1
+                
+                qimg = QImage(img.tobytes(), w, h, ch * w, format_qimg).copy() 
                 pixmap = QPixmap.fromImage(qimg)
 
+        # Tambahkan ke Scene
         item = self.scene.addPixmap(pixmap)
-        item.setTransformationMode(Qt.SmoothTransformation)
+        item.setTransformationMode(Qt.FastTransformation)
+        
         self._layer_id += 1
         layer_id = self._layer_id
         self.layer_items[layer_id] = item
+        
         self.fit_to_view()
-
         return layer_id
     
     def set_visible(self, layer_id, visible):
@@ -83,3 +113,24 @@ class Viewer(QWidget):
         for z, lid in enumerate(ordered_ids):
             self.layer_items[lid].setZValue(z)
         
+    def add_shapefile(self, path):
+        logger.info("Membuka shapefile")
+        gdf = gpd.read_file(path)
+        
+        for _, feature in gdf.iterrows():
+            geom = feature.geometry
+            if geom.geom_type == 'Polygon':
+                self._draw_polygon(geom.exterior.coords)
+            elif geom.geom_type == 'MultiPolygon':
+                for poly in geom.geoms:
+                    self._draw_polygon(poly.exterior.coords)
+
+    def _draw_polygon(self, coords):
+        # Konversi koordinat Geopandas ke QPolygonF milik Qt
+        points = [QPointF(x, y) for x, y in coords]
+        polygon = QPolygonF(points)
+        
+        # Tambahkan ke scene dengan garis tepi merah agar terlihat jelas
+        item = self.scene.addPolygon(polygon)
+        item.setPen(QPen(QColor(255, 0, 0), 2)) # Garis merah, tebal 2
+        item.setZValue(10) # Pastikan di atas layer citra (z-order tinggi)

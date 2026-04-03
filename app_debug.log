@@ -1,0 +1,55 @@
+2026-04-03 22:05:05,591 [INFO] main: Aplikasi dimulai!
+2026-04-03 22:05:05,778 [INFO] gui.main_window: Sinyal Action terhubung
+2026-04-03 22:05:26,253 [INFO] gui.main_window: Aksi buka img berhasil
+2026-04-03 22:05:31,951 [INFO] gui.viewer: Memasukkan raster
+2026-04-03 22:05:58,838 [INFO] gui.main_window: Aksi buka img berhasil
+2026-04-03 22:06:03,741 [INFO] gui.viewer: Memasukkan raster
+2026-04-03 22:06:22,124 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:06:26,900 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-03 22:06:27,524 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-03 22:06:28,517 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:06:29,556 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-03 22:06:30,595 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-03 22:06:31,084 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-03 22:06:31,685 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-03 22:06:32,245 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-03 22:06:32,740 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-03 22:06:37,724 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-03 22:06:49,253 [INFO] gui.layer_panel: Menghapus layer
+2026-04-03 22:06:54,716 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-03 22:06:56,630 [INFO] gui.layer_panel: Menghapus layer
+2026-04-03 22:07:00,126 [INFO] gui.main_window: Aksi buka shp berhasil
+2026-04-03 22:07:16,388 [INFO] gui.viewer: Memasukkan shapefile
+2026-04-03 22:07:21,660 [INFO] gui.layer_panel: Mengubah visibilitas layer None
+2026-04-03 22:26:45,549 [INFO] main: Aplikasi dibuka!
+2026-04-03 22:26:45,737 [INFO] gui.main_window: Sinyal Action terhubung
+2026-04-03 22:26:50,358 [INFO] gui.main_window: Aksi buka img berhasil
+2026-04-03 22:26:56,326 [INFO] gui.main_window: Aksi buka shp berhasil
+2026-04-03 22:27:05,933 [INFO] gui.viewer: Membuka shapefile
+2026-04-03 22:27:13,653 [INFO] gui.layer_panel: Mengubah visibilitas layer None
+2026-04-03 22:30:09,384 [INFO] main: Aplikasi dibuka!
+2026-04-03 22:30:09,574 [INFO] gui.main_window: Sinyal Action terhubung
+2026-04-03 22:30:12,590 [INFO] gui.main_window: Aksi buka shp berhasil
+2026-04-03 22:30:23,535 [INFO] gui.viewer: Membuka shapefile
+2026-04-03 22:30:32,445 [INFO] gui.main_window: Aksi buka img berhasil
+2026-04-03 22:30:44,378 [INFO] gui.viewer: Membuka raster
+2026-04-03 22:30:48,573 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:30:49,076 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:30:49,797 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:30:50,236 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:30:55,700 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:30:56,132 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:30:56,701 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:30:57,245 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:30:57,893 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:30:59,068 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:30:59,916 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:31:00,557 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:31:01,012 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:31:01,548 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:31:01,940 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:31:02,468 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:31:02,973 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-03 22:31:05,212 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-03 22:31:06,518 [INFO] gui.layer_panel: Menghapus layer
+2026-04-03 22:31:07,604 [INFO] gui.layer_panel: Mengubah visibilitas layer None

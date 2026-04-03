@@ -2,7 +2,7 @@
 Modul berisi fungsi-fungsi pembantu
 yang digunakan pada program utama
 '''
-import random, os
+import os
 import glob
 import numpy as np
 import pandas as pd
@@ -790,8 +790,8 @@ class PlantDiseaseAnalyzer:
         with rio.open(input_folder) as src:
             data = src.read(1) 
             plt.imshow(data, cmap=cmaps, norm=norms) 
-            plt.show() 
-            # plt.savefig(os.path.join(output_folder, f"sebaran_{penyakit}.png"))
+            # plt.show() 
+            plt.savefig(os.path.join(output_folder, f"sebaran_{penyakit}.png"))
         return None
 
     # Fungsi untuk menghitung sebaran penyakit per rumpun
@@ -915,8 +915,8 @@ class PlotDiseaseAnalyzer:
         ]
         ax.legend(handles=patches, loc="lower right", bbox_to_anchor=(1, 1), title="Tingkat Kerusakan")
         plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}", fontsize=14)
-        plt.show()
-        # plt.savefig(os.path.join(output_folder, f"sebaran_petak_{penyakit}.png"))
+        # plt.show()
+        plt.savefig(os.path.join(output_folder, f"sebaran_petak_{penyakit}.png"))
         return None
         
     # Fungsi untuk menghitung sebaran penyakit per petak

@@ -1,5 +1,7 @@
 # Folder
 __pycache__/
 .venv/
-
+*.tif
+*.jpg
+*.png
 

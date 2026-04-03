@@ -4,7 +4,9 @@ from PyQt5.QtWidgets import (
     QTreeWidget, QTreeWidgetItem,
     QAbstractItemView, QMenu
 )
+import logging
 
+logger = logging.getLogger(__name__)
 
 class LayerPanel(QWidget):
     def __init__(self, parent, viewer):
@@ -34,6 +36,7 @@ class LayerPanel(QWidget):
 
     # Menambah layer
     def add_layer(self, name, layer_id):
+        logger.info("Menambah layer")
         item = QTreeWidgetItem([name])
         item.setData(0, Qt.UserRole, layer_id)
         item.setCheckState(0, Qt.Checked)
@@ -42,6 +45,7 @@ class LayerPanel(QWidget):
     # Toggle visibility (checkbox)
     def on_item_changed(self, item, column):
         layer_id = item.data(0, Qt.UserRole)
+        logger.info(f"Mengubah visibilitas layer {layer_id}")
         visible = item.checkState(0) == Qt.Checked
         self.viewer.set_visible(layer_id, visible)
 
@@ -57,6 +61,7 @@ class LayerPanel(QWidget):
     # Context menu
     def _open_menu(self, pos):
         item = self.tree.itemAt(pos)
+        logger.info("Membuka menu layer")
         if not item:
             return
 
@@ -69,18 +74,19 @@ class LayerPanel(QWidget):
 
     # Menghapus layer
     def remove_layer(self, item):
+        logger.info("Menghapus layer")
         data = item.data(0, Qt.UserRole)
         if data:
             self.viewer.remove_layer(data)
         parent = item.parent() or self.tree.invisibleRootItem()
         parent.removeChild(item)
 
-    def remove_selected(self):
-        item = self.tree.currentItem()
-        layer_id = item.data(0, Qt.UserRole)
+    # def remove_selected(self):
+    #     item = self.tree.currentItem()
+    #     layer_id = item.data(0, Qt.UserRole)
 
-        self.viewer.remove_layer(layer_id)
-        self.tree.takeTopLevelItem(self.tree.indexOfTopLevelItem(item))
+    #     self.viewer.remove_layer(layer_id)
+    #     self.tree.takeTopLevelItem(self.tree.indexOfTopLevelItem(item))
 
     # Menghubungkan signal
     def _connect_signals(self):
