@@ -1,9 +1,16 @@
 import sys
+import os
 import ctypes
 import logging
 from PyQt5.QtWidgets import QApplication
 from gui.main_window import MainWindow   
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 
+venv_path = os.path.join(os.getcwd(), ".venv", "Lib", "site-packages", "tensorflow")
+if os.path.exists(venv_path):
+    os.add_dll_directory(venv_path)
+    
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',

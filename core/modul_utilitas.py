@@ -17,6 +17,9 @@ import shapely.ops as ops
 from sklearn.cluster import KMeans
 import matplotlib.colors as mcolor
 import matplotlib.patches as mpatch
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Fungsi bantu pembuatan multipoligon 
 def lonlat_to_utm_epsg(lon, lat):
@@ -91,21 +94,23 @@ class Splitter:
     def __init__(self):
         self.status = "Idle"
         self.last_result = None
+        self.n_poly = 1
+        self.n_subpoly = 2000
 
-    def run(self, shp_path, jml_poligon, jml_komponen, output_folder):
+    def run(self, shp_path, output_folder):
         self.status = "Processing"
-        print(f"\nDEBUG: Memulai pembuatan multipoligon...") 
+        logger.info("Memulai pembuatan multipoligon...") 
         try:
-            self.last_result = self.buat_multipoligon(shp_path, jml_poligon, jml_komponen, output_folder) 
+            self.last_result = self.buat_multipoligon(shp_path, output_folder) 
             self.status = "Done"
             return self.last_result
         except Exception as e:
             self.status = "Error"
-            print(f"\nERROR: {e}")
+            logger.error(f"ERROR: {e}")
             return None
         
     # Fungsi untuk membuat multipoligon (shahiban)
-    def buat_multipoligon(self, shp_path, jml_poligon, jml_komponen,  output_folder):
+    def buat_multipoligon(self, shp_path, output_folder):
         """
         Membuat multipoligon dari shapefile poligon.
 
@@ -120,7 +125,7 @@ class Splitter:
         """
 
         print("\nMembuat multipoligon...")
-        jml_cluster = jml_poligon * jml_komponen
+        jml_cluster = self.n_poly * self.n_subpoly
         output_folder = f"{output_folder}/multipoligon"
         os.makedirs(output_folder, exist_ok=True)
         filename = os.path.splitext(os.path.basename(shp_path))[0]
@@ -741,7 +746,7 @@ class PlantDiseaseAnalyzer:
 
     def run(self, input_folder, output_folder):
         self.status = "Processing"
-        print(f"\nDEBUG: Menghitung sebaran dan memunculkan hasil...") 
+        logger.info("Menghitung sebaran dan memunculkan hasil...") 
         try:
             self.tampilkan_penyakit_rumpun(input_folder, output_folder)
             self.last_result = self.hitung_sebaran_rumpun(input_folder) 
@@ -749,7 +754,7 @@ class PlantDiseaseAnalyzer:
             return self.last_result
         except Exception as e:
             self.status = "Error"
-            print(f"\nERROR: {e}")
+            logger.error(f"ERROR: {e}")
             return None 
         
     # Fungsi menampilkan hasil prediksi model per rumpun
@@ -857,7 +862,7 @@ class PlotDiseaseAnalyzer:
 
     def run(self, shp_path, penyakit, output_folder):
         self.status = "Processing"
-        print(f"\nDEBUG: Menghitung sebaran dan memunculkan hasil...") 
+        logger.info("Menghitung sebaran dan memunculkan hasil...") 
         try:
             self.tampilkan_penyakit_petak(shp_path, penyakit, output_folder)
             self.last_result = self.hitung_sebaran_petak(shp_path, penyakit) 
@@ -865,7 +870,7 @@ class PlotDiseaseAnalyzer:
             return self.last_result
         except Exception as e:
             self.status = "Error"
-            print(f"\nERROR: {e}")
+            logger.error(f"ERROR: {e}")
             return None 
         
     # Fungsi menampilkan hasil prediksi model per petak 

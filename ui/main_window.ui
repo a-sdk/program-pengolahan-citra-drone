@@ -191,21 +191,6 @@
     <string>Exit</string>
    </property>
   </action>
-  <action name="actionMineral_Sufficiency">
-   <property name="text">
-    <string>Mineral Sufficiency</string>
-   </property>
-  </action>
-  <action name="actionWater_Availability">
-   <property name="text">
-    <string>Water Availability</string>
-   </property>
-  </action>
-  <action name="actionPlant_Disease">
-   <property name="text">
-    <string>Plant Disease</string>
-   </property>
-  </action>
   <action name="action_open_img">
    <property name="text">
     <string>Image</string>
@@ -223,7 +208,7 @@
   </action>
   <action name="action_disease_predict">
    <property name="text">
-    <string>Disease</string>
+    <string>Disease Detection</string>
    </property>
   </action>
   <action name="action_nutrient_predict">

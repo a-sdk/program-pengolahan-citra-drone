@@ -1,17 +1,39 @@
 from PyQt5 import uic
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QSize
+from PyQt5.QtCore import QSize, QThread, pyqtSignal
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QLabel, QVBoxLayout, 
-    QFileDialog, QMessageBox
+    QFileDialog, QMessageBox, QProgressBar
 )
 from gui.viewer import Viewer
 from gui.layer_panel import LayerPanel
+from gui.dialog_disease import DiseasePredictDialog
+from app.controller import AnalysisController
 import os
 import logging
 
 logger = logging.getLogger(__name__)
 
+class AnalysisWorker(QThread):
+    progress_signal = pyqtSignal(int, str)
+    finished_signal = pyqtSignal(str)
+    error_signal = pyqtSignal(str)
+
+    def __init__(self, controller, tif, shp, out):
+        super().__init__()
+        self.controller = controller
+        self.tif = tif
+        self.shp = shp
+        self.out = out
+
+    def run(self):
+        hooks = {
+            "on_progress": lambda val, msg: self.progress_signal.emit(val, msg),
+            "on_error": lambda err: self.error_signal.emit(err),
+            "on_finished": lambda path: self.finished_signal.emit(path)
+        }
+        self.controller.run(self.tif, self.shp, self.out, hooks)
+        
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -28,10 +50,16 @@ class MainWindow(QMainWindow):
         layer_layout = QVBoxLayout(self.layerPanel)
         layer_layout.setContentsMargins(0, 0, 0, 0)
         layer_layout.addWidget(self.layers)
-
+        
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setMaximum(100)
+        self.progress_bar.setVisible(False)
+    
+        self.controller = AnalysisController()
         self._setup_icons()
         self._setup_statusbar()
-        self.statusBar().showMessage("Siap menerima data...")
+        self.statusBar().showMessage("Ready")
+        self.statusBar().addPermanentWidget(self.progress_bar)
         self._connect_signals()
         self.viewer.mouseMoved.connect(self.update_coord_label)
         self.viewer.fit_to_view()
@@ -68,6 +96,7 @@ class MainWindow(QMainWindow):
         self.action_open_shp.triggered.connect(self.open_shp_file)
         self.action_open_img.triggered.connect(self.open_img_file)
         self.actionExit.triggered.connect(self.handle_exit)
+        self.action_disease_predict.triggered.connect(self.run_disease_analysis)
 
     def open_img_file(self):
         logger.info("Action: open_img berhasil")
@@ -90,10 +119,62 @@ class MainWindow(QMainWindow):
             self.layers.add_input_layer(file_name, layer_id)
             self.statusBar().showMessage(f"Memuat Vektor: {file_name}", 3000)
 
+    def update_progress_bar(self, value, msg):
+        if hasattr(self, 'progress_bar'):
+            self.progress_bar.setValue(value)
+            self.progress_bar.setVisible(value > 0 and value < 100)
+
+        self.statusBar().showMessage(msg, 5000*12) 
+        logger.info(f"Progress {value}% - {msg}")
+
+
+    def on_analysis_finished(self, result_path):
+        if not os.path.exists(result_path):
+            self.show_error_msg(f"File tidak ditemukan di: {result_path}")
+            return
+        file_name = os.path.basename(result_path)
+
+        try:
+            layer_id = self.viewer.add_raster(result_path)
+            self.layers.add_layer_to_root(self.root_result, file_name, layer_id)
+            self.statusBar().showMessage(f"Berhasil memuat: {file_name}", 5000)
+            logger.info(f"Hasil analisis berhasil dimuat: {result_path}")
+        except Exception as e:
+            self.show_error_msg(f"Gagal memuat hasil: {str(e)}")
+
+    def show_error_msg(self, error_msg):
+        if hasattr(self, 'progress_bar'):
+            self.progress_bar.setVisible(False) 
+
+        msg = QMessageBox(self)
+        msg.setIcon(QMessageBox.Critical)
+        msg.setWindowTitle("ERROR")
+        msg.setText("Terjadi kesalahan")
+        msg.setInformativeText(str(error_msg)) 
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
+        
+    def run_disease_analysis(self):
+        logger.info("action_disease_predict ditekan")
+        dialog = DiseasePredictDialog(self)
+        
+        if dialog.exec_():
+            tif, shp, out = dialog.get_values()
+            self.worker = AnalysisWorker(self.controller, tif, shp, out)
+            self.worker.progress_signal.connect(self.update_progress_bar)
+            self.worker.finished_signal.connect(self.on_analysis_finished)
+            self.worker.error_signal.connect(self.show_error_msg)
+            self.worker.start()
+            self.progress_bar.setVisible(True)
+            self.progress_bar.setValue(0)
+        
+        self.statusBar().showMessage("Ready")
+
     def handle_exit(self):
         logger.info("Action: exit ditekan")
         reply = QMessageBox.question(self, 'Exit', 'Are you sure?', 
                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
             QApplication.instance().quit() 
+
     

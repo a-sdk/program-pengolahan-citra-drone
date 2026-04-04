@@ -6,6 +6,9 @@ import os
 import geopandas as gpd
 import rasterio as rio
 from rasterio.mask import mask
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Clipper:
     """
@@ -17,14 +20,14 @@ class Clipper:
 
     def run(self, input_folder, shp_path, output_folder):
         self.status = "Processing"
-        print(f"\nDEBUG: Memulai clipping...") 
+        logger.info("Memulai clipping...") 
         try:
             self.last_result = self.potong_raster(input_folder, shp_path, output_folder) 
             self.status = "Done"
             return self.last_result
         except Exception as e:
             self.status = "Error"
-            print(f"\nERROR: {e}")
+            logger.error(f"ERROR: {e}")
             return None
     
     # Fungsi untuk memotong citra bedasarkan shapefile poligon

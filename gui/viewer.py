@@ -138,7 +138,6 @@ class Viewer(QWidget):
         for z, lid in enumerate(ordered_ids):
             if lid in self.layer_items:
                 self.layer_items[lid].setZValue(z)
-        
         self.view.viewport().update()
         
     def add_shapefile(self, path):

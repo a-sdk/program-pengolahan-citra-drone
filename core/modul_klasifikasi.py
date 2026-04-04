@@ -2,11 +2,18 @@ import rasterio as rio
 import os
 import numpy as np
 import joblib
-import tensorflow as tf
-import glob
+import logging
 import geopandas as gpd
 import pandas as pd
 
+try:
+    import tensorflow as tf
+    HAS_TF = True
+except ImportError:
+    HAS_TF = False
+    print("TENSORFLOW ROBLOK")
+
+logger = logging.getLogger(__name__)
 
 def pisahkan_gulma(model_path, stack_path, output_folder, output_filename):
     """
@@ -84,40 +91,40 @@ class PlantDiseaseClassifier:
     def __init__(self):
         self.status = "Idle"
         self.last_result = None
+        if HAS_TF:
+            self.scaler_disease = joblib.load("core/scaler/MinMaxScaler_v1.joblib")
+            self.model_disease = tf.keras.models.load_model("core/models/model_deteksi_penyakit_v1.keras")
+            pass
 
-    def run(self, model_path, scaler_path, input_folder, output_folder):
+    def predict(self):
+        if not HAS_TF:
+            import time 
+            time.sleep(2)
+            return "Hasil Simulasi (TF Error)"
+
+    def run(self, input_folder, output_folder):
         self.status = "Processing"
-        print(f"\nDEBUG: Memprediksi penyakit...") 
+        logger.info("Memprediksi penyakit...") 
         try:
-            self.last_result = self.deteksi_penyakit_rumpun(model_path, scaler_path, input_folder, output_folder) 
+            self.last_result = self.deteksi_penyakit_rumpun(input_folder, output_folder) 
             self.status = "Done"
             return self.last_result
         except Exception as e:
             self.status = "Error"
-            print(f"\nERROR: {e}")
+            logger.error(f"ERROR: {e}")
             return None 
           
-    def deteksi_penyakit_rumpun(self, model_path, scaler_path, input_folder, output_folder):
+    def deteksi_penyakit_rumpun(self, input_folder, output_folder):
         """
         Menerapkan model multi-output ke raster dan menghasilkan 4 peta sebaran terpisah.
 
         Parameters:
-            model_path (str): Lokasi model deteksi penyakit.
-            scaler_path (str): Lokasi file scaler.
             input_folder (str): Lokasi folder berisi file GeoTiff. 
             output_folder (str): Nama folder tempat file akan disimpan.
 
         Returns:
             str: Output path.
         """
-        print(f"Memuat model dari {model_path}...")
-        print(f"Memuat scaler dari {scaler_path}...")
-        try:
-            model = tf.keras.models.load_model(model_path) 
-            scaler_loaded = joblib.load(scaler_path)
-        except Exception as e:
-            print(f"ERROR: Gagal memuat: {e}")
-            return
 
         output_names = ["blas", "blb", "bs", "nbs"] 
         path_hasil = []
@@ -157,8 +164,8 @@ class PlantDiseaseClassifier:
                 
                 # Memprediksi piksel 
                 if pixels_valid.shape[0] > 0:
-                    pixels_valid_scaled = scaler_loaded.transform(pixels_valid)
-                    predictions_list = model.predict(pixels_valid_scaled, verbose=0)
+                    pixels_valid_scaled = self.scaler_disease.transform(pixels_valid)
+                    predictions_list = self.model_disease.predict(pixels_valid_scaled, verbose=0)
                 else:
                     predictions_list = [np.array([])] * len(output_names) 
 
@@ -196,24 +203,22 @@ class PlotDiseaseClassifier:
 
     def run(self, model_path, scaler_path, input_folder, shp_path, output_folder):
         self.status = "Processing"
-        print(f"\nDEBUG: Memprediksi penyakit...") 
+        logger.info("Memprediksi penyakit...") 
         try:
             self.last_result = self.deteksi_penyakit_petak(model_path, scaler_path, input_folder, shp_path, output_folder) 
             self.status = "Done"
             return self.last_result
         except Exception as e:
             self.status = "Error"
-            print(f"\nERROR: {e}")
+            logger.error(f"ERROR: {e}")
             return None 
         
-    def deteksi_penyakit_petak(self, model_path, scaler_path, input_folder, shp_path, output_folder):
+    def deteksi_penyakit_petak(self, input_folder, shp_path, output_folder):
         """
         Menerapkan model multi-output ke untuk memprediksi
         penyakit dari dataset.
 
         Parameters:
-            model_path (str): Lokasi model deteksi penyakit.
-            scaler_path (str): Lokasi scaler.
             input_folder (str): Lokasi folder hasil ekstraksi nilai piksel.
             shp_path (str): Lokasi shapefile yang menjadi acuan.
             output_folder (str): Nama folder tempat file akan disimpan.
@@ -221,14 +226,6 @@ class PlotDiseaseClassifier:
         Returns:
             str: Output path.
         """
-        print(f"Memuat model dari {model_path}...")
-        print(f"Memuat scaler dari {scaler_path}...")
-        try:
-            model = tf.keras.models.load_model(model_path) 
-            scaler = joblib.load(scaler_path)
-        except Exception as e:
-            print(f"ERROR: Gagal memuat: {e}")
-            return
 
         df = pd.read_csv(input_folder)
         gdf = gpd.read_file(shp_path)
@@ -237,9 +234,9 @@ class PlotDiseaseClassifier:
         X_inf = df[fitur]
         X_inf_array = X_inf.values
         print("Menormalisasi data...")
-        X_inf_scaled = scaler.transform(X_inf_array)
+        X_inf_scaled = self.scaler_disease.transform(X_inf_array)
         print("Memprediksi penyakit...")
-        raw_preds = model.predict(X_inf_scaled)
+        raw_preds = self.model_disease.predict(X_inf_scaled)
 
         map_label = {1: "Sehat", 2: "Ringan", 3: "Sedang", 4: "Parah"}
         disease_names = ["blas", "blb", "bs", "nbs"]

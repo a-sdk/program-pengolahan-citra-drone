@@ -15,6 +15,9 @@ import glob
 import gc
 from mahotas.polygon import fill_polygon
 from tqdm import tqdm
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Fungsi untuk membuat polygon sebagai grid titik (mmuhaemin)
 def render(poly):
@@ -373,14 +376,14 @@ class Extractor:
 
     def run(self, shp_path, input_folder, output_folder):
         self.status = "Processing"
-        print(f"\nDEBUG: Memulai proses ekstraksi...") 
+        logger.info("Memulai proses ekstraksi...") 
         try:
             self.last_result = self.ekstrak_rerata_piksel(shp_path, input_folder, output_folder) 
             self.status = "Done"
             return self.last_result
         except Exception as e:
             self.status = "Error"
-            print(f"\nERROR: {e}")
+            logger.error(f"ERROR: {e}")
             return None
         
     # Fungsi untuk mengekstrak rata-rata nilai piksel dalam sub poligon

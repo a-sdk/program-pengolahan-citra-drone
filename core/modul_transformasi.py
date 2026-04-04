@@ -4,8 +4,11 @@ Modul untuk transformasi dan segmentasi.
 
 import numpy as np
 import rasterio as rio
-from modul_utilitas import otsu_threshold, simpan_raster, tampilkan_histogram
-from modul_klasifikasi import pisahkan_gulma
+from core.modul_utilitas import otsu_threshold, simpan_raster, tampilkan_histogram
+from core.modul_klasifikasi import pisahkan_gulma
+import logging
+
+logger = logging.getLogger(__name__)
 
 def hitung_savi(nir_band, red_band, L):
     """
@@ -88,26 +91,25 @@ class Transformer:
         self.status = "Idle"
         self.last_result = None
     
-    def run(self, lst_band, profile, output_folder):
+    def run(self, input_folder, output_folder):
         self.status = "Processing"
-        print(f"\nDEBUG: Memulai proses transformasi...") 
+        logger.info("Memulai proses transformasi...") 
         try:
-            self.last_result = self.proses_transformasi(lst_band, profile, output_folder) 
+            self.last_result = self.proses_transformasi(input_folder, output_folder) 
             self.status = "Done"
             return self.last_result
         except Exception as e:
             self.status = "Error"
-            print(f"\nERROR: {e}")
+            logger.error(f"ERROR: {e}")
             return None
         
     # Fungsi untuk melakukan proses transformasi
-    def proses_transformasi(self, lst_band, profile, output_folder, nilai_nodata=0):
+    def proses_transformasi(self, input_folder, output_folder, nilai_nodata=0):
         """
         Melakukan proses transformasi indeks vegetasi.
         
         Parameters:
-            lst_band (list): List semua band (kanal) yang digunakan.
-            profile (dict): Metadata raster dari file sumber.
+            input_folder (str): Lokasi file raster.
             output_folder (str): Nama folder tempat hasil transformasi disimpan.
             nilai_nodata (float): Nilai nodata raster.
             mode (str): Mode oprasi.
@@ -116,8 +118,13 @@ class Transformer:
             str: gndvi_file_path, ndre_file_path, ndvi_file_path, savi_file_path.
         """
         # Memuat band
-        m_red = lst_band[0]
-        nir = lst_band[1]
+        with rio.open(input_folder) as src:
+            m_green = src.read(4)
+            m_red = src.read(5)
+            red_edge = src.read(6)
+            nir = src.read(7)
+            profile = src.profile
+
         print("\nMenghitung transformasi indeks vegetasi...")
         profile.update(
             dtype="float32",
@@ -144,26 +151,26 @@ class Segmenter:
         self.status = "Idle"
         self.last_result = None
 
-    def run(self, lst_fitur, profile, output_folder):
+    def run(self, input_folder, ndvi_path, output_folder):
         self.status = "Processing"
-        print(f"\nDEBUG: Memulai proses segmentasi...") 
+        logger.info("Memulai proses segmentasi...") 
         try:
-            self.last_result = self.proses_segmentasi(lst_fitur, profile, output_folder) 
+            self.last_result = self.proses_segmentasi(input_folder, ndvi_path, output_folder) 
             self.status = "Done"
             return self.last_result
         except Exception as e:
             self.status = "Error"
-            print(f"\nERROR: {e}")
+            logger.error(f"ERROR: {e}")
             return None
         
     # Fungsi untuk melakukan proses segmentasi
-    def proses_segmentasi(self, lst_fitur, profile, output_folder, nilai_nodata=0):
+    def proses_segmentasi(self, input_folder, ndvi_path, output_folder, nilai_nodata=0):
         """
         Melakukan proses segmentasi untuk memisahkan tanaman padi.
 
         Parameters:
-            lst_fitur (list): Fitur yang akan digunakan.
-            profile (dict): Metadata raster dari file sumber.
+            input_folder (str): Lokasi file raster.
+            ndvi_path (str): Lokasi file raster NDVI.
             output_folder (str): Nama folder tempat hasil transformasi disimpan.
             nilai_nodata (float): Nilai nodata raster.
 
@@ -172,14 +179,15 @@ class Segmenter:
         """
 
         # Membuat peta segmentasi gulma dan padi
-        peta_segmentasi_gulma = pisahkan_gulma(r"core\models\model_deteksi_gulma.joblib", lst_fitur[0], output_folder, "segmentasi_gulma.tif")
+        peta_segmentasi_gulma = pisahkan_gulma(r"core\models\model_deteksi_gulma.joblib", input_folder, output_folder, "segmentasi_gulma.tif")
         print("Memuat file hasil transformasi...")
         with (
-            rio.open(lst_fitur[1]) as src_ndvi, 
+            rio.open(ndvi_path) as src_ndvi,
             rio.open(peta_segmentasi_gulma) as src_gulma
         ):
             ndvi = src_ndvi.read(1).astype(float)
             mask_padi = src_gulma.read(1).astype(float) == 1
+            profile = src_ndvi.profile
         
         # Menghitung threshold indeks vegetasi
         # t_ndre = otsu_threshold(ndre, jumlah_bin=256, rentang_nilai=(-1, 1))

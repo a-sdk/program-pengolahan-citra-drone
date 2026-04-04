@@ -6,6 +6,9 @@ import os
 import glob
 import numpy as np
 import rasterio as rio
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Masker:
     """
@@ -17,14 +20,14 @@ class Masker:
 
     def run(self, input_folder, mask_path, output_folder):
         self.status = "Processing"
-        print(f"\nDEBUG: Memulai proses masking...") 
+        logger.info("Memulai proses masking...") 
         try:
             self.last_result = self.mask_tumpukan_fitur(input_folder, mask_path, output_folder) 
             self.status = "Done"
             return self.last_result
         except Exception as e:
             self.status = "Error"
-            print(f"\nERROR: {e}")
+            logger.error(f"ERROR: {e}")
             return None
             
     # Fungsi untuk melakukan masking pada setiap band terpisah
@@ -42,7 +45,6 @@ class Masker:
         Returns:
             str: Output path.
         """
-        print("\nMemuat mask...")
         with rio.open(mask_path) as src_mask:
             mask_data = src_mask.read(1)
         # Membuat boolean mask
@@ -88,7 +90,6 @@ class Masker:
         Returns:
             str: Output path.
         """
-        print("\nMemuat mask...")
         with rio.open(mask_path) as src_mask:
                 mask_data = src_mask.read(1)
         # Membuat boolean mask
@@ -109,7 +110,7 @@ class Masker:
             
             # Perbarui profile untuk file output agar konsisten
             profile.update(
-                dtye="float32",
+                # dtye="float32",
                 count=data_stack.shape[0], 
                 nodata=nilai_nodata
             )

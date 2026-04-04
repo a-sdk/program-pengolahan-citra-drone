@@ -109,7 +109,7 @@ class LayerPanel(QWidget):
         metadata = self.viewer.get_metadata(layer_id)
         
         if metadata:
-            from gui.dialogs import PropertyDialog 
+            from gui.dialog_property import PropertyDialog 
             dialog = PropertyDialog(name, metadata, self)
             dialog.exec_()
 
@@ -131,6 +131,7 @@ class LayerPanel(QWidget):
         item.setText(0, name)
         item.setCheckState(0, Qt.Checked)
         root.setExpanded(True)
+ 
         logger.info(f"Berhasil menambah '{name}' dengan ID: {layer_id}")
         return item
 
