@@ -79,12 +79,18 @@ class LayerPanel(QWidget):
         if not item:
             return
 
-        menu = QMenu()
-        remove_action = menu.addAction("Remove Layer")
-        action = menu.exec_(self.tree.viewport().mapToGlobal(pos))
+        if item and item.data(0, Qt.UserRole) is not None:
+            menu = QMenu()
+            remove_action = menu.addAction("Remove Layer")
+            prop_action = menu.addAction("Properties")
+
+            action = menu.exec_(self.tree.viewport().mapToGlobal(pos))
 
         if action == remove_action:
             self.remove_layer(item)
+
+        if action == prop_action:
+            self._show_properties(item)
 
     # Menghapus layer
     def remove_layer(self, item):
@@ -95,12 +101,26 @@ class LayerPanel(QWidget):
         parent = item.parent() or self.tree.invisibleRootItem()
         parent.removeChild(item)
 
+    # Properties layer
+    def _show_properties(self, item):
+        layer_id = item.data(0, Qt.UserRole)
+        name = item.text(0)
+        
+        metadata = self.viewer.get_metadata(layer_id)
+        
+        if metadata:
+            from gui.dialogs import PropertyDialog 
+            dialog = PropertyDialog(name, metadata, self)
+            dialog.exec_()
+
     # Menghubungkan signal
     def _connect_signals(self):
+        # Sinyal drag drop layer
         self.tree.model().rowsInserted.connect(self.update_z_order)
         self.tree.model().rowsRemoved.connect(self.update_z_order)
         self.tree.model().rowsMoved.connect(self.update_z_order)
         self.tree.itemChanged.connect(self.on_item_changed)
+        # Menu right-click
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self._open_menu)
     

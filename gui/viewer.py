@@ -1,8 +1,12 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, 
-    QGraphicsItemGroup
-    )
-from PyQt5.QtGui import QPixmap, QImage, QPainter, QPolygonF, QPen, QColor
+    QGraphicsItemGroup, QGraphicsPixmapItem
+)
+from PyQt5.QtGui import (
+    QPixmap, QImage, QPainter, 
+    QPolygonF, QPen, QColor,
+    QTransform
+)
 from PyQt5.QtCore import Qt, pyqtSignal, QPointF
 import rasterio as rio
 import geopandas as gpd
@@ -20,6 +24,8 @@ class Viewer(QWidget):
         self.scene = QGraphicsScene()
         self.layer_items = {}
         self._layer_id = 0
+        self.raster_info = {}
+        self.vector_info = {}
         self.setMouseTracking(True)
         self.view.setMouseTracking(True)
         self.view.setScene(self.scene)
@@ -35,14 +41,18 @@ class Viewer(QWidget):
             pixmap = QPixmap(path)
         else:  # GeoTIFF Logic
             with rio.open(path) as src:
-                # Baca data dan paksa ke float32 untuk perhitungan percentile
                 dtype = src.dtypes[0]
                 bands = src.read().astype(np.float32)
                 count = src.count
-
+                crs = src.crs
+                nodata = src.nodata
+                t = src.transform
+                pixel_width = abs(t.a)
                 img_max = bands.max()
-                
-                # Normalisasi per band (Robust untuk uint16/float32)
+                img_min = bands.min()
+                qt_transform = QTransform(t.a, t.b, t.d, t.e, t.c, t.f)
+
+                # Normalisasi per band 
                 for i in range(count):
                     b = bands[i]
                     
@@ -75,6 +85,7 @@ class Viewer(QWidget):
 
         # Tambahkan ke Scene
         item = self.scene.addPixmap(pixmap)
+        item.setTransform(qt_transform)
         item.setTransformationMode(Qt.FastTransformation)
         
         self._layer_id += 1
@@ -82,6 +93,16 @@ class Viewer(QWidget):
         item.setZValue(layer_id)
         self.layer_items[layer_id] = item
         self.fit_to_view()
+        # Simpan info raster
+        self.raster_info[layer_id] = {
+            "dtype": str(dtype),
+            "crs": crs.to_string() if crs else "Non-Georeferenced",
+            "count": count,
+            "nodata": nodata,
+            "min_data": str(img_min),
+            "max_data": str(img_max),
+            "res": f"{pixel_width:.4f} m ({pixel_width*100:.1f} cm/px)"
+        }
         return layer_id
     
     def set_visible(self, layer_id, visible):
@@ -134,19 +155,61 @@ class Viewer(QWidget):
             elif geom.geom_type == 'MultiPolygon':
                 for poly in geom.geoms:
                     self._draw_polygon_to_group(poly.exterior.coords, group)
-
+        
         self._layer_id += 1
         layer_id = self._layer_id
 
         group.setZValue(layer_id + 100)
         self.layer_items[layer_id] = group
+
+        self.vector_info[layer_id] = {
+            "crs": gdf.crs.to_string() if gdf.crs else "Unknown",
+            "geom_type": str(gdf.geom_type.iloc[0]),
+            "count": len(gdf)
+        }
         return layer_id
 
     def _draw_polygon_to_group(self, coords, group):
         # Konversi koordinat Geopandas ke QPolygonF milik Qt
         points = [QPointF(x, y) for x, y in coords]
         polygon_item = self.scene.addPolygon(QPolygonF(points))
-        polygon_item.setPen(QPen(QColor(255, 0, 0, 128), 0.5))
-
+        pen = QPen(QColor(255, 0, 0, 150))
+        pen.setWidth(2)
+        pen.setCosmetic(True)
+        polygon_item.setPen(pen)
+        polygon_item.setBrush(QColor(255, 0, 0, 30))
         group.addToGroup(polygon_item)
+
+    def get_metadata(self, layer_id):
+        # Ambil item dari dictionary layer_items
+        item = self.layer_items.get(layer_id)
+        if not item: return None
+        
+        metadata = {
+            "Layer ID": str(layer_id),
+            "Z-Value": str(item.zValue()),
+            "Visible": "Yes" if item.isVisible() else "No"
+        }
+        
+        # Jika item adalah Raster (Pixmap)
+        if isinstance(item, QGraphicsPixmapItem):
+            info = self.raster_info.get(layer_id, {})
+            metadata.update({
+                        "Type": "Raster (GeoTIFF)",
+                        "Data Type (DType)": info.get("dtype", "Unknown"),
+                        "CRS": info.get("crs", "Unknown"),
+                        "NoData Value": info.get("nodata", "None"),
+                        "Resolution": info.get("res", "Unknown")
+                    })
+        # Jika item adalah Shapefile
+        elif isinstance(item, QGraphicsItemGroup):
+            info = self.vector_info.get(layer_id, {})
+            metadata.update({
+                "Type": "Vector (Shapefile)",
+                "Geometry": info.get("geom_type", "Polygon"),
+                "CRS": info.get("crs", "Unknown"),
+                "Feature Count": info.get("count", "0")
+            })  
+            
+        return metadata
 

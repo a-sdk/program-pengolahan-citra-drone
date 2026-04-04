@@ -161,7 +161,6 @@
      <addaction name="action_open_shp"/>
     </widget>
     <addaction name="menuOpen"/>
-    <addaction name="actionClose"/>
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuProcessing">
@@ -172,9 +171,9 @@
      <property name="title">
       <string>Model</string>
      </property>
-     <addaction name="actionMineral_Sufficiency"/>
-     <addaction name="actionWater_Availability"/>
-     <addaction name="actionPlant_Disease"/>
+     <addaction name="action_nutrient_predict"/>
+     <addaction name="action_water_predict"/>
+     <addaction name="action_disease_predict"/>
     </widget>
     <addaction name="menuModel"/>
    </widget>
@@ -215,6 +214,21 @@
   <action name="action_open_shp">
    <property name="text">
     <string>Shapefile</string>
+   </property>
+  </action>
+  <action name="action_water_predict">
+   <property name="text">
+    <string>Water Available</string>
+   </property>
+  </action>
+  <action name="action_disease_predict">
+   <property name="text">
+    <string>Disease</string>
+   </property>
+  </action>
+  <action name="action_nutrient_predict">
+   <property name="text">
+    <string>Nutrient Available</string>
    </property>
   </action>
  </widget>

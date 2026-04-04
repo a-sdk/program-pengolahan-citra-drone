@@ -1,8 +1,10 @@
 from PyQt5 import uic
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QLabel, QVBoxLayout, 
     QFileDialog, QMessageBox
-    )
+)
 from gui.viewer import Viewer
 from gui.layer_panel import LayerPanel
 import os
@@ -15,6 +17,8 @@ class MainWindow(QMainWindow):
         super().__init__()
         uic.loadUi("ui/main_window.ui", self)
 
+        self.setWindowTitle("Multispectral Image Processing Program")
+        self.setWindowIcon(QIcon("assets/icon/edit-image.png"))
         self.viewer = Viewer()
         viewer_layout = QVBoxLayout(self.viewerPanel)
         viewer_layout.setContentsMargins(0, 0, 0, 0)
@@ -25,11 +29,32 @@ class MainWindow(QMainWindow):
         layer_layout.setContentsMargins(0, 0, 0, 0)
         layer_layout.addWidget(self.layers)
 
+        self._setup_icons()
         self._setup_statusbar()
         self.statusBar().showMessage("Siap menerima data...")
         self._connect_signals()
         self.viewer.mouseMoved.connect(self.update_coord_label)
         self.viewer.fit_to_view()
+
+    def _setup_icons(self):
+        icon_tif = QIcon("assets/icon/add_img.png")
+        icon_shp = QIcon("assets/icon/poly.png")
+        icon_open = QIcon("assets/icon/folder.png")
+        icon_exit = QIcon("assets/icon/exit.png")
+        icon_model = QIcon("assets/icon/deep-learning.png")
+        icon_disease = QIcon("assets/icon/virus.png")
+        icon_mineral = QIcon("assets/icon/nutrients.png")
+        icon_water = QIcon("assets/icon/drop.png")
+        self.menuOpen.setIcon(icon_open)
+        self.action_open_img.setIcon(icon_tif)
+        self.action_open_shp.setIcon(icon_shp)
+        self.actionExit.setIcon(icon_exit)
+        self.menuModel.setIcon(icon_model)
+        self.action_nutrient_predict.setIcon(icon_mineral)
+        self.action_water_predict.setIcon(icon_water)
+        self.action_disease_predict.setIcon(icon_disease)
+
+        self.layers.tree.setIconSize(QSize(24, 24))
 
     def _setup_statusbar(self):
         self.coord_label = QLabel("X: -, Y: -")
