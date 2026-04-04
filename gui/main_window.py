@@ -29,9 +29,6 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage("Siap menerima data...")
         self._connect_signals()
         self.viewer.mouseMoved.connect(self.update_coord_label)
-
-        # layer_id = self.viewer.add_raster("aja sendiri.jpg")
-        # self.layers.add_input_layer("Contoh jpg", layer_id)
         self.viewer.fit_to_view()
 
     def _setup_statusbar(self):
@@ -41,24 +38,16 @@ class MainWindow(QMainWindow):
     def update_coord_label(self, x, y):
         self.coord_label.setText(f"X: {x:.2f}, Y: {y:.2f}")
 
-    def load_shp(self):
-        path = self.le_shp_path.text()
-        if path:
-            self.viewer.add_shapefile(path)
-            self.layers.add_input_layer("Batas Lahan", path)
-
-
     def _connect_signals(self):
         logger.info("Sinyal Action terhubung")
-        self.action_open_shp.triggered.connect(self.pilih_file_shp)
-        self.action_open_img.triggered.connect(self.pilih_file_tif)
+        self.action_open_shp.triggered.connect(self.open_shp_file)
+        self.action_open_img.triggered.connect(self.open_img_file)
         self.actionExit.triggered.connect(self.handle_exit)
 
-    
-    def pilih_file_tif(self):
-        logger.info("Aksi buka img berhasil")
+    def open_img_file(self):
+        logger.info("Action: open_img berhasil")
         path, _ = QFileDialog.getOpenFileName(
-            self, "Buka Citra Drone", "", "GeoTIFF (*.tif *.tiff);;Images (*.jpg *.png)"
+            self, "Pilih Citra", "", "GeoTIFF (*.tif *.tiff);;Images (*.jpg *.png)"
         )
         if path:
             layer_id = self.viewer.add_raster(path)
@@ -66,19 +55,18 @@ class MainWindow(QMainWindow):
             self.layers.add_input_layer(file_name, layer_id)
             self.statusBar().showMessage(f"Memuat Citra: {file_name}", 3000)
 
-    def pilih_file_shp(self):
-        logger.info("Aksi buka shp berhasil")
+    def open_shp_file(self):
+        logger.info("Action: open_shp berhasil")
         path, _ = QFileDialog.getOpenFileName(self, "Pilih Shapefile", "", "Shapefile (*.shp)")
         
         if path:      
             layer_id = self.viewer.add_shapefile(path)
             file_name = os.path.basename(path)
             self.layers.add_input_layer(file_name, layer_id)
-
             self.statusBar().showMessage(f"Memuat Vektor: {file_name}", 3000)
 
     def handle_exit(self):
-        logger.info("Aksi exit ditekan")
+        logger.info("Action: exit ditekan")
         reply = QMessageBox.question(self, 'Exit', 'Are you sure?', 
                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:

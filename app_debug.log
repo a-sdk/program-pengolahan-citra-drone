@@ -1,55 +1,214 @@
-2026-04-03 22:05:05,591 [INFO] main: Aplikasi dimulai!
-2026-04-03 22:05:05,778 [INFO] gui.main_window: Sinyal Action terhubung
-2026-04-03 22:05:26,253 [INFO] gui.main_window: Aksi buka img berhasil
-2026-04-03 22:05:31,951 [INFO] gui.viewer: Memasukkan raster
-2026-04-03 22:05:58,838 [INFO] gui.main_window: Aksi buka img berhasil
-2026-04-03 22:06:03,741 [INFO] gui.viewer: Memasukkan raster
-2026-04-03 22:06:22,124 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:06:26,900 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
-2026-04-03 22:06:27,524 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
-2026-04-03 22:06:28,517 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:06:29,556 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
-2026-04-03 22:06:30,595 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
-2026-04-03 22:06:31,084 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
-2026-04-03 22:06:31,685 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
-2026-04-03 22:06:32,245 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
-2026-04-03 22:06:32,740 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
-2026-04-03 22:06:37,724 [INFO] gui.layer_panel: Membuka menu layer
-2026-04-03 22:06:49,253 [INFO] gui.layer_panel: Menghapus layer
-2026-04-03 22:06:54,716 [INFO] gui.layer_panel: Membuka menu layer
-2026-04-03 22:06:56,630 [INFO] gui.layer_panel: Menghapus layer
-2026-04-03 22:07:00,126 [INFO] gui.main_window: Aksi buka shp berhasil
-2026-04-03 22:07:16,388 [INFO] gui.viewer: Memasukkan shapefile
-2026-04-03 22:07:21,660 [INFO] gui.layer_panel: Mengubah visibilitas layer None
-2026-04-03 22:26:45,549 [INFO] main: Aplikasi dibuka!
-2026-04-03 22:26:45,737 [INFO] gui.main_window: Sinyal Action terhubung
-2026-04-03 22:26:50,358 [INFO] gui.main_window: Aksi buka img berhasil
-2026-04-03 22:26:56,326 [INFO] gui.main_window: Aksi buka shp berhasil
-2026-04-03 22:27:05,933 [INFO] gui.viewer: Membuka shapefile
-2026-04-03 22:27:13,653 [INFO] gui.layer_panel: Mengubah visibilitas layer None
-2026-04-03 22:30:09,384 [INFO] main: Aplikasi dibuka!
-2026-04-03 22:30:09,574 [INFO] gui.main_window: Sinyal Action terhubung
-2026-04-03 22:30:12,590 [INFO] gui.main_window: Aksi buka shp berhasil
-2026-04-03 22:30:23,535 [INFO] gui.viewer: Membuka shapefile
-2026-04-03 22:30:32,445 [INFO] gui.main_window: Aksi buka img berhasil
-2026-04-03 22:30:44,378 [INFO] gui.viewer: Membuka raster
-2026-04-03 22:30:48,573 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:30:49,076 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:30:49,797 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:30:50,236 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:30:55,700 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:30:56,132 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:30:56,701 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:30:57,245 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:30:57,893 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:30:59,068 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:30:59,916 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:31:00,557 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:31:01,012 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:31:01,548 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:31:01,940 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:31:02,468 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:31:02,973 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-03 22:31:05,212 [INFO] gui.layer_panel: Membuka menu layer
-2026-04-03 22:31:06,518 [INFO] gui.layer_panel: Menghapus layer
-2026-04-03 22:31:07,604 [INFO] gui.layer_panel: Mengubah visibilitas layer None
+2026-04-04 10:47:39,207 [INFO] __main__: Aplikasi dibuka!
+2026-04-04 10:47:39,430 [INFO] gui.main_window: Sinyal Action terhubung
+2026-04-04 10:47:44,395 [INFO] gui.main_window: Action: open_img berhasil
+2026-04-04 10:47:47,049 [INFO] gui.viewer: Membuka raster
+2026-04-04 10:47:47,616 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:47:47,616 [WARNING] gui.layer_panel: Item '' tidak punya ID di UserRole
+2026-04-04 10:47:47,617 [INFO] gui.layer_panel: Layer IDs di panel: []
+2026-04-04 10:47:47,617 [INFO] gui.viewer: Mengatur ulang z-order: []
+2026-04-04 10:47:47,617 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-04 10:47:47,618 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-04 10:47:47,618 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-04 10:47:47,618 [INFO] gui.layer_panel: Berhasil menambah 'hasil_potong.tif' dengan ID: 1
+2026-04-04 10:47:47,618 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:47:47,618 [INFO] gui.layer_panel: Layer IDs di panel: [1]
+2026-04-04 10:47:47,618 [INFO] gui.viewer: Mengatur ulang z-order: [1]
+2026-04-04 10:47:58,140 [INFO] gui.main_window: Action: open_img berhasil
+2026-04-04 10:48:00,869 [INFO] gui.viewer: Membuka raster
+2026-04-04 10:48:00,970 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:48:00,971 [WARNING] gui.layer_panel: Item '' tidak punya ID di UserRole
+2026-04-04 10:48:00,971 [INFO] gui.layer_panel: Layer IDs di panel: [1]
+2026-04-04 10:48:00,971 [INFO] gui.viewer: Mengatur ulang z-order: [1]
+2026-04-04 10:48:00,971 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-04 10:48:00,972 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-04 10:48:00,972 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-04 10:48:00,972 [INFO] gui.layer_panel: Berhasil menambah 'NDVI.tif' dengan ID: 2
+2026-04-04 10:48:00,972 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:48:00,972 [INFO] gui.layer_panel: Layer IDs di panel: [2, 1]
+2026-04-04 10:48:00,973 [INFO] gui.viewer: Mengatur ulang z-order: [2, 1]
+2026-04-04 10:48:07,308 [INFO] gui.main_window: Action: open_img berhasil
+2026-04-04 10:48:14,580 [INFO] gui.viewer: Membuka raster
+2026-04-04 10:48:15,143 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:48:15,143 [WARNING] gui.layer_panel: Item '' tidak punya ID di UserRole
+2026-04-04 10:48:15,143 [INFO] gui.layer_panel: Layer IDs di panel: [2, 1]
+2026-04-04 10:48:15,144 [INFO] gui.viewer: Mengatur ulang z-order: [2, 1]
+2026-04-04 10:48:15,144 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
+2026-04-04 10:48:15,144 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
+2026-04-04 10:48:15,144 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
+2026-04-04 10:48:15,144 [INFO] gui.layer_panel: Berhasil menambah 'hasil_potong_masked.tif' dengan ID: 3
+2026-04-04 10:48:15,144 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:48:15,144 [INFO] gui.layer_panel: Layer IDs di panel: [3, 2, 1]
+2026-04-04 10:48:15,144 [INFO] gui.viewer: Mengatur ulang z-order: [3, 2, 1]
+2026-04-04 10:48:20,083 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:48:20,083 [INFO] gui.layer_panel: Layer IDs di panel: [2, 1]
+2026-04-04 10:48:20,084 [INFO] gui.viewer: Mengatur ulang z-order: [2, 1]
+2026-04-04 10:48:20,084 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:48:20,084 [INFO] gui.layer_panel: Layer IDs di panel: [2, 1, 3]
+2026-04-04 10:48:20,084 [INFO] gui.viewer: Mengatur ulang z-order: [2, 1, 3]
+2026-04-04 10:48:29,011 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:48:29,012 [INFO] gui.layer_panel: Layer IDs di panel: [2, 3]
+2026-04-04 10:48:29,012 [INFO] gui.viewer: Mengatur ulang z-order: [2, 3]
+2026-04-04 10:48:29,012 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:48:29,012 [INFO] gui.layer_panel: Layer IDs di panel: [2, 3, 1]
+2026-04-04 10:48:29,013 [INFO] gui.viewer: Mengatur ulang z-order: [2, 3, 1]
+2026-04-04 10:48:31,307 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:48:31,307 [INFO] gui.layer_panel: Layer IDs di panel: [3, 1]
+2026-04-04 10:48:31,307 [INFO] gui.viewer: Mengatur ulang z-order: [3, 1]
+2026-04-04 10:48:31,308 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:48:31,308 [INFO] gui.layer_panel: Layer IDs di panel: [3, 1, 2]
+2026-04-04 10:48:31,308 [INFO] gui.viewer: Mengatur ulang z-order: [3, 1, 2]
+2026-04-04 10:48:36,493 [INFO] gui.main_window: Action: open_shp berhasil
+2026-04-04 10:48:44,759 [INFO] gui.viewer: Membuka shapefile
+2026-04-04 10:48:44,808 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:48:44,809 [WARNING] gui.layer_panel: Item '' tidak punya ID di UserRole
+2026-04-04 10:48:44,809 [INFO] gui.layer_panel: Layer IDs di panel: [3, 1, 2]
+2026-04-04 10:48:44,809 [INFO] gui.viewer: Mengatur ulang z-order: [3, 1, 2]
+2026-04-04 10:48:44,809 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
+2026-04-04 10:48:44,809 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
+2026-04-04 10:48:44,810 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
+2026-04-04 10:48:44,810 [INFO] gui.layer_panel: Berhasil menambah 'poligon_rumpun_lahan_2_43.shp' dengan ID: 4
+2026-04-04 10:48:44,810 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:48:44,810 [INFO] gui.layer_panel: Layer IDs di panel: [4, 3, 1, 2]
+2026-04-04 10:48:44,810 [INFO] gui.viewer: Mengatur ulang z-order: [4, 3, 1, 2]
+2026-04-04 10:48:52,611 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:48:52,611 [INFO] gui.layer_panel: Layer IDs di panel: [3, 1, 2]
+2026-04-04 10:48:52,611 [INFO] gui.viewer: Mengatur ulang z-order: [3, 1, 2]
+2026-04-04 10:48:52,612 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:48:52,612 [INFO] gui.layer_panel: Layer IDs di panel: [3, 1, 2, 4]
+2026-04-04 10:48:52,612 [INFO] gui.viewer: Mengatur ulang z-order: [3, 1, 2, 4]
+2026-04-04 10:48:57,235 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-04 10:48:58,762 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-04 10:49:00,202 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
+2026-04-04 10:49:01,355 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
+2026-04-04 10:49:01,858 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
+2026-04-04 10:49:03,226 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-04 10:49:04,043 [INFO] gui.layer_panel: Menghapus layer
+2026-04-04 10:49:04,043 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:49:04,044 [INFO] gui.layer_panel: Layer IDs di panel: [3, 1, 2]
+2026-04-04 10:49:04,044 [INFO] gui.viewer: Mengatur ulang z-order: [3, 1, 2]
+2026-04-04 10:49:06,212 [INFO] gui.main_window: Action: open_shp berhasil
+2026-04-04 10:49:11,301 [INFO] gui.viewer: Membuka shapefile
+2026-04-04 10:49:11,304 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:49:11,305 [WARNING] gui.layer_panel: Item '' tidak punya ID di UserRole
+2026-04-04 10:49:11,305 [INFO] gui.layer_panel: Layer IDs di panel: [3, 1, 2]
+2026-04-04 10:49:11,305 [INFO] gui.viewer: Mengatur ulang z-order: [3, 1, 2]
+2026-04-04 10:49:11,305 [INFO] gui.layer_panel: Mengubah visibilitas layer 5
+2026-04-04 10:49:11,305 [INFO] gui.layer_panel: Mengubah visibilitas layer 5
+2026-04-04 10:49:11,305 [INFO] gui.layer_panel: Mengubah visibilitas layer 5
+2026-04-04 10:49:11,305 [INFO] gui.layer_panel: Berhasil menambah 'Lahan 2_0.shp' dengan ID: 5
+2026-04-04 10:49:11,305 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:49:11,306 [INFO] gui.layer_panel: Layer IDs di panel: [5, 3, 1, 2]
+2026-04-04 10:49:11,306 [INFO] gui.viewer: Mengatur ulang z-order: [5, 3, 1, 2]
+2026-04-04 10:49:15,075 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-04 10:49:16,035 [INFO] gui.layer_panel: Menghapus layer
+2026-04-04 10:49:16,035 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:49:16,035 [INFO] gui.layer_panel: Layer IDs di panel: [3, 1, 2]
+2026-04-04 10:49:16,036 [INFO] gui.viewer: Mengatur ulang z-order: [3, 1, 2]
+2026-04-04 10:49:16,979 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-04 10:49:18,002 [INFO] gui.layer_panel: Menghapus layer
+2026-04-04 10:49:18,004 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:49:18,004 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2]
+2026-04-04 10:49:18,004 [INFO] gui.viewer: Mengatur ulang z-order: [1, 2]
+2026-04-04 10:49:21,795 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-04 10:49:22,899 [INFO] gui.layer_panel: Menghapus layer
+2026-04-04 10:49:22,901 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:49:22,901 [INFO] gui.layer_panel: Layer IDs di panel: [2]
+2026-04-04 10:49:22,901 [INFO] gui.viewer: Mengatur ulang z-order: [2]
+2026-04-04 10:49:24,515 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-04 10:49:25,940 [INFO] gui.layer_panel: Menghapus layer
+2026-04-04 10:49:25,942 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:49:25,942 [INFO] gui.layer_panel: Layer IDs di panel: []
+2026-04-04 10:49:25,942 [INFO] gui.viewer: Mengatur ulang z-order: []
+2026-04-04 10:49:29,828 [INFO] gui.main_window: Action: open_shp berhasil
+2026-04-04 10:49:32,311 [INFO] gui.viewer: Membuka shapefile
+2026-04-04 10:49:32,328 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:49:32,328 [WARNING] gui.layer_panel: Item '' tidak punya ID di UserRole
+2026-04-04 10:49:32,328 [INFO] gui.layer_panel: Layer IDs di panel: []
+2026-04-04 10:49:32,328 [INFO] gui.viewer: Mengatur ulang z-order: []
+2026-04-04 10:49:32,328 [INFO] gui.layer_panel: Mengubah visibilitas layer 6
+2026-04-04 10:49:32,329 [INFO] gui.layer_panel: Mengubah visibilitas layer 6
+2026-04-04 10:49:32,329 [INFO] gui.layer_panel: Mengubah visibilitas layer 6
+2026-04-04 10:49:32,329 [INFO] gui.layer_panel: Berhasil menambah 'Lahan 1_0.shp' dengan ID: 6
+2026-04-04 10:49:32,329 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:49:32,329 [INFO] gui.layer_panel: Layer IDs di panel: [6]
+2026-04-04 10:49:32,329 [INFO] gui.viewer: Mengatur ulang z-order: [6]
+2026-04-04 10:49:37,986 [INFO] gui.layer_panel: Mengubah visibilitas layer 6
+2026-04-04 10:49:38,427 [INFO] gui.layer_panel: Mengubah visibilitas layer 6
+2026-04-04 10:49:40,186 [INFO] gui.layer_panel: Mengubah visibilitas layer 6
+2026-04-04 10:49:40,594 [INFO] gui.layer_panel: Mengubah visibilitas layer 6
+2026-04-04 10:49:41,419 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-04 10:49:42,028 [INFO] gui.layer_panel: Menghapus layer
+2026-04-04 10:49:42,029 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:49:42,029 [INFO] gui.layer_panel: Layer IDs di panel: []
+2026-04-04 10:49:42,029 [INFO] gui.viewer: Mengatur ulang z-order: []
+2026-04-04 10:49:44,164 [INFO] gui.main_window: Action: open_img berhasil
+2026-04-04 10:49:50,206 [INFO] gui.viewer: Membuka raster
+2026-04-04 10:49:50,762 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:49:50,762 [WARNING] gui.layer_panel: Item '' tidak punya ID di UserRole
+2026-04-04 10:49:50,763 [INFO] gui.layer_panel: Layer IDs di panel: []
+2026-04-04 10:49:50,763 [INFO] gui.viewer: Mengatur ulang z-order: []
+2026-04-04 10:49:50,763 [INFO] gui.layer_panel: Mengubah visibilitas layer 7
+2026-04-04 10:49:50,763 [INFO] gui.layer_panel: Mengubah visibilitas layer 7
+2026-04-04 10:49:50,763 [INFO] gui.layer_panel: Mengubah visibilitas layer 7
+2026-04-04 10:49:50,764 [INFO] gui.layer_panel: Berhasil menambah 'hasil_potong.tif' dengan ID: 7
+2026-04-04 10:49:50,764 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:49:50,764 [INFO] gui.layer_panel: Layer IDs di panel: [7]
+2026-04-04 10:49:50,764 [INFO] gui.viewer: Mengatur ulang z-order: [7]
+2026-04-04 10:49:55,901 [INFO] gui.main_window: Action: open_img berhasil
+2026-04-04 10:50:00,912 [INFO] gui.viewer: Membuka raster
+2026-04-04 10:50:01,015 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:50:01,016 [WARNING] gui.layer_panel: Item '' tidak punya ID di UserRole
+2026-04-04 10:50:01,016 [INFO] gui.layer_panel: Layer IDs di panel: [7]
+2026-04-04 10:50:01,016 [INFO] gui.viewer: Mengatur ulang z-order: [7]
+2026-04-04 10:50:01,017 [INFO] gui.layer_panel: Mengubah visibilitas layer 8
+2026-04-04 10:50:01,017 [INFO] gui.layer_panel: Mengubah visibilitas layer 8
+2026-04-04 10:50:01,017 [INFO] gui.layer_panel: Mengubah visibilitas layer 8
+2026-04-04 10:50:01,017 [INFO] gui.layer_panel: Berhasil menambah 'NDVI.tif' dengan ID: 8
+2026-04-04 10:50:01,017 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:50:01,017 [INFO] gui.layer_panel: Layer IDs di panel: [8, 7]
+2026-04-04 10:50:01,018 [INFO] gui.viewer: Mengatur ulang z-order: [8, 7]
+2026-04-04 10:50:05,107 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:50:05,108 [INFO] gui.layer_panel: Layer IDs di panel: [7]
+2026-04-04 10:50:05,108 [INFO] gui.viewer: Mengatur ulang z-order: [7]
+2026-04-04 10:50:05,108 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:50:05,108 [INFO] gui.layer_panel: Layer IDs di panel: [7, 8]
+2026-04-04 10:50:05,108 [INFO] gui.viewer: Mengatur ulang z-order: [7, 8]
+2026-04-04 10:50:07,877 [INFO] gui.main_window: Action: open_img berhasil
+2026-04-04 10:50:14,671 [INFO] gui.viewer: Membuka raster
+2026-04-04 10:50:15,226 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:50:15,226 [WARNING] gui.layer_panel: Item '' tidak punya ID di UserRole
+2026-04-04 10:50:15,226 [INFO] gui.layer_panel: Layer IDs di panel: [7, 8]
+2026-04-04 10:50:15,226 [INFO] gui.viewer: Mengatur ulang z-order: [7, 8]
+2026-04-04 10:50:15,227 [INFO] gui.layer_panel: Mengubah visibilitas layer 9
+2026-04-04 10:50:15,227 [INFO] gui.layer_panel: Mengubah visibilitas layer 9
+2026-04-04 10:50:15,227 [INFO] gui.layer_panel: Mengubah visibilitas layer 9
+2026-04-04 10:50:15,227 [INFO] gui.layer_panel: Berhasil menambah 'hasil_potong_masked.tif' dengan ID: 9
+2026-04-04 10:50:15,227 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:50:15,227 [INFO] gui.layer_panel: Layer IDs di panel: [9, 7, 8]
+2026-04-04 10:50:15,227 [INFO] gui.viewer: Mengatur ulang z-order: [9, 7, 8]
+2026-04-04 10:50:18,418 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:50:18,419 [INFO] gui.layer_panel: Layer IDs di panel: [7, 8]
+2026-04-04 10:50:18,419 [INFO] gui.viewer: Mengatur ulang z-order: [7, 8]
+2026-04-04 10:50:18,419 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:50:18,419 [INFO] gui.layer_panel: Layer IDs di panel: [7, 8, 9]
+2026-04-04 10:50:18,419 [INFO] gui.viewer: Mengatur ulang z-order: [7, 8, 9]
+2026-04-04 10:50:24,780 [INFO] gui.main_window: Action: open_img berhasil
+2026-04-04 10:50:26,820 [INFO] gui.viewer: Membuka raster
+2026-04-04 10:50:26,905 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:50:26,906 [WARNING] gui.layer_panel: Item '' tidak punya ID di UserRole
+2026-04-04 10:50:26,906 [INFO] gui.layer_panel: Layer IDs di panel: [7, 8, 9]
+2026-04-04 10:50:26,906 [INFO] gui.viewer: Mengatur ulang z-order: [7, 8, 9]
+2026-04-04 10:50:26,906 [INFO] gui.layer_panel: Mengubah visibilitas layer 10
+2026-04-04 10:50:26,906 [INFO] gui.layer_panel: Mengubah visibilitas layer 10
+2026-04-04 10:50:26,907 [INFO] gui.layer_panel: Mengubah visibilitas layer 10
+2026-04-04 10:50:26,907 [INFO] gui.layer_panel: Berhasil menambah 'peta_sebaran_penyakit_blas.tif' dengan ID: 10
+2026-04-04 10:50:26,907 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:50:26,907 [INFO] gui.layer_panel: Layer IDs di panel: [10, 7, 8, 9]
+2026-04-04 10:50:26,908 [INFO] gui.viewer: Mengatur ulang z-order: [10, 7, 8, 9]
+2026-04-04 10:50:29,723 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:50:29,724 [INFO] gui.layer_panel: Layer IDs di panel: [7, 8, 9]
+2026-04-04 10:50:29,724 [INFO] gui.viewer: Mengatur ulang z-order: [7, 8, 9]
+2026-04-04 10:50:29,724 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-04 10:50:29,724 [INFO] gui.layer_panel: Layer IDs di panel: [7, 8, 9, 10]
+2026-04-04 10:50:29,724 [INFO] gui.viewer: Mengatur ulang z-order: [7, 8, 9, 10]
+2026-04-04 10:50:36,076 [INFO] gui.main_window: Action: exit ditekan

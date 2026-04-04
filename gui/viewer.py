@@ -1,4 +1,7 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, QGraphicsPolygonItem
+from PyQt5.QtWidgets import (
+    QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, 
+    QGraphicsItemGroup
+    )
 from PyQt5.QtGui import QPixmap, QImage, QPainter, QPolygonF, QPen, QColor
 from PyQt5.QtCore import Qt, pyqtSignal, QPointF
 import rasterio as rio
@@ -76,8 +79,8 @@ class Viewer(QWidget):
         
         self._layer_id += 1
         layer_id = self._layer_id
+        item.setZValue(layer_id)
         self.layer_items[layer_id] = item
-        
         self.fit_to_view()
         return layer_id
     
@@ -110,27 +113,40 @@ class Viewer(QWidget):
         self.mouseMoved.emit(x, y)
 
     def set_z_order(self, ordered_ids):
+        logger.info(f"Mengatur ulang z-order: {ordered_ids}")
         for z, lid in enumerate(ordered_ids):
-            self.layer_items[lid].setZValue(z)
+            if lid in self.layer_items:
+                self.layer_items[lid].setZValue(z)
+        
+        self.view.viewport().update()
         
     def add_shapefile(self, path):
         logger.info("Membuka shapefile")
         gdf = gpd.read_file(path)
         
+        group = QGraphicsItemGroup()
+        self.scene.addItem(group)
+
         for _, feature in gdf.iterrows():
             geom = feature.geometry
             if geom.geom_type == 'Polygon':
-                self._draw_polygon(geom.exterior.coords)
+                self._draw_polygon_to_group(geom.exterior.coords, group)
             elif geom.geom_type == 'MultiPolygon':
                 for poly in geom.geoms:
-                    self._draw_polygon(poly.exterior.coords)
+                    self._draw_polygon_to_group(poly.exterior.coords, group)
 
-    def _draw_polygon(self, coords):
+        self._layer_id += 1
+        layer_id = self._layer_id
+
+        group.setZValue(layer_id + 100)
+        self.layer_items[layer_id] = group
+        return layer_id
+
+    def _draw_polygon_to_group(self, coords, group):
         # Konversi koordinat Geopandas ke QPolygonF milik Qt
         points = [QPointF(x, y) for x, y in coords]
-        polygon = QPolygonF(points)
-        
-        # Tambahkan ke scene dengan garis tepi merah agar terlihat jelas
-        item = self.scene.addPolygon(polygon)
-        item.setPen(QPen(QColor(255, 0, 0), 2)) # Garis merah, tebal 2
-        item.setZValue(10) # Pastikan di atas layer citra (z-order tinggi)
+        polygon_item = self.scene.addPolygon(QPolygonF(points))
+        polygon_item.setPen(QPen(QColor(255, 0, 0, 128), 0.5))
+
+        group.addToGroup(polygon_item)
+

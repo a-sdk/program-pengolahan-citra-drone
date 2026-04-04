@@ -67,8 +67,20 @@
            <enum>Qt::Horizontal</enum>
           </property>
           <widget class="QTreeWidget" name="layerPanel">
+           <property name="acceptDrops">
+            <bool>true</bool>
+           </property>
            <property name="frameShape">
             <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
+           <property name="dragEnabled">
+            <bool>true</bool>
+           </property>
+           <property name="dragDropMode">
+            <enum>QAbstractItemView::InternalMove</enum>
            </property>
            <property name="columnCount">
             <number>0</number>

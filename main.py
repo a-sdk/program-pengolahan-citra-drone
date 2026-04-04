@@ -7,7 +7,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
     handlers=[
-        logging.FileHandler("app_debug.log"), 
+        logging.FileHandler("app_debug.log", mode='w'), 
         logging.StreamHandler(sys.stdout) 
     ]
 )
