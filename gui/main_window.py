@@ -99,7 +99,7 @@ class MainWindow(QMainWindow):
         self.action_disease_predict.triggered.connect(self.run_disease_analysis)
 
     def open_img_file(self):
-        logger.info("Action: open_img berhasil")
+        logger.info("Action: open_img ditekan")
         path, _ = QFileDialog.getOpenFileName(
             self, "Pilih Citra", "", "GeoTIFF (*.tif *.tiff);;Images (*.jpg *.png)"
         )
@@ -110,7 +110,7 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage(f"Memuat Citra: {file_name}", 3000)
 
     def open_shp_file(self):
-        logger.info("Action: open_shp berhasil")
+        logger.info("Action: open_shp ditekan")
         path, _ = QFileDialog.getOpenFileName(self, "Pilih Shapefile", "", "Shapefile (*.shp)")
         
         if path:      
@@ -124,7 +124,7 @@ class MainWindow(QMainWindow):
             self.progress_bar.setValue(value)
             self.progress_bar.setVisible(value > 0 and value < 100)
 
-        self.statusBar().showMessage(msg, 5000*12) 
+        self.statusBar().showMessage(msg, 1000*60*5) 
         logger.info(f"Progress {value}% - {msg}")
 
 

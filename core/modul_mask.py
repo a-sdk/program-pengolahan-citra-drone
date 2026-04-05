@@ -110,7 +110,7 @@ class Masker:
             
             # Perbarui profile untuk file output agar konsisten
             profile.update(
-                # dtye="float32",
+                dtype="uint16",
                 count=data_stack.shape[0], 
                 nodata=nilai_nodata
             )

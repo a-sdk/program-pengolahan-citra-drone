@@ -140,13 +140,13 @@ class Splitter:
             raise ValueError(f"File {filename} tidak memiliki CRS. Harap periksa file.")
 
         if polygons.crs.is_geographic:
-            overall_geometry = polygons.union_all()
+            overall_geometry = polygons.unary_union
             centroid = overall_geometry.centroid
             epsg_code = lonlat_to_utm_epsg(centroid.x, centroid.y)
             polygons = polygons.to_crs(epsg=epsg_code)
             print(f"CRS diubah dari {crs_asal} ke UTM (EPSG:{epsg_code})")
         else:
-            print(f"CRS sudah proyeksi: {polygons.crs}")
+            print(f"CRS sudah proyeksi: ({str(polygons.crs).upper()})")
 
         # ========================================
         # Tahap 2: Generate Random Points
@@ -196,7 +196,7 @@ class Splitter:
         # Tahap 6: Voronoi Polygon
         # ========================================
         points = MultiPoint(list(centroids.geometry))
-        buffer_union = centroids.buffer(100).union_all()
+        buffer_union = centroids.buffer(100).unary_union
         boundary = buffer_union.convex_hull
 
         vor = ops.voronoi_diagram(points, envelope=boundary, tolerance=0)

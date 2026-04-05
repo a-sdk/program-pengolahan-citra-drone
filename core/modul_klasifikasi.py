@@ -1,17 +1,9 @@
 import rasterio as rio
 import os
 import numpy as np
-import joblib
 import logging
 import geopandas as gpd
 import pandas as pd
-
-try:
-    import tensorflow as tf
-    HAS_TF = True
-except ImportError:
-    HAS_TF = False
-    print("TENSORFLOW ROBLOK")
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +20,7 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename):
     Returns:
         str: Output path.
     """
+    import joblib
     output_path = os.path.join(output_folder, output_filename)
     os.makedirs(output_folder, exist_ok=True)
     print(f"Memuat model...")
@@ -91,20 +84,28 @@ class PlantDiseaseClassifier:
     def __init__(self):
         self.status = "Idle"
         self.last_result = None
-        if HAS_TF:
-            self.scaler_disease = joblib.load("core/scaler/MinMaxScaler_v1.joblib")
-            self.model_disease = tf.keras.models.load_model("core/models/model_deteksi_penyakit_v1.keras")
-            pass
+        self.scaler = None
+        self.model = None
 
-    def predict(self):
-        if not HAS_TF:
-            import time 
-            time.sleep(2)
-            return "Hasil Simulasi (TF Error)"
+    def _load_model(self):
+        if self.model is not None:
+            return
+        import tensorflow as tf
+        import joblib
+
+        model_path = "core/models/deteksi_penyakit/model_deteksi_penyakit_v1.h5"
+        scaler_path = "core/scaler/MinMaxScaler_v1.joblib"
+        self.scaler = joblib.load(scaler_path)
+        logger.info("Memuat scaler")
+        print("DEBUG: Memuat scaler")
+        self.model = tf.keras.models.load_model(model_path, compile=False)
+        logger.info(f"Model dimuat bertipe: {type(self.model)}")
+        print(f"Model dimuat bertipe: {type(self.model)}")
 
     def run(self, input_folder, output_folder):
         self.status = "Processing"
         logger.info("Memprediksi penyakit...") 
+        print("DEBUG: Prediksi penyakit")
         try:
             self.last_result = self.deteksi_penyakit_rumpun(input_folder, output_folder) 
             self.status = "Done"
@@ -125,7 +126,7 @@ class PlantDiseaseClassifier:
         Returns:
             str: Output path.
         """
-
+        self._load_model()
         output_names = ["blas", "blb", "bs", "nbs"] 
         path_hasil = []
         print(f"Memprediksi citra...")
@@ -164,8 +165,8 @@ class PlantDiseaseClassifier:
                 
                 # Memprediksi piksel 
                 if pixels_valid.shape[0] > 0:
-                    pixels_valid_scaled = self.scaler_disease.transform(pixels_valid)
-                    predictions_list = self.model_disease.predict(pixels_valid_scaled, verbose=0)
+                    pixels_valid_scaled = self.scaler.transform(pixels_valid)
+                    predictions_list = self.model.predict(pixels_valid_scaled, verbose=0)
                 else:
                     predictions_list = [np.array([])] * len(output_names) 
 

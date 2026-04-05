@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class DiseasePredictDialog(QDialog):
-    def __init__(self):
+    def __init__(self, parent=None):
         super().__init__()
         uic.loadUi("ui/dialog_disease.ui", self)
 

@@ -7,6 +7,7 @@ import rasterio as rio
 from core.modul_utilitas import otsu_threshold, simpan_raster, tampilkan_histogram
 from core.modul_klasifikasi import pisahkan_gulma
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -179,7 +180,8 @@ class Segmenter:
         """
 
         # Membuat peta segmentasi gulma dan padi
-        peta_segmentasi_gulma = pisahkan_gulma(r"core\models\model_deteksi_gulma.joblib", input_folder, output_folder, "segmentasi_gulma.tif")
+        model_gulma = r"core\models\model_deteksi_gulma_v1.joblib"
+        peta_segmentasi_gulma = pisahkan_gulma(model_gulma, input_folder, output_folder, "segmentasi_gulma.tif")
         print("Memuat file hasil transformasi...")
         with (
             rio.open(ndvi_path) as src_ndvi,
@@ -210,7 +212,7 @@ class Segmenter:
 
         # Menyimpan hasil threshold
         threshold_file_path = simpan_raster(hasil_threshold, profile, output_folder, "hasil_threshold_model.tif", nilai_nodata)
-
+        os.remove(peta_segmentasi_gulma)
         return threshold_file_path
 
 
