@@ -6,7 +6,6 @@ from core.modul_ekstraksi import Extractor
 from core.modul_klasifikasi import PlantDiseaseClassifier
 from core.modul_utilitas import Splitter, PlantDiseaseAnalyzer
 
-import rasterio as rio
 import logging
 import os
 import time
@@ -53,11 +52,17 @@ class AnalysisController:
             emit_progress(60, "Extracting pixel...")
             extracted_path = self.extractor.run(multipolygon_path, masked_path, output_folder)
             emit_progress(70, "Detecting disease...")
-            classified_path = self.classifier.predict() #self.classifier.run(masked_path, output_folder)
+            classified_path = self.classifier.run(masked_path, output_folder) 
             emit_progress(90, "Calculating stats...")
-            for disease in classified_path:
-                stats = self.stats_calc.run(disease, output_folder)
-                result.statistic.append(stats)
+            for i, name in enumerate(classified_path):
+                stats = self.stats_calc.run(name, output_folder)
+                emit_progress(90+i, f"Calculating stats ({str(i)}/{str(len(classified_path))})...")
+            logger.info(f"Hasil tipe: {str(type(stats))}, berisi {str(len(stats))} elemen.")
+            logger.info(f"{stats}")
+            result.maps = stats[0::2]
+            result.statistic = stats[1::2]
+            logger.info(f"Maps: {result.maps}")
+            logger.info(f"Stats: {result.statistic}")
             result.clip_path = clipped_path
             result.transform_path = transformed_path
             result.segmentation_path = segmented_path

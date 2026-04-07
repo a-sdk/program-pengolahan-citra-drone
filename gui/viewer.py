@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class Viewer(QWidget):
     mouseMoved = pyqtSignal(float, float)
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.layout = QVBoxLayout(self)
         self.view = QGraphicsView()
@@ -27,10 +27,10 @@ class Viewer(QWidget):
         self.raster_info = {}
         self.vector_info = {}
         self.setMouseTracking(True)
+        self.view.viewport().setMouseTracking(True)
         self.view.setMouseTracking(True)
         self.view.setScene(self.scene)
         self.view.setRenderHint(QPainter.Antialiasing)
-        # self.view.setRenderHint(QPainter.SmoothPixmapTransform)
         self.view.setDragMode(QGraphicsView.ScrollHandDrag)
         self.layout.addWidget(self.view)
         self.zoom = 0
@@ -39,7 +39,9 @@ class Viewer(QWidget):
         logger.info("Membuka raster")
         if path.lower().endswith((".png", ".jpg", ".jpeg")):
             pixmap = QPixmap(path)
+            isGeoTiff = False
         else:  # GeoTIFF Logic
+            isGeoTiff = True
             with rio.open(path) as src:
                 dtype = src.dtypes[0]
                 bands = src.read().astype(np.float32)
@@ -83,26 +85,29 @@ class Viewer(QWidget):
                 qimg = QImage(img.tobytes(), w, h, ch * w, format_qimg).copy() 
                 pixmap = QPixmap.fromImage(qimg)
 
-        # Tambahkan ke Scene
-        item = self.scene.addPixmap(pixmap)
-        item.setTransform(qt_transform)
-        item.setTransformationMode(Qt.FastTransformation)
-        
+        # Assign layer
         self._layer_id += 1
         layer_id = self._layer_id
+        # Tambahkan ke Scene
+        item = self.scene.addPixmap(pixmap)
+        if isGeoTiff:
+            item.setTransform(qt_transform)
+            # Simpan info raster
+            self.raster_info[layer_id] = {
+                "dtype": str(dtype),
+                "crs": crs.to_string() if crs else "Non-Georeferenced",
+                "count": count,
+                "nodata": nodata,
+                "min_data": str(img_min),
+                "max_data": str(img_max),
+                "res": f"{pixel_width:.4f} m ({pixel_width*100:.1f} cm/px)"
+            }
         item.setZValue(layer_id)
         self.layer_items[layer_id] = item
+        item.setTransformationMode(Qt.FastTransformation)
+        item.setAcceptHoverEvents(False)
+        
         self.fit_to_view()
-        # Simpan info raster
-        self.raster_info[layer_id] = {
-            "dtype": str(dtype),
-            "crs": crs.to_string() if crs else "Non-Georeferenced",
-            "count": count,
-            "nodata": nodata,
-            "min_data": str(img_min),
-            "max_data": str(img_max),
-            "res": f"{pixel_width:.4f} m ({pixel_width*100:.1f} cm/px)"
-        }
         return layer_id
     
     def set_visible(self, layer_id, visible):
@@ -132,6 +137,7 @@ class Viewer(QWidget):
         x = pos.x()
         y = pos.y()
         self.mouseMoved.emit(x, y)
+        super().mouseMoveEvent(event)
 
     def set_z_order(self, ordered_ids):
         logger.info(f"Mengatur ulang z-order: {ordered_ids}")
@@ -194,7 +200,7 @@ class Viewer(QWidget):
         if isinstance(item, QGraphicsPixmapItem):
             info = self.raster_info.get(layer_id, {})
             metadata.update({
-                        "Type": "Raster (GeoTIFF)",
+                        "Type": "Raster",
                         "Data Type (DType)": info.get("dtype", "Unknown"),
                         "CRS": info.get("crs", "Unknown"),
                         "NoData Value": info.get("nodata", "None"),

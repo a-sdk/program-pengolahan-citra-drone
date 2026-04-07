@@ -93,21 +93,19 @@ class PlantDiseaseClassifier:
         import tensorflow as tf
         import joblib
 
-        model_path = "core/models/deteksi_penyakit/model_deteksi_penyakit_v1.h5"
-        scaler_path = "core/scaler/MinMaxScaler_v1.joblib"
+        model_path = "core/models/deteksi_penyakit/model_deteksi_penyakit.h5"
+        scaler_path = "core/scaler/model_deteksi_penyakit_Scaler.joblib"
         self.scaler = joblib.load(scaler_path)
         logger.info("Memuat scaler")
-        print("DEBUG: Memuat scaler")
         self.model = tf.keras.models.load_model(model_path, compile=False)
         logger.info(f"Model dimuat bertipe: {type(self.model)}")
-        print(f"Model dimuat bertipe: {type(self.model)}")
 
-    def run(self, input_folder, output_folder):
+    def run(self, input_folder, output_folder, hooks=None):
         self.status = "Processing"
         logger.info("Memprediksi penyakit...") 
         print("DEBUG: Prediksi penyakit")
         try:
-            self.last_result = self.deteksi_penyakit_rumpun(input_folder, output_folder) 
+            self.last_result = self.deteksi_penyakit_rumpun(input_folder, output_folder, hooks=None) 
             self.status = "Done"
             return self.last_result
         except Exception as e:
@@ -115,7 +113,7 @@ class PlantDiseaseClassifier:
             logger.error(f"ERROR: {e}")
             return None 
           
-    def deteksi_penyakit_rumpun(self, input_folder, output_folder):
+    def deteksi_penyakit_rumpun(self, input_folder, output_folder, hooks=None):
         """
         Menerapkan model multi-output ke raster dan menghasilkan 4 peta sebaran terpisah.
 
@@ -127,7 +125,9 @@ class PlantDiseaseClassifier:
             str: Output path.
         """
         self._load_model()
-        output_names = ["blas", "blb", "bs", "nbs"] 
+        def emit_progress(val, msg):
+            if hooks and "on_progress" in hooks: hooks["on_progress"](val, msg)
+        output_names = ["blas", "hdb", "bercak cokelat", "bercak sempit"] 
         path_hasil = []
         print(f"Memprediksi citra...")
         with rio.open(input_folder) as src:
@@ -138,9 +138,11 @@ class PlantDiseaseClassifier:
                 nodata=0
             )
             output_dests = {}
-            output_folder = f"{output_folder}/Sebaran_Rumpun"
+            output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Rumpun"
             os.makedirs(output_folder, exist_ok=True)
-            for name in output_names:
+            for i, name in enumerate(output_names):
+                val = (i + 1) * 5 + 70
+                emit_progress(val, f"Detecting disease ({str(i+1)}/{str(len(output_names))})...")
                 output_path = os.path.join(output_folder, f"peta_sebaran_penyakit_{name}.tif")
                 path_hasil.append(output_path)
 

@@ -742,14 +742,14 @@ class PlantDiseaseAnalyzer:
     """ 
     def __init__(self):
         self.status = "Idle"
-        self.last_result = None
+        self.last_result = []
 
     def run(self, input_folder, output_folder):
         self.status = "Processing"
         logger.info("Menghitung sebaran dan memunculkan hasil...") 
         try:
-            self.tampilkan_penyakit_rumpun(input_folder, output_folder)
-            self.last_result = self.hitung_sebaran_rumpun(input_folder) 
+            self.last_result.append(self.tampilkan_penyakit_rumpun(input_folder, output_folder))
+            self.last_result.append(self.hitung_sebaran_rumpun(input_folder))
             self.status = "Done"
             return self.last_result
         except Exception as e:
@@ -767,10 +767,12 @@ class PlantDiseaseAnalyzer:
             penyakit (str): Nama penyakit.
 
         Returns:
-            None.
+            str: Output path.
         """
         nf = os.path.splitext(os.path.basename(input_folder))[0]
         penyakit = nf.split("_")[-1]
+        output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Rumpun"
+        output_path = f"{output_folder}/peta_sebaran_{penyakit}.png"
         print(f"\nMenampilkan peta sebaran penyakit {penyakit.title()}...")
         os.makedirs(output_folder, exist_ok=True)
         alpha = "#00000000"
@@ -789,15 +791,15 @@ class PlantDiseaseAnalyzer:
             mpatch.Patch(color=kuning, label="Sedang", ec="black"),
             mpatch.Patch(color=merah, label="Parah", ec="black")
         ]
-        fig, ax = plt.subplots(1, 1, figsize=(10, 8))
-        ax.legend(handles=patches, loc="lower right", bbox_to_anchor=(1, 1), title="Tingkat Kerusakan")
+        # fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+        plt.legend(handles=patches, loc="lower right", bbox_to_anchor=(1, 1), title="Tingkat Kerusakan")
         plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}", fontsize=14)
         with rio.open(input_folder) as src:
             data = src.read(1) 
             plt.imshow(data, cmap=cmaps, norm=norms) 
             # plt.show() 
-            plt.savefig(os.path.join(output_folder, f"sebaran_{penyakit}.png"))
-        return None
+            plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        return output_path
 
     # Fungsi untuk menghitung sebaran penyakit per rumpun
     def hitung_sebaran_rumpun(self, input_folder):
@@ -858,14 +860,14 @@ class PlotDiseaseAnalyzer:
     """ 
     def __init__(self):
         self.status = "Idle"
-        self.last_result = None
+        self.last_result = []
 
     def run(self, shp_path, penyakit, output_folder):
         self.status = "Processing"
         logger.info("Menghitung sebaran dan memunculkan hasil...") 
         try:
-            self.tampilkan_penyakit_petak(shp_path, penyakit, output_folder)
-            self.last_result = self.hitung_sebaran_petak(shp_path, penyakit) 
+            self.last_result.append(self.tampilkan_penyakit_petak(shp_path, penyakit, output_folder))
+            self.last_result.append(self.hitung_sebaran_petak(shp_path, penyakit))
             self.status = "Done"
             return self.last_result
         except Exception as e:
@@ -884,10 +886,12 @@ class PlotDiseaseAnalyzer:
             output_folder (str): Nama folder tempat file akan disimpan.
 
         Returns:
-            None.
+            str: Output path.
         """
 
         print(f"\nMenampilkan peta sebaran penyakit {penyakit.title()}...")
+        output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Rumpun"
+        output_path = f"{output_folder}/peta_sebaran_{penyakit}.png"
         os.makedirs(output_folder, exist_ok=True)
         alpha = "#00000000"
         hg = "#008000ff"
@@ -921,8 +925,8 @@ class PlotDiseaseAnalyzer:
         ax.legend(handles=patches, loc="lower right", bbox_to_anchor=(1, 1), title="Tingkat Kerusakan")
         plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}", fontsize=14)
         # plt.show()
-        plt.savefig(os.path.join(output_folder, f"sebaran_petak_{penyakit}.png"))
-        return None
+        plt.savefig(output_path)
+        return output_path
         
     # Fungsi untuk menghitung sebaran penyakit per petak
     def hitung_sebaran_petak(self, shp_path, penyakit):

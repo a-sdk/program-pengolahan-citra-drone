@@ -9,6 +9,7 @@ from gui.viewer import Viewer
 from gui.layer_panel import LayerPanel
 from gui.dialog_disease import DiseasePredictDialog
 from app.controller import AnalysisController
+from app.result_model import AnalysisResult
 import os
 import logging
 
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class AnalysisWorker(QThread):
     progress_signal = pyqtSignal(int, str)
-    finished_signal = pyqtSignal(str)
+    finished_signal = pyqtSignal(object)
     error_signal = pyqtSignal(str)
 
     def __init__(self, controller, tif, shp, out):
@@ -124,23 +125,24 @@ class MainWindow(QMainWindow):
             self.progress_bar.setValue(value)
             self.progress_bar.setVisible(value > 0 and value < 100)
 
-        self.statusBar().showMessage(msg, 1000*60*5) 
+        self.statusBar().showMessage(msg, 1000*60*10) 
         logger.info(f"Progress {value}% - {msg}")
 
 
-    def on_analysis_finished(self, result_path):
-        if not os.path.exists(result_path):
-            self.show_error_msg(f"File tidak ditemukan di: {result_path}")
+    def on_analysis_finished(self, result: AnalysisResult):
+        if not os.path.exists(result.statistic[0]):
+            self.show_error_msg(f"Hasil tidak ditemukan")
             return
-        file_name = os.path.basename(result_path)
-
-        try:
-            layer_id = self.viewer.add_raster(result_path)
-            self.layers.add_layer_to_root(self.root_result, file_name, layer_id)
-            self.statusBar().showMessage(f"Berhasil memuat: {file_name}", 5000)
-            logger.info(f"Hasil analisis berhasil dimuat: {result_path}")
-        except Exception as e:
-            self.show_error_msg(f"Gagal memuat hasil: {str(e)}")
+        
+        for stat in result.statistic:
+            file_name = os.path.basename(stat)
+            try:
+                layer_id = self.viewer.add_raster(stat)
+                self.layers.add_layer_to_root(self.root_result, file_name, layer_id)
+                self.statusBar().showMessage(f"Berhasil memuat: {file_name}", 5000)
+                logger.info(f"Hasil analisis berhasil dimuat: {stat}")
+            except Exception as e:
+                self.show_error_msg(f"Gagal memuat hasil: {str(e)}")
 
     def show_error_msg(self, error_msg):
         if hasattr(self, 'progress_bar'):
@@ -162,7 +164,7 @@ class MainWindow(QMainWindow):
             tif, shp, out = dialog.get_values()
             self.worker = AnalysisWorker(self.controller, tif, shp, out)
             self.worker.progress_signal.connect(self.update_progress_bar)
-            self.worker.finished_signal.connect(self.on_analysis_finished)
+            # self.worker.finished_signal.connect(self.on_analysis_finished)
             self.worker.error_signal.connect(self.show_error_msg)
             self.worker.start()
             self.progress_bar.setVisible(True)
