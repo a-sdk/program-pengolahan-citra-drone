@@ -35,7 +35,7 @@ class Viewer(QWidget):
         self.layout.addWidget(self.view)
         self.zoom = 0
 
-    def add_raster(self, path):
+    def add_raster(self, path, isPrediction=False):
         logger.info("Membuka raster")
         if path.lower().endswith((".png", ".jpg", ".jpeg")):
             pixmap = QPixmap(path)
@@ -45,44 +45,69 @@ class Viewer(QWidget):
             with rio.open(path) as src:
                 dtype = src.dtypes[0]
                 bands = src.read().astype(np.float32)
+                mask = src.read_masks(1)
+                alpha = mask.astype(np.uint8)
                 count = src.count
                 crs = src.crs
                 nodata = src.nodata
+                h, w = src.shape
                 t = src.transform
+                software_tag = src.tags().get('TIFFTAG_SOFTWARE', '')
                 pixel_width = abs(t.a)
                 img_max = bands.max()
                 img_min = bands.min()
+                ch = 4
                 qt_transform = QTransform(t.a, t.b, t.d, t.e, t.c, t.f)
 
-                # Normalisasi per band 
-                for i in range(count):
-                    b = bands[i]
-                    
-                    if img_max > 0:
-                        if img_max <= 5:
-                            bands[i] = np.clip(b / img_max, 0, 1)
-                        elif dtype == 'uint8':
-                            bands[i] = np.clip(b / 255.0, 0, 1)
-                        elif dtype == 'uint16':
-                            bands[i] = np.clip(b / 65535.0, 0, 1)
-                    else:
-                        bands[i] = np.clip(b, 0, 1)
+                if img_max <= 4 and dtype == 'uint8':
+                    isPrediction = True
 
-                # Penanganan Channel (RGB vs Grayscale)
-                if count >= 3:
-                    # Ambil 3 band pertama saja untuk visualisasi RGB
-                    img_data = bands[:3]
-                    img = (np.transpose(img_data, (1, 2, 0)) * 255).astype(np.uint8)
-                    format_qimg = QImage.Format_RGB888
-                    h, w, ch = img.shape
-                else:
-                    # Jika hanya 1 atau 2 band, tampilkan sebagai grayscale 
-                    img = (bands[0] * 255).astype(np.uint8)
-                    format_qimg = QImage.Format_Grayscale8
-                    h, w = img.shape
-                    ch = 1
+                if isPrediction:
+                    img = np.zeros((h, w, ch), dtype=np.uint8)
+                    img_data = bands[0]
+                    colors = {
+                        0: [0, 0, 0, 0],
+                        1: [0, 128, 0, 255],
+                        2: [144, 238, 144, 255],
+                        3: [255, 255, 116, 255],
+                        4: [215, 25, 28, 255]
+                    }
+                    for val, color in colors.items():
+                        img[img_data == val] = color
+                # Jika bukan hasil prediksi
+                else: 
+                    # Normalisasi per band 
+                    for i in range(count):
+                        b = bands[i]
+                        
+                        if img_max > 0:
+                            if img_max <= 5:
+                                bands[i] = np.clip(b / img_max, 0, 1)
+                            elif dtype == 'uint8':
+                                bands[i] = np.clip(b / 255.0, 0, 1)
+                            elif dtype == 'uint16':
+                                bands[i] = np.clip(b / 65535.0, 0, 1)
+                        else:
+                            bands[i] = np.clip(b, 0, 1)
+
+                    # Penanganan Channel (RGB vs Grayscale)
+                    if count >= 3:
+                        # Ambil 3 band pertama untuk visualisasi RGB
+                        img_data = bands[:3]
+                        rgb = (np.transpose(img_data, (1, 2, 0)) * 255).astype(np.uint8)
+                        img = np.dstack((rgb, alpha))
+
+                    else:
+                        # Jika hanya 1 atau 2 band, tampilkan sebagai grayscale 
+                        gray = (bands[0] * 255).astype(np.uint8)
+                        alpha = np.full_like(gray, 255, dtype=np.uint8)
+                        if mask is not None and np.any(mask):
+                            alpha = mask.astype(np.uint8)
+                        elif nodata is not None:
+                            alpha[bands[0]==nodata] = 0
+                        img = np.dstack((gray, gray, gray, alpha))
                 
-                qimg = QImage(img.tobytes(), w, h, ch * w, format_qimg).copy() 
+                qimg = QImage(img.tobytes(), w, h, ch * w, QImage.Format_RGBA8888).copy() 
                 pixmap = QPixmap.fromImage(qimg)
 
         # Assign layer ID
@@ -105,7 +130,6 @@ class Viewer(QWidget):
         self.layer_items[layer_id] = item
         item.setTransformationMode(Qt.FastTransformation)
         item.setAcceptHoverEvents(False)
-        
         self.fit_to_view()
         return layer_id
     

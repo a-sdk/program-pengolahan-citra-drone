@@ -31,13 +31,13 @@ class LayerPanel(QWidget):
         self.tree.setSelectionMode(QAbstractItemView.SingleSelection)
 
     # Menambah layer
-    def add_layer(self, path):
+    def add_layer(self, path, isPrediction=False):
         file_name = os.path.basename(path)
         file_ext = os.path.splitext(file_name)[1]
         if path.lower().endswith((".shp")):
             layer_id = self.viewer.add_shapefile(path)
         else:
-            layer_id = self.viewer.add_raster(path)
+            layer_id = self.viewer.add_raster(path, isPrediction)
         item = QTreeWidgetItem([file_name])
         item.setData(0, Qt.UserRole, layer_id)
         item.setCheckState(0, Qt.Checked)

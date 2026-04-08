@@ -44,7 +44,6 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, check
         
         print(f"Memisahkan padi dengan gulma...")
         with rio.open(output_path, "w", **profile) as dest:
-            
             # Proses citra dalam "potongan" (chunks/tiles) untuk menghemat RAM
             for ji, window in src.block_windows(1):
                 row = ji[0]

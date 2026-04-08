@@ -7,5 +7,4 @@ class AnalysisResult:
         self.mask_path = None
         self.extraction_path = None
         self.prediction_path = None
-        self.maps = []
-        self.statistic = []
+        self.statistic = None

@@ -756,14 +756,14 @@ class PlantDiseaseAnalyzer:
     """ 
     def __init__(self):
         self.status = "Idle"
-        self.last_result = []
+        self.last_result = None
 
     def run(self, input_folder, output_folder):
         self.status = "Processing"
         logger.info("Menghitung sebaran dan memunculkan hasil...") 
         try:
-            self.last_result.append(self.tampilkan_penyakit_rumpun(input_folder, output_folder))
-            self.last_result.append(self.hitung_sebaran_rumpun(input_folder))
+            # self.last_result.append(self.tampilkan_penyakit_rumpun(input_folder, output_folder))
+            self.last_result = self.hitung_sebaran_rumpun(input_folder)
             self.status = "Done"
             return self.last_result
         except Exception as e:

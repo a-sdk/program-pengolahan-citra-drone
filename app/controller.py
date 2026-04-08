@@ -83,25 +83,23 @@ class AnalysisController:
                 check_cancel=is_cancelled, 
                 on_progress=emit_progress
                 )   
-            if classified_path is None: return None 
+            if classified_path is None: 
+                emit_error(f"FileNotFoundError: No such file or directory: '{classified_path}'")
+                return None 
             if is_cancelled(): return None
             emit_progress(90, "Calculating stats...")
             for i, name in enumerate(classified_path):
                 if is_cancelled(): return None
                 stats = self.stats_calc.run(name, output_folder)
                 emit_progress(90+i, f"Calculating stats ({str(i)}/{str(len(classified_path))})...")
-            logger.info(f"Hasil tipe: {str(type(stats))}, berisi {str(len(stats))} elemen.")
-            logger.info(f"{stats}")
-            result.maps = stats[0::2]
-            result.statistic = stats[1::2]
-            logger.info(f"Maps: {result.maps}")
-            logger.info(f"Stats: {result.statistic}")
+            logger.info(f"Stats: {stats}")
             result.clip_path = clipped_path
             result.transform_path = transformed_path
             result.segmentation_path = segmented_path
             result.mask_path = masked_path
             result.extraction_path = extracted_path
             result.prediction_path = classified_path
+            result.statistic = stats
             if hooks and "on_finished" in hooks:
                 hooks["on_finished"](result)
             return result

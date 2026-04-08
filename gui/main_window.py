@@ -123,13 +123,13 @@ class MainWindow(QMainWindow):
 
     def on_analysis_finished(self, result: AnalysisResult):
         self.pd.close()
-        if not os.path.exists(result.maps[0]):
+        if not os.path.exists(result.prediction_path[0]):
             self.show_error_msg(f"Hasil tidak ditemukan")
             return
         
-        for file in result.maps:
+        for file in result.prediction_path:
             try:
-                self.layer_panel.add_layer(file)
+                self.layer_panel.add_layer(file, isPrediction=True)
             except Exception as e:
                 self.show_error_msg(f"Gagal memuat hasil: {str(e)}")
 
