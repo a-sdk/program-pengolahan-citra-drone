@@ -1,138 +1,155 @@
-2026-04-07 10:23:19,215 [INFO] main: Aplikasi dibuka!
-2026-04-07 10:23:19,457 [INFO] gui.main_window: Sinyal Action terhubung
-2026-04-07 10:23:23,206 [INFO] gui.main_window: Action: open_img ditekan
-2026-04-07 10:23:32,024 [INFO] gui.viewer: Membuka raster
-2026-04-07 10:23:32,732 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:23:32,732 [WARNING] gui.layer_panel: Item '' tidak punya ID di UserRole
-2026-04-07 10:23:32,732 [INFO] gui.layer_panel: Layer IDs di panel: []
-2026-04-07 10:23:32,732 [INFO] gui.viewer: Mengatur ulang z-order: []
-2026-04-07 10:23:32,732 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-07 10:23:32,733 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-07 10:23:32,733 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-07 10:23:32,733 [INFO] gui.layer_panel: Berhasil menambah 'hasil_potong.tif' dengan ID: 1
-2026-04-07 10:23:32,733 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:23:32,733 [INFO] gui.layer_panel: Layer IDs di panel: [1]
-2026-04-07 10:23:32,734 [INFO] gui.viewer: Mengatur ulang z-order: [1]
-2026-04-07 10:23:34,788 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-07 10:23:35,157 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-07 10:23:35,469 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-07 10:23:35,772 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-07 10:23:36,236 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-07 10:23:36,644 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
-2026-04-07 10:23:38,621 [INFO] gui.main_window: Action: open_img ditekan
-2026-04-07 10:23:41,582 [INFO] gui.viewer: Membuka raster
-2026-04-07 10:23:41,691 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:23:41,691 [WARNING] gui.layer_panel: Item '' tidak punya ID di UserRole
-2026-04-07 10:23:41,691 [INFO] gui.layer_panel: Layer IDs di panel: [1]
-2026-04-07 10:23:41,692 [INFO] gui.viewer: Mengatur ulang z-order: [1]
-2026-04-07 10:23:41,692 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
-2026-04-07 10:23:41,692 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
-2026-04-07 10:23:41,692 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
-2026-04-07 10:23:41,692 [INFO] gui.layer_panel: Berhasil menambah 'hasil_threshold_model.tif' dengan ID: 2
-2026-04-07 10:23:41,693 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:23:41,693 [INFO] gui.layer_panel: Layer IDs di panel: [2, 1]
-2026-04-07 10:23:41,693 [INFO] gui.viewer: Mengatur ulang z-order: [2, 1]
-2026-04-07 10:23:45,685 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:23:45,685 [INFO] gui.layer_panel: Layer IDs di panel: [1]
-2026-04-07 10:23:45,685 [INFO] gui.viewer: Mengatur ulang z-order: [1]
-2026-04-07 10:23:45,686 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:23:45,686 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2]
-2026-04-07 10:23:45,686 [INFO] gui.viewer: Mengatur ulang z-order: [1, 2]
-2026-04-07 10:23:47,100 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
-2026-04-07 10:23:47,476 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
-2026-04-07 10:23:47,796 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
-2026-04-07 10:23:49,470 [INFO] gui.main_window: Action: open_img ditekan
-2026-04-07 10:23:54,943 [INFO] gui.viewer: Membuka raster
-2026-04-07 10:23:55,615 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:23:55,615 [WARNING] gui.layer_panel: Item '' tidak punya ID di UserRole
-2026-04-07 10:23:55,615 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2]
-2026-04-07 10:23:55,616 [INFO] gui.viewer: Mengatur ulang z-order: [1, 2]
-2026-04-07 10:23:55,616 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
-2026-04-07 10:23:55,616 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
-2026-04-07 10:23:55,616 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
-2026-04-07 10:23:55,616 [INFO] gui.layer_panel: Berhasil menambah 'hasil_potong_masked.tif' dengan ID: 3
-2026-04-07 10:23:55,617 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:23:55,617 [INFO] gui.layer_panel: Layer IDs di panel: [3, 1, 2]
-2026-04-07 10:23:55,617 [INFO] gui.viewer: Mengatur ulang z-order: [3, 1, 2]
-2026-04-07 10:23:58,644 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:23:58,644 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2]
-2026-04-07 10:23:58,644 [INFO] gui.viewer: Mengatur ulang z-order: [1, 2]
-2026-04-07 10:23:58,645 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:23:58,645 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2, 3]
-2026-04-07 10:23:58,645 [INFO] gui.viewer: Mengatur ulang z-order: [1, 2, 3]
-2026-04-07 10:23:59,844 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
-2026-04-07 10:24:00,276 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
-2026-04-07 10:24:00,772 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
-2026-04-07 10:24:04,507 [INFO] gui.layer_panel: Membuka menu layer
-2026-04-07 10:24:08,268 [INFO] gui.layer_panel: Membuka menu layer
-2026-04-07 10:24:23,036 [INFO] gui.layer_panel: Membuka menu layer
-2026-04-07 10:24:25,492 [INFO] gui.layer_panel: Membuka menu layer
-2026-04-07 10:24:26,276 [INFO] gui.layer_panel: Menghapus layer
-2026-04-07 10:24:26,278 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:24:26,278 [INFO] gui.layer_panel: Layer IDs di panel: [2, 3]
-2026-04-07 10:24:26,278 [INFO] gui.viewer: Mengatur ulang z-order: [2, 3]
-2026-04-07 10:24:26,932 [INFO] gui.layer_panel: Membuka menu layer
-2026-04-07 10:24:27,525 [INFO] gui.layer_panel: Menghapus layer
-2026-04-07 10:24:27,528 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:24:27,528 [INFO] gui.layer_panel: Layer IDs di panel: [3]
-2026-04-07 10:24:27,528 [INFO] gui.viewer: Mengatur ulang z-order: [3]
-2026-04-07 10:24:28,092 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
-2026-04-07 10:24:28,803 [INFO] gui.layer_panel: Membuka menu layer
-2026-04-07 10:24:29,629 [INFO] gui.layer_panel: Menghapus layer
-2026-04-07 10:24:29,630 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:24:29,631 [INFO] gui.layer_panel: Layer IDs di panel: []
-2026-04-07 10:24:29,631 [INFO] gui.viewer: Mengatur ulang z-order: []
-2026-04-07 10:24:34,597 [INFO] gui.main_window: Action: open_img ditekan
-2026-04-07 10:24:48,109 [INFO] gui.viewer: Membuka raster
-2026-04-07 10:24:48,147 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:24:48,148 [WARNING] gui.layer_panel: Item '' tidak punya ID di UserRole
-2026-04-07 10:24:48,148 [INFO] gui.layer_panel: Layer IDs di panel: []
-2026-04-07 10:24:48,148 [INFO] gui.viewer: Mengatur ulang z-order: []
-2026-04-07 10:24:48,149 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:24:48,149 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:24:48,149 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:24:48,149 [INFO] gui.layer_panel: Berhasil menambah 'peta_sebaran_blas.png' dengan ID: 4
-2026-04-07 10:24:48,149 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:24:48,149 [INFO] gui.layer_panel: Layer IDs di panel: [4]
-2026-04-07 10:24:48,150 [INFO] gui.viewer: Mengatur ulang z-order: [4]
-2026-04-07 10:24:51,124 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:24:51,443 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:24:51,915 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:24:52,370 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:05,050 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:05,292 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:05,811 [INFO] gui.layer_panel: Membuka menu layer
-2026-04-07 10:25:08,628 [INFO] gui.main_window: Action: open_img ditekan
-2026-04-07 10:25:13,544 [INFO] gui.viewer: Membuka raster
-2026-04-07 10:25:13,576 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:25:13,576 [WARNING] gui.layer_panel: Item '' tidak punya ID di UserRole
-2026-04-07 10:25:13,576 [INFO] gui.layer_panel: Layer IDs di panel: [4]
-2026-04-07 10:25:13,577 [INFO] gui.viewer: Mengatur ulang z-order: [4]
-2026-04-07 10:25:13,577 [INFO] gui.layer_panel: Mengubah visibilitas layer 5
-2026-04-07 10:25:13,577 [INFO] gui.layer_panel: Mengubah visibilitas layer 5
-2026-04-07 10:25:13,577 [INFO] gui.layer_panel: Mengubah visibilitas layer 5
-2026-04-07 10:25:13,577 [INFO] gui.layer_panel: Berhasil menambah 'peta_sebaran_bercak cokelat.png' dengan ID: 5
-2026-04-07 10:25:13,578 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-07 10:25:13,578 [INFO] gui.layer_panel: Layer IDs di panel: [5, 4]
-2026-04-07 10:25:13,578 [INFO] gui.viewer: Mengatur ulang z-order: [5, 4]
-2026-04-07 10:25:16,370 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:16,867 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:18,643 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:19,435 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:19,979 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:20,587 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:22,499 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:23,171 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:23,579 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:24,515 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:24,891 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:26,219 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:26,898 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:27,395 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:28,155 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:28,611 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:29,115 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:30,738 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-07 10:25:31,115 [INFO] gui.layer_panel: Membuka menu layer
-2026-04-07 10:25:48,619 [INFO] gui.layer_panel: Membuka menu layer
-2026-04-07 10:25:57,156 [INFO] gui.main_window: Action: exit ditekan
+2026-04-08 11:01:57,441 [INFO] main: Aplikasi dibuka!
+2026-04-08 11:01:57,674 [INFO] gui.main_window: Sinyal Action terhubung
+2026-04-08 11:02:00,321 [INFO] gui.main_window: Action: open_img ditekan
+2026-04-08 11:02:06,285 [INFO] gui.viewer: Membuka raster
+2026-04-08 11:02:06,989 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:02:06,990 [INFO] gui.layer_panel: Layer IDs di panel: [1]
+2026-04-08 11:02:06,990 [INFO] gui.viewer: Mengatur ulang z-order: [1]
+2026-04-08 11:02:06,990 [INFO] gui.layer_panel: Berhasil menambah 'hasil_potong.tif' dengan ID: 1
+2026-04-08 11:02:14,384 [INFO] gui.main_window: Action: open_img ditekan
+2026-04-08 11:02:16,361 [INFO] gui.viewer: Membuka raster
+2026-04-08 11:02:17,035 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:02:17,036 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2]
+2026-04-08 11:02:17,036 [INFO] gui.viewer: Mengatur ulang z-order: [1, 2]
+2026-04-08 11:02:17,036 [INFO] gui.layer_panel: Berhasil menambah 'hasil_potong_masked.tif' dengan ID: 2
+2026-04-08 11:02:25,599 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-08 11:02:29,815 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-08 11:02:33,631 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-08 11:02:38,695 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:02:38,695 [INFO] gui.layer_panel: Layer IDs di panel: [2]
+2026-04-08 11:02:38,696 [INFO] gui.viewer: Mengatur ulang z-order: [2]
+2026-04-08 11:02:38,696 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:02:38,696 [INFO] gui.layer_panel: Layer IDs di panel: [2, 1]
+2026-04-08 11:02:38,697 [INFO] gui.viewer: Mengatur ulang z-order: [2, 1]
+2026-04-08 11:05:28,919 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:05:28,920 [INFO] gui.layer_panel: Layer IDs di panel: [2]
+2026-04-08 11:05:28,920 [INFO] gui.viewer: Mengatur ulang z-order: [2]
+2026-04-08 11:05:28,921 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:05:28,921 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2]
+2026-04-08 11:05:28,921 [INFO] gui.viewer: Mengatur ulang z-order: [1, 2]
+2026-04-08 11:05:39,918 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-08 11:05:52,134 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-08 11:05:57,680 [INFO] gui.main_window: Action: open_img ditekan
+2026-04-08 11:06:11,129 [INFO] gui.viewer: Membuka raster
+2026-04-08 11:06:11,232 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:06:11,233 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2, 3]
+2026-04-08 11:06:11,233 [INFO] gui.viewer: Mengatur ulang z-order: [1, 2, 3]
+2026-04-08 11:06:11,233 [INFO] gui.layer_panel: Berhasil menambah 'hasil_threshold_model.tif' dengan ID: 3
+2026-04-08 11:06:40,039 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:06:40,040 [INFO] gui.layer_panel: Layer IDs di panel: [1, 3]
+2026-04-08 11:06:40,040 [INFO] gui.viewer: Mengatur ulang z-order: [1, 3]
+2026-04-08 11:06:40,040 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:06:40,040 [INFO] gui.layer_panel: Layer IDs di panel: [1, 3, 2]
+2026-04-08 11:06:40,041 [INFO] gui.viewer: Mengatur ulang z-order: [1, 3, 2]
+2026-04-08 11:06:56,111 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-08 11:06:57,022 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-08 11:06:59,023 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-08 11:06:59,423 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-08 11:06:59,767 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-08 11:07:00,030 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-08 11:07:06,207 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
+2026-04-08 11:07:06,631 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
+2026-04-08 11:07:06,959 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
+2026-04-08 11:07:07,247 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
+2026-04-08 11:07:08,174 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-08 11:07:09,270 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
+2026-04-08 11:07:09,559 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
+2026-04-08 11:07:09,927 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
+2026-04-08 11:07:10,271 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
+2026-04-08 11:07:11,126 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
+2026-04-08 11:07:12,134 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-08 11:07:12,439 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-08 11:07:12,783 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-08 11:07:13,102 [INFO] gui.layer_panel: Mengubah visibilitas layer 1
+2026-04-08 11:07:15,798 [INFO] gui.layer_panel: Mengubah visibilitas layer 2
+2026-04-08 11:07:16,190 [INFO] gui.layer_panel: Mengubah visibilitas layer 3
+2026-04-08 11:07:18,703 [INFO] gui.main_window: Action: open_img ditekan
+2026-04-08 11:07:23,888 [INFO] gui.main_window: Action: open_shp ditekan
+2026-04-08 11:07:25,922 [INFO] gui.viewer: Membuka shapefile
+2026-04-08 11:07:26,184 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:07:26,185 [INFO] gui.layer_panel: Layer IDs di panel: [1, 3, 2, 4]
+2026-04-08 11:07:26,185 [INFO] gui.viewer: Mengatur ulang z-order: [1, 3, 2, 4]
+2026-04-08 11:07:26,186 [INFO] gui.layer_panel: Berhasil menambah 'Lahan 2_0_2000_komponen.shp' dengan ID: 4
+2026-04-08 11:07:37,535 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:07:37,536 [INFO] gui.layer_panel: Layer IDs di panel: [1, 3, 4]
+2026-04-08 11:07:37,536 [INFO] gui.viewer: Mengatur ulang z-order: [1, 3, 4]
+2026-04-08 11:07:37,536 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:07:37,536 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2, 3, 4]
+2026-04-08 11:07:37,536 [INFO] gui.viewer: Mengatur ulang z-order: [1, 2, 3, 4]
+2026-04-08 11:07:45,934 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-08 11:07:48,494 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-08 11:07:49,063 [INFO] gui.layer_panel: Menghapus layer
+2026-04-08 11:07:49,066 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:07:49,066 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2, 3]
+2026-04-08 11:07:49,066 [INFO] gui.viewer: Mengatur ulang z-order: [1, 2, 3]
+2026-04-08 11:07:49,455 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-08 11:07:49,912 [INFO] gui.layer_panel: Menghapus layer
+2026-04-08 11:07:49,914 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:07:49,914 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2]
+2026-04-08 11:07:49,915 [INFO] gui.viewer: Mengatur ulang z-order: [1, 2]
+2026-04-08 11:07:50,327 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-08 11:07:50,816 [INFO] gui.layer_panel: Menghapus layer
+2026-04-08 11:07:50,817 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:07:50,817 [INFO] gui.layer_panel: Layer IDs di panel: [1]
+2026-04-08 11:07:50,817 [INFO] gui.viewer: Mengatur ulang z-order: [1]
+2026-04-08 11:07:51,238 [INFO] gui.layer_panel: Membuka menu layer
+2026-04-08 11:07:51,711 [INFO] gui.layer_panel: Menghapus layer
+2026-04-08 11:07:51,713 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:07:51,713 [INFO] gui.layer_panel: Layer IDs di panel: []
+2026-04-08 11:07:51,713 [INFO] gui.viewer: Mengatur ulang z-order: []
+2026-04-08 11:07:54,864 [INFO] gui.main_window: action_disease_predict ditekan
+2026-04-08 11:07:56,351 [INFO] gui.dialog_disease: btn_browse_tif ditekan
+2026-04-08 11:08:00,575 [INFO] gui.dialog_disease: btn_browse_shp ditekan
+2026-04-08 11:08:16,814 [INFO] gui.dialog_disease: btn_browse_out ditekan
+2026-04-08 11:08:35,658 [INFO] gui.viewer: Membuka raster
+2026-04-08 11:08:36,332 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:08:36,332 [INFO] gui.layer_panel: Layer IDs di panel: [5]
+2026-04-08 11:08:36,332 [INFO] gui.viewer: Mengatur ulang z-order: [5]
+2026-04-08 11:08:36,332 [INFO] gui.layer_panel: Berhasil menambah 'hasil_potong.tif' dengan ID: 5
+2026-04-08 11:08:36,333 [INFO] gui.viewer: Membuka shapefile
+2026-04-08 11:08:36,352 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-08 11:08:36,353 [INFO] gui.layer_panel: Layer IDs di panel: [5, 6]
+2026-04-08 11:08:36,353 [INFO] gui.viewer: Mengatur ulang z-order: [5, 6]
+2026-04-08 11:08:36,353 [INFO] gui.layer_panel: Berhasil menambah 'Lahan 2_0.shp' dengan ID: 6
+2026-04-08 11:08:36,360 [INFO] core.modul_utilitas: Memulai pembuatan multipoligon...
+2026-04-08 11:08:36,368 [INFO] gui.main_window: Progress 10% - Generating intersection in polygon...
+2026-04-08 11:08:40,502 [INFO] gui.layer_panel: Mengubah visibilitas layer 6
+2026-04-08 11:08:40,998 [INFO] gui.layer_panel: Mengubah visibilitas layer 6
+2026-04-08 11:08:56,289 [INFO] core.modul_klip: Memulai clipping...
+2026-04-08 11:08:56,290 [INFO] gui.main_window: Progress 20% - Loading raster file...
+2026-04-08 11:08:56,969 [INFO] core.modul_transformasi: Memulai proses transformasi...
+2026-04-08 11:08:56,969 [INFO] gui.main_window: Progress 30% - Transforming with NDVI...
+2026-04-08 11:08:57,485 [INFO] core.modul_transformasi: Memulai proses segmentasi...
+2026-04-08 11:08:57,485 [INFO] gui.main_window: Progress 40% - Separating vegetation...
+2026-04-08 11:09:35,180 [INFO] core.modul_mask: Memulai proses masking...
+2026-04-08 11:09:35,180 [INFO] gui.main_window: Progress 50% - Masking raster...
+2026-04-08 11:09:35,653 [INFO] core.modul_ekstraksi: Memulai proses ekstraksi...
+2026-04-08 11:09:35,653 [INFO] gui.main_window: Progress 60% - Extracting pixel...
+2026-04-08 11:09:44,616 [INFO] core.modul_klasifikasi: Memprediksi penyakit...
+2026-04-08 11:09:44,617 [INFO] gui.main_window: Progress 70% - Detecting disease...
+2026-04-08 11:09:50,596 [INFO] core.modul_klasifikasi: Memuat scaler
+2026-04-08 11:09:50,837 [INFO] core.modul_klasifikasi: Model dimuat bertipe: <class 'keras.engine.functional.Functional'>
+2026-04-08 11:09:50,848 [WARNING] rasterio._env: CPLE_NotSupported in driver GTiff does not support open option BLOCKYSIZE
+2026-04-08 11:09:50,848 [WARNING] rasterio._env: CPLE_NotSupported in driver GTiff does not support open option INTERLEAVE
+2026-04-08 11:09:50,857 [WARNING] rasterio._env: CPLE_NotSupported in driver GTiff does not support open option BLOCKYSIZE
+2026-04-08 11:09:50,857 [WARNING] rasterio._env: CPLE_NotSupported in driver GTiff does not support open option INTERLEAVE
+2026-04-08 11:09:50,867 [WARNING] rasterio._env: CPLE_NotSupported in driver GTiff does not support open option BLOCKYSIZE
+2026-04-08 11:09:50,867 [WARNING] rasterio._env: CPLE_NotSupported in driver GTiff does not support open option INTERLEAVE
+2026-04-08 11:09:50,877 [WARNING] rasterio._env: CPLE_NotSupported in driver GTiff does not support open option BLOCKYSIZE
+2026-04-08 11:09:50,877 [WARNING] rasterio._env: CPLE_NotSupported in driver GTiff does not support open option INTERLEAVE
+2026-04-08 11:14:47,612 [INFO] core.modul_utilitas: Menghitung sebaran dan memunculkan hasil...
+2026-04-08 11:14:47,612 [INFO] gui.main_window: Progress 90% - Calculating stats...
+2026-04-08 11:14:49,225 [INFO] core.modul_utilitas: Menghitung sebaran dan memunculkan hasil...
+2026-04-08 11:14:49,226 [INFO] gui.main_window: Progress 90% - Calculating stats (0/4)...
+2026-04-08 11:14:51,880 [INFO] core.modul_utilitas: Menghitung sebaran dan memunculkan hasil...
+2026-04-08 11:14:51,880 [INFO] gui.main_window: Progress 91% - Calculating stats (1/4)...
+2026-04-08 11:14:55,682 [INFO] core.modul_utilitas: Menghitung sebaran dan memunculkan hasil...
+2026-04-08 11:14:55,682 [INFO] gui.main_window: Progress 92% - Calculating stats (2/4)...
+2026-04-08 11:15:00,807 [INFO] app.controller: Hasil tipe: <class 'list'>, berisi 8 elemen.
+2026-04-08 11:15:00,807 [INFO] gui.main_window: Progress 93% - Calculating stats (3/4)...
+2026-04-08 11:15:00,807 [INFO] app.controller: ['C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_blas.png', {1: 4.3, 2: 0.0, 3: 61.6, 4: 34.1, 'rekomendasi': 'Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!'}, 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_hdb.png', {1: 28.56, 2: 69.0, 3: 0.0, 4: 2.44, 'rekomendasi': 'Lakukan pemantauan rutin dan tindakan pencegahan.'}, 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_bercak cokelat.png', {1: 3.92, 2: 0.0, 3: 58.1, 4: 37.98, 'rekomendasi': 'Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!'}, 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_bercak sempit.png', {1: 3.67, 2: 6.48, 3: 89.86, 4: 0.0, 'rekomendasi': 'Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!'}]
+2026-04-08 11:15:00,808 [INFO] app.controller: Maps: ['C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_blas.png', 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_hdb.png', 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_bercak cokelat.png', 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_bercak sempit.png']
+2026-04-08 11:15:00,808 [INFO] app.controller: Stats: [{1: 4.3, 2: 0.0, 3: 61.6, 4: 34.1, 'rekomendasi': 'Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!'}, {1: 28.56, 2: 69.0, 3: 0.0, 4: 2.44, 'rekomendasi': 'Lakukan pemantauan rutin dan tindakan pencegahan.'}, {1: 3.92, 2: 0.0, 3: 58.1, 4: 37.98, 'rekomendasi': 'Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!'}, {1: 3.67, 2: 6.48, 3: 89.86, 4: 0.0, 'rekomendasi': 'Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!'}]
+2026-04-08 11:15:00,808 [INFO] app.controller: Semua proses selesai!
+2026-04-08 11:15:00,808 [INFO] gui.main_window: Progress 100% - Done
+2026-04-08 11:19:39,471 [INFO] gui.main_window: Action: exit ditekan

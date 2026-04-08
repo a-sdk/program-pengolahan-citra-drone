@@ -1,14 +1,16 @@
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, 
     QTreeWidget, QTreeWidgetItem,
     QTreeWidgetItemIterator, QAbstractItemView, QMenu
 )
+import os
 import logging
 
 logger = logging.getLogger(__name__)
 
 class LayerPanel(QWidget):
+    fileLoaded = pyqtSignal(str)
     def __init__(self, parent, viewer):
         super().__init__(parent)
         self.viewer = viewer
@@ -17,7 +19,6 @@ class LayerPanel(QWidget):
         self.layout.addWidget(self.tree)
 
         self._setup_tree()
-        self._create_roots()
         self._connect_signals()
 
     def _setup_tree(self):
@@ -29,22 +30,23 @@ class LayerPanel(QWidget):
         self.tree.setDefaultDropAction(Qt.MoveAction)
         self.tree.setSelectionMode(QAbstractItemView.SingleSelection)
 
-    def _create_roots(self):
-        self.root_input = QTreeWidgetItem(self.tree, ["Input Data"])
-        self.root_result = QTreeWidgetItem(self.tree, ["Hasil Analisis"])
-        self.root_input.setExpanded(True)
-        self.root_result.setExpanded(True)
-
     # Menambah layer
-    def add_layer(self, name, layer_id):
-        logger.info("Menambah layer")
-        item = QTreeWidgetItem([name])
+    def add_layer(self, path):
+        file_name = os.path.basename(path)
+        file_ext = os.path.splitext(file_name)[1]
+        if file_ext == '.shp':
+            layer_id = self.viewer.add_shapefile(path)
+        else:
+            layer_id = self.viewer.add_raster(path)
+        item = QTreeWidgetItem([file_name])
         item.setData(0, Qt.UserRole, layer_id)
         item.setCheckState(0, Qt.Checked)
-        self.tree.addTopLevelItem(item)    
+        self.tree.insertTopLevelItem(0, item)  
+        self.fileLoaded.emit(file_name)  
+        logger.info(f"Berhasil menambah '{file_name}' dengan ID: {layer_id}")
 
     # Toggle visibility (checkbox)
-    def on_item_changed(self, item, column):
+    def on_item_changed(self, item):
         layer_id = item.data(0, Qt.UserRole)
         logger.info(f"Mengubah visibilitas layer {layer_id}")
         visible = item.checkState(0) == Qt.Checked
@@ -55,22 +57,18 @@ class LayerPanel(QWidget):
         logger.info("Sinyal terdeteksi, perbarui z-order")
         ids = []
         iterator = QTreeWidgetItemIterator(self.tree)
-
         while iterator.value():
             item = iterator.value()
             lid = item.data(0, Qt.UserRole)
 
             if lid is not None:
                 ids.append(lid)
-            else:
-                if item not in [self.root_input, self.root_result]:
-                    logger.warning(f"Item '{item.text(0)}' tidak punya ID di UserRole")
             
             iterator += 1
-        
         ids.reverse()
         logger.info(f"Layer IDs di panel: {ids}")
         self.viewer.set_z_order(ids)
+
 
     # Context menu
     def _open_menu(self, pos):
@@ -123,26 +121,5 @@ class LayerPanel(QWidget):
         # Menu right-click
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self._open_menu)
-    
-    # API ke luar
-    def add_layer_to_root(self, root, name, layer_id):
-        item = QTreeWidgetItem(root)
-        item.setData(0, Qt.UserRole, layer_id)
-        item.setText(0, name)
-        item.setCheckState(0, Qt.Checked)
-        root.setExpanded(True)
- 
-        logger.info(f"Berhasil menambah '{name}' dengan ID: {layer_id}")
-        return item
 
-    def add_input_layer(self, name, layer_id):
-        item = self.add_layer_to_root(self.root_input, name, layer_id)
-        self.update_z_order()
-        return item
- 
-
-    def add_result_layer(self, name, layer_id):
-        item = self.add_layer_to_root(self.root_input, name, layer_id)
-        self.update_z_order()
-        return item
     

@@ -85,7 +85,7 @@ class Viewer(QWidget):
                 qimg = QImage(img.tobytes(), w, h, ch * w, format_qimg).copy() 
                 pixmap = QPixmap.fromImage(qimg)
 
-        # Assign layer
+        # Assign layer ID
         self._layer_id += 1
         layer_id = self._layer_id
         # Tambahkan ke Scene
@@ -102,7 +102,6 @@ class Viewer(QWidget):
                 "max_data": str(img_max),
                 "res": f"{pixel_width:.4f} m ({pixel_width*100:.1f} cm/px)"
             }
-        item.setZValue(layer_id)
         self.layer_items[layer_id] = item
         item.setTransformationMode(Qt.FastTransformation)
         item.setAcceptHoverEvents(False)
@@ -140,7 +139,7 @@ class Viewer(QWidget):
         super().mouseMoveEvent(event)
 
     def set_z_order(self, ordered_ids):
-        logger.info(f"Mengatur ulang z-order: {ordered_ids}")
+        logger.info(f"Mengatur z-order: {ordered_ids}")
         for z, lid in enumerate(ordered_ids):
             if lid in self.layer_items:
                 self.layer_items[lid].setZValue(z)
@@ -164,7 +163,6 @@ class Viewer(QWidget):
         self._layer_id += 1
         layer_id = self._layer_id
 
-        group.setZValue(layer_id + 100)
         self.layer_items[layer_id] = group
 
         self.vector_info[layer_id] = {
