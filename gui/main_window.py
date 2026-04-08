@@ -1,13 +1,15 @@
 from PyQt5 import uic
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QSize, QThread, pyqtSignal
+from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QLabel, QVBoxLayout, 
-    QFileDialog, QMessageBox, QProgressBar
+    QFileDialog, QMessageBox, QProgressBar,
+    QProgressDialog,
 )
 from gui.viewer import Viewer
 from gui.layer_panel import LayerPanel
 from gui.dialog_disease import DiseasePredictDialog
+from gui.worker import Worker
 from app.controller import AnalysisController
 from app.result_model import AnalysisResult
 import os
@@ -15,26 +17,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class AnalysisWorker(QThread):
-    progress_signal = pyqtSignal(int, str)
-    finished_signal = pyqtSignal(object)
-    error_signal = pyqtSignal(str)
 
-    def __init__(self, controller, tif, shp, out):
-        super().__init__()
-        self.isRunning
-        self.controller = controller
-        self.tif = tif
-        self.shp = shp
-        self.out = out
-
-    def run(self):
-        hooks = {
-            "on_progress": lambda val, msg: self.progress_signal.emit(val, msg),
-            "on_error": lambda err: self.error_signal.emit(err),
-            "on_finished": lambda path: self.finished_signal.emit(path)
-        }
-        self.controller.run(self.tif, self.shp, self.out, hooks)
         
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -90,6 +73,17 @@ class MainWindow(QMainWindow):
         self.coord_label = QLabel("X: -, Y: -")
         self.statusBar().addPermanentWidget(self.coord_label)
         
+    def _setup_progress_dialog(self):
+        self.pd = QProgressDialog("Processing...", "Cancel", 0, 100, self)
+        self.pd.setWindowTitle("Processing file")
+        self.pd.setWindowModality(Qt.WindowModal)
+        self.pd.setMinimumDuration(0)
+        self.pd.setValue(0)
+
+    def handle_progress_dialog(self, val, msg):
+        self.pd.setValue(val)
+        self.pd.setLabelText(msg)
+
     def update_coord_label(self, x, y):
         self.coord_label.setText(f"X: {x:.2f}, Y: {y:.2f}")
 
@@ -127,34 +121,31 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(msg, 1000*60*10) 
         logger.info(f"Progress {value}% - {msg}")
 
-
     def on_analysis_finished(self, result: AnalysisResult):
-        if not os.path.exists(result.statistic[0]):
+        self.pd.close()
+        if not os.path.exists(result.maps[0]):
             self.show_error_msg(f"Hasil tidak ditemukan")
             return
         
-        for stat in result.statistic:
-            file_name = os.path.basename(stat)
+        for file in result.maps:
             try:
-                layer_id = self.viewer.add_raster(stat)
-                self.layer_panel.add_layer_to_root(self.root_result, file_name, layer_id)
-                self.statusBar().showMessage(f"Berhasil memuat: {file_name}", 5000)
-                logger.info(f"Hasil analisis berhasil dimuat: {stat}")
+                self.layer_panel.add_layer(file)
             except Exception as e:
                 self.show_error_msg(f"Gagal memuat hasil: {str(e)}")
 
     def show_error_msg(self, error_msg):
+        self.pd.close()
         if hasattr(self, 'progress_bar'):
             self.progress_bar.setVisible(False) 
 
         msg = QMessageBox(self)
         msg.setIcon(QMessageBox.Critical)
         msg.setWindowTitle("ERROR")
-        msg.setText("Terjadi kesalahan")
+        msg.setText("An error occured")
         msg.setInformativeText(str(error_msg)) 
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
-        
+
     def run_disease_analysis(self):
         logger.info("action_disease_predict ditekan")
         dialog = DiseasePredictDialog(self)
@@ -165,11 +156,17 @@ class MainWindow(QMainWindow):
             self.layer_panel.add_layer(tif)
             # Menambah shp ke layer panel
             self.layer_panel.add_layer(shp)
-            # Mulai worker thread
-            self.worker = AnalysisWorker(self.controller, tif, shp, out)
+            # Inisiasi worker thread
+            self.worker = Worker(self.controller, tif, shp, out)
+            # Inisiasi progress dialog
+            self._setup_progress_dialog()
+            # Menghubungkan sinyal worker ke progress dialog
+            self.worker.progress_signal.connect(self.handle_progress_dialog)
             self.worker.progress_signal.connect(self.update_progress_bar)
-            # self.worker.finished_signal.connect(self.on_analysis_finished)
+            self.worker.finished_signal.connect(self.on_analysis_finished)
             self.worker.error_signal.connect(self.show_error_msg)
+            # Menghubungkan tombol 'cancel'
+            self.pd.canceled.connect(self.worker.requestInterruption)
             self.worker.start()
             self.progress_bar.setVisible(True)
             self.progress_bar.setValue(0)

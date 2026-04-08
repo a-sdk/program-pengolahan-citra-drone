@@ -152,11 +152,11 @@ class Segmenter:
         self.status = "Idle"
         self.last_result = None
 
-    def run(self, input_folder, ndvi_path, output_folder):
+    def run(self, input_folder, ndvi_path, output_folder, check_cancel=None, on_progress=None):
         self.status = "Processing"
         logger.info("Memulai proses segmentasi...") 
         try:
-            self.last_result = self.proses_segmentasi(input_folder, ndvi_path, output_folder) 
+            self.last_result = self.proses_segmentasi(input_folder, ndvi_path, output_folder, check_cancel, on_progress) 
             self.status = "Done"
             return self.last_result
         except Exception as e:
@@ -165,7 +165,7 @@ class Segmenter:
             return None
         
     # Fungsi untuk melakukan proses segmentasi
-    def proses_segmentasi(self, input_folder, ndvi_path, output_folder, nilai_nodata=0):
+    def proses_segmentasi(self, input_folder, ndvi_path, output_folder, check_cancel, on_progress, nilai_nodata=0):
         """
         Melakukan proses segmentasi untuk memisahkan tanaman padi.
 
@@ -181,7 +181,7 @@ class Segmenter:
 
         # Membuat peta segmentasi gulma dan padi
         model_gulma = r"core\models\model_deteksi_gulma_v1.joblib"
-        peta_segmentasi_gulma = pisahkan_gulma(model_gulma, input_folder, output_folder, "segmentasi_gulma.tif")
+        peta_segmentasi_gulma = pisahkan_gulma(model_gulma, input_folder, output_folder, "segmentasi_gulma.tif", check_cancel, on_progress)
         print("Memuat file hasil transformasi...")
         with (
             rio.open(ndvi_path) as src_ndvi,

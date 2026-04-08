@@ -97,11 +97,11 @@ class Splitter:
         self.n_poly = 1
         self.n_subpoly = 2000
 
-    def run(self, shp_path, output_folder):
+    def run(self, shp_path, output_folder, on_progress=None):
         self.status = "Processing"
         logger.info("Memulai pembuatan multipoligon...") 
         try:
-            self.last_result = self.buat_multipoligon(shp_path, output_folder) 
+            self.last_result = self.buat_multipoligon(shp_path, output_folder, on_progress) 
             self.status = "Done"
             return self.last_result
         except Exception as e:
@@ -110,7 +110,7 @@ class Splitter:
             return None
         
     # Fungsi untuk membuat multipoligon (shahiban)
-    def buat_multipoligon(self, shp_path, output_folder):
+    def buat_multipoligon(self, shp_path, output_folder, on_progress):
         """
         Membuat multipoligon dari shapefile poligon.
 
@@ -134,6 +134,8 @@ class Splitter:
         # ========================================
         # Tahap 1: Membaca & Konversi CRS
         # ========================================
+        if on_progress:
+            on_progress(11, f"Loading polygon crs...")
         polygons = gpd.read_file(shp_path)
         crs_asal = polygons.crs.to_string()
         if polygons.crs is None:
@@ -151,6 +153,8 @@ class Splitter:
         # ========================================
         # Tahap 2: Generate Random Points
         # ========================================
+        if on_progress:
+            on_progress(12, f"Generating random points...")
         point_count = jml_cluster * 5
         areas = polygons.area
         total_area = areas.sum()
@@ -174,6 +178,8 @@ class Splitter:
         # ========================================
         # Tahap 3: K-Means Clustering
         # ========================================
+        if on_progress:
+            on_progress(13, f"Clustering points...")
         coords = [(p.x, p.y) for p in gdf_points.geometry]
         kmeans = KMeans(n_clusters=jml_cluster, random_state=42, n_init=20)
         gdf_points["CLUSTER_ID"] = kmeans.fit_predict(coords)
@@ -182,12 +188,16 @@ class Splitter:
         # ========================================
         # Tahap 4: Aggregate per Cluster
         # ========================================
+        if on_progress:
+            on_progress(14, f"Generating aggregates...")
         agg = gdf_points.dissolve(by="CLUSTER_ID", aggfunc="first").reset_index()
         print("Aggregate selesai")
 
         # ========================================
         # Tahap 5: Hitung Centroid
         # ========================================
+        if on_progress:
+            on_progress(15, f"Calculating centroids...")
         agg["geometry"] = agg.geometry.centroid
         centroids = agg.copy()
         print(f"{len(centroids)} centroid dihasilkan")
@@ -195,6 +205,8 @@ class Splitter:
         # ========================================
         # Tahap 6: Voronoi Polygon
         # ========================================
+        if on_progress:
+            on_progress(16, f"Generating voronoi polygons...")
         points = MultiPoint(list(centroids.geometry))
         buffer_union = centroids.buffer(100).unary_union
         boundary = buffer_union.convex_hull
@@ -212,6 +224,8 @@ class Splitter:
         # ========================================
         # Tahap 7: Intersection
         # ========================================
+        if on_progress:
+            on_progress(19, f"Performing intersection...")
         if polygons.crs != gdf_voronoi.crs:
             gdf_voronoi = gdf_voronoi.to_crs(polygons.crs)
             print("CRS berbeda, disamakan dulu.")

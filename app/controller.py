@@ -33,28 +33,61 @@ class AnalysisController:
             
         def emit_error(err_msg):
             if hooks and "on_error" in hooks: hooks["on_error"](err_msg)
-
+        
+        def is_cancelled():
+            if hooks and "check_interruption" in hooks:
+                if hooks["check_interruption"]():
+                    logger.info("Berhenti, dibatalkan oleh pengguna")
+                    emit_error("User aborted.")
+                    return True
+            return False
+        
         try:
             result.original_path = raw_tif_path
-            emit_progress(10, "Generating intersection in polygon...")
-            multipolygon_path = self.splitter.run(shp_path, output_folder)
+            if is_cancelled(): return None
+            emit_progress(10, "Generating multi polygon...")
+            multipolygon_path = self.splitter.run(
+                shp_path, 
+                output_folder, 
+                on_progress=emit_progress
+                )
+            if is_cancelled(): return None
             emit_progress(20, "Loading raster file...")
             if shp_path:
                 clipped_path = self.clipper.run(raw_tif_path, shp_path, output_folder)
             else:
                 clipped_path = raw_tif_path
+            if is_cancelled(): return None
             emit_progress(30, "Transforming with NDVI...")
             transformed_path = self.transformer.run(clipped_path, output_folder)
+            if is_cancelled(): return None
             emit_progress(40, "Separating vegetation...")
-            segmented_path = self.segmenter.run(clipped_path, transformed_path, output_folder)
+            segmented_path = self.segmenter.run(
+                clipped_path, 
+                transformed_path, 
+                output_folder, 
+                check_cancel=is_cancelled,
+                on_progress=emit_progress
+                )
+            if is_cancelled(): return None
             emit_progress(50, "Masking raster...")
             masked_path = self.masker.run(clipped_path, segmented_path, output_folder)
+            if is_cancelled(): return None
             emit_progress(60, "Extracting pixel...")
             extracted_path = self.extractor.run(multipolygon_path, masked_path, output_folder)
+            if is_cancelled(): return None
             emit_progress(70, "Detecting disease...")
-            classified_path = self.classifier.run(masked_path, output_folder) 
+            classified_path = self.classifier.run(
+                masked_path, 
+                output_folder, 
+                check_cancel=is_cancelled, 
+                on_progress=emit_progress
+                )   
+            if classified_path is None: return None 
+            if is_cancelled(): return None
             emit_progress(90, "Calculating stats...")
             for i, name in enumerate(classified_path):
+                if is_cancelled(): return None
                 stats = self.stats_calc.run(name, output_folder)
                 emit_progress(90+i, f"Calculating stats ({str(i)}/{str(len(classified_path))})...")
             logger.info(f"Hasil tipe: {str(type(stats))}, berisi {str(len(stats))} elemen.")
@@ -71,7 +104,6 @@ class AnalysisController:
             result.prediction_path = classified_path
             if hooks and "on_finished" in hooks:
                 hooks["on_finished"](result)
-
             return result
         
         except FileNotFoundError as e:

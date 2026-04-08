@@ -1,7 +1,6 @@
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QDialog, QFileDialog
 from PyQt5 import uic
-import os
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,7 +18,7 @@ class DiseasePredictDialog(QDialog):
 
     def _handle_browse_tif(self):
         logger.info("btn_browse_tif ditekan")
-        path, _ = QFileDialog.getOpenFileName(self, "Pilih Citra", "", "Raster (*.tif *.tiff)")
+        path, _ = QFileDialog.getOpenFileName(self, "Pilih Citra", "", "GeoTiff (*.tif *.tiff)")
         if path: self.lineEdit_tif.setText(path)
 
 

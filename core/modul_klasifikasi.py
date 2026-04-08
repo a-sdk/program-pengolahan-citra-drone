@@ -7,7 +7,7 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-def pisahkan_gulma(model_path, stack_path, output_folder, output_filename):
+def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, check_cancel, on_progress):
     """
     Menerapkan model terlatih ke seluruh tumpukan fitur untuk memisahkan padi dan gulma.
 
@@ -32,6 +32,7 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename):
 
     print(f"Membuka tumpukan fitur...")
     with rio.open(stack_path) as src:
+        total_rows = src.height
         # Dapatkan metadata untuk file output
         profile = src.profile
         nodata = src.nodata
@@ -46,7 +47,16 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename):
             
             # Proses citra dalam "potongan" (chunks/tiles) untuk menghemat RAM
             for ji, window in src.block_windows(1):
+                row = ji[0]
+                # Memeriksa interupsi
+                if check_cancel and check_cancel():
+                    logger.warning("Segmenter dihentikan")
+                    return None
                 
+                # Perbarui progres internal 
+                if on_progress and row % 10 == 0:
+                    relative_prog = 40 + int((row/total_rows) * 10)
+                    on_progress(relative_prog, f"Separating vegetation ({row}/{total_rows})...")
                 # Baca data untuk potongan ini
                 stack_chunk = src.read(window=window)
                 
@@ -100,12 +110,12 @@ class PlantDiseaseClassifier:
         self.model = tf.keras.models.load_model(model_path, compile=False)
         logger.info(f"Model dimuat bertipe: {type(self.model)}")
 
-    def run(self, input_folder, output_folder, hooks=None):
+    def run(self, input_folder, output_folder, check_cancel=None, on_progress=None):
         self.status = "Processing"
         logger.info("Memprediksi penyakit...") 
         print("DEBUG: Prediksi penyakit")
         try:
-            self.last_result = self.deteksi_penyakit_rumpun(input_folder, output_folder, hooks=None) 
+            self.last_result = self.deteksi_penyakit_rumpun(input_folder, output_folder, check_cancel, on_progress) 
             self.status = "Done"
             return self.last_result
         except Exception as e:
@@ -113,7 +123,7 @@ class PlantDiseaseClassifier:
             logger.error(f"ERROR: {e}")
             return None 
           
-    def deteksi_penyakit_rumpun(self, input_folder, output_folder, hooks=None):
+    def deteksi_penyakit_rumpun(self, input_folder, output_folder, check_cancel, on_progress):
         """
         Menerapkan model multi-output ke raster dan menghasilkan 4 peta sebaran terpisah.
 
@@ -125,13 +135,13 @@ class PlantDiseaseClassifier:
             str: Output path.
         """
         self._load_model()
-        def emit_progress(val, msg):
-            if hooks and "on_progress" in hooks: hooks["on_progress"](val, msg)
+        
         output_names = ["blas", "hdb", "bercak cokelat", "bercak sempit"] 
         path_hasil = []
         print(f"Memprediksi citra...")
         with rio.open(input_folder) as src:
             base_profile = src.profile
+            total_rows = src.height
             base_profile.update(
                 dtype=rio.uint8, 
                 count=1,          
@@ -141,8 +151,6 @@ class PlantDiseaseClassifier:
             output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Rumpun"
             os.makedirs(output_folder, exist_ok=True)
             for i, name in enumerate(output_names):
-                val = (i + 1) * 5 + 70
-                emit_progress(val, f"Detecting disease ({str(i+1)}/{str(len(output_names))})...")
                 output_path = os.path.join(output_folder, f"peta_sebaran_penyakit_{name}.tif")
                 path_hasil.append(output_path)
 
@@ -152,6 +160,17 @@ class PlantDiseaseClassifier:
 
             # Memproses lewat potongan (chunk)
             for ji, window in src.block_windows(1):
+                row = ji[0]
+                # Memeriksa interupsi
+                if check_cancel and check_cancel():
+                    logger.warning("Classifier dihentikan")
+                    return None
+                
+                # Perbarui progres internal 
+                if on_progress and row % 10 == 0:
+                    relative_prog = 70 + int((row/total_rows) * 20)
+                    on_progress(relative_prog, f"Generating prediction ({row}/{total_rows})...")
+                
                 print(f"Memproses potongan di {window}...")
                 
                 # Baca per potongan

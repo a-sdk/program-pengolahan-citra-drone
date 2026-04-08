@@ -34,7 +34,7 @@ class LayerPanel(QWidget):
     def add_layer(self, path):
         file_name = os.path.basename(path)
         file_ext = os.path.splitext(file_name)[1]
-        if file_ext == '.shp':
+        if path.lower().endswith((".shp")):
             layer_id = self.viewer.add_shapefile(path)
         else:
             layer_id = self.viewer.add_raster(path)
