@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, 
+    QWidget, QVBoxLayout, QFrame,
     QTreeWidget, QTreeWidgetItem,
     QTreeWidgetItemIterator, QAbstractItemView, QMenu
 )
@@ -17,11 +17,13 @@ class LayerPanel(QWidget):
         self.layout = QVBoxLayout(self)
         self.tree = QTreeWidget()
         self.layout.addWidget(self.tree)
-
         self._setup_tree()
         self._connect_signals()
 
     def _setup_tree(self):
+        self.tree.setFrameShape(QFrame.NoFrame)
+        self.tree.setLineWidth(0)
+        self.tree.setStyleSheet("border: none;")
         self.tree.setAcceptDrops(True)
         self.tree.setHeaderHidden(True)
         self.tree.setDragEnabled(True)

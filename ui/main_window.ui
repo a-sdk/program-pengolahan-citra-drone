@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1006</width>
-    <height>759</height>
+    <width>1033</width>
+    <height>777</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="styleSheet">
     <string notr="true"/>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <property name="leftMargin">
      <number>0</number>
     </property>
@@ -31,111 +31,46 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QSplitter" name="splitter_2">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
+     <widget class="QFrame" name="frame_2">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
       </property>
-      <widget class="QFrame" name="frame_2">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>706</height>
+       </size>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <property name="leftMargin">
+        <number>0</number>
        </property>
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
+       <property name="topMargin">
+        <number>0</number>
        </property>
-       <property name="frameShadow">
-        <enum>QFrame::Plain</enum>
+       <property name="rightMargin">
+        <number>0</number>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="QSplitter" name="splitter">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <widget class="QTreeWidget" name="layerPanel">
-           <property name="acceptDrops">
-            <bool>true</bool>
-           </property>
-           <property name="frameShape">
-            <enum>QFrame::NoFrame</enum>
-           </property>
-           <property name="frameShadow">
-            <enum>QFrame::Plain</enum>
-           </property>
-           <property name="dragEnabled">
-            <bool>true</bool>
-           </property>
-           <property name="dragDropMode">
-            <enum>QAbstractItemView::InternalMove</enum>
-           </property>
-           <property name="columnCount">
-            <number>0</number>
-           </property>
-          </widget>
-          <widget class="QGraphicsView" name="viewerPanel">
-           <property name="frameShape">
-            <enum>QFrame::NoFrame</enum>
-           </property>
-          </widget>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QFrame" name="frame_3">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>500</height>
-        </size>
+       <property name="bottomMargin">
+        <number>0</number>
        </property>
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
-        <item>
-         <widget class="QTableWidget" name="infoPanel">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::NoFrame</enum>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
+       <item>
+        <widget class="QGraphicsView" name="viewerPanel">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>
@@ -145,7 +80,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1006</width>
+     <width>1033</width>
      <height>21</height>
     </rect>
    </property>
@@ -161,7 +96,8 @@
      <addaction name="action_open_shp"/>
     </widget>
     <addaction name="menuOpen"/>
-    <addaction name="actionExit"/>
+    <addaction name="separator"/>
+    <addaction name="action_exit"/>
    </widget>
    <widget class="QMenu" name="menuProcessing">
     <property name="title">
@@ -177,16 +113,95 @@
     </widget>
     <addaction name="menuModel"/>
    </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <widget class="QMenu" name="menuPanels">
+     <property name="title">
+      <string>Panels</string>
+     </property>
+     <addaction name="action_layer_panel"/>
+    </widget>
+    <addaction name="action_pan"/>
+    <addaction name="action_zoom_in"/>
+    <addaction name="action_zoom_out"/>
+    <addaction name="action_fit_to_view"/>
+    <addaction name="separator"/>
+    <addaction name="menuPanels"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuView"/>
    <addaction name="menuProcessing"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QDockWidget" name="dockLayers">
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_0">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="leftMargin">
+      <number>0</number>
+     </property>
+     <property name="topMargin">
+      <number>0</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QTreeWidget" name="layerPanel">
+       <property name="acceptDrops">
+        <bool>true</bool>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="dragEnabled">
+        <bool>true</bool>
+       </property>
+       <property name="dragDropMode">
+        <enum>QAbstractItemView::InternalMove</enum>
+       </property>
+       <property name="columnCount">
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="action_open_img"/>
+   <addaction name="action_open_shp"/>
+   <addaction name="separator"/>
+   <addaction name="action_pan"/>
+   <addaction name="action_zoom_in"/>
+   <addaction name="action_zoom_out"/>
+   <addaction name="action_fit_to_view"/>
+  </widget>
   <action name="actionClose">
    <property name="text">
     <string>Close</string>
    </property>
   </action>
-  <action name="actionExit">
+  <action name="action_exit">
    <property name="text">
     <string>Exit</string>
    </property>
@@ -214,6 +229,37 @@
   <action name="action_nutrient_predict">
    <property name="text">
     <string>Nutrient Available</string>
+   </property>
+  </action>
+  <action name="action_pan">
+   <property name="text">
+    <string>Pan</string>
+   </property>
+  </action>
+  <action name="action_zoom_in">
+   <property name="text">
+    <string>Zoom In</string>
+   </property>
+  </action>
+  <action name="action_zoom_out">
+   <property name="text">
+    <string>Zoom Out</string>
+   </property>
+  </action>
+  <action name="action_fit_to_view">
+   <property name="text">
+    <string>Fit to View</string>
+   </property>
+  </action>
+  <action name="action_layer_panel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Layers</string>
    </property>
   </action>
  </widget>

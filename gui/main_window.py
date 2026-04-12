@@ -4,7 +4,7 @@ from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QLabel, QVBoxLayout, 
     QFileDialog, QMessageBox, QProgressBar,
-    QProgressDialog,
+    QProgressDialog, QDockWidget
 )
 from gui.viewer import Viewer
 from gui.layer_panel import LayerPanel
@@ -26,6 +26,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Multispectral Image Processing Program")
         self.setWindowIcon(QIcon("assets/icon/edit-image.png"))
+        
         self.viewer = Viewer()
         viewer_layout = QVBoxLayout(self.viewerPanel)
         viewer_layout.setContentsMargins(0, 0, 0, 0)
@@ -49,6 +50,12 @@ class MainWindow(QMainWindow):
         self.viewer.mouseMoved.connect(self.update_coord_label)
         self.viewer.fit_to_view()
 
+        self.dockLayers.setWindowTitle("Layers")
+        self.action_layer_panel.setCheckable(True)
+        self.action_layer_panel.toggled.connect(self.dockLayers.setVisible)
+        self.dockLayers.visibilityChanged.connect(self.action_layer_panel.setChecked)
+        
+
     def _setup_icons(self):
         icon_tif = QIcon("assets/icon/add_img.png")
         icon_shp = QIcon("assets/icon/poly.png")
@@ -58,21 +65,30 @@ class MainWindow(QMainWindow):
         icon_disease = QIcon("assets/icon/virus.png")
         icon_mineral = QIcon("assets/icon/nutrients.png")
         icon_water = QIcon("assets/icon/drop.png")
+        icon_hand = QIcon("assets/icon/hand.png")
+        icon_zoom_in = QIcon("assets/icon/zoom-in.png")
+        icon_zoom_out = QIcon("assets/icon/zoom-out.png")
+        icon_fit_to_view = QIcon("assets/icon/width.png")
         self.menuOpen.setIcon(icon_open)
         self.action_open_img.setIcon(icon_tif)
         self.action_open_shp.setIcon(icon_shp)
-        self.actionExit.setIcon(icon_exit)
+        self.action_exit.setIcon(icon_exit)
+        self.action_pan.setIcon(icon_hand)
+        self.action_zoom_in.setIcon(icon_zoom_in)
+        self.action_zoom_out.setIcon(icon_zoom_out)
+        self.action_fit_to_view.setIcon(icon_fit_to_view)
         self.menuModel.setIcon(icon_model)
         self.action_nutrient_predict.setIcon(icon_mineral)
         self.action_water_predict.setIcon(icon_water)
         self.action_disease_predict.setIcon(icon_disease)
+        
 
         self.layer_panel.tree.setIconSize(QSize(24, 24))
 
     def _setup_statusbar(self):
         self.coord_label = QLabel("X: -, Y: -")
         self.statusBar().addPermanentWidget(self.coord_label)
-        
+
     def _setup_progress_dialog(self):
         self.pd = QProgressDialog("Processing...", "Cancel", 0, 100, self)
         self.pd.setWindowTitle("Processing file")
@@ -95,7 +111,11 @@ class MainWindow(QMainWindow):
         self.layer_panel.fileLoaded.connect(self.update_status_bar)
         self.action_open_shp.triggered.connect(self.open_shp_file)
         self.action_open_img.triggered.connect(self.open_img_file)
-        self.actionExit.triggered.connect(self.handle_exit)
+        self.action_exit.triggered.connect(self.handle_exit)
+        self.action_pan.toggled.connect(self.viewer.set_pan_mode)
+        self.action_zoom_in.triggered.connect(self.viewer.zoom_in)
+        self.action_zoom_out.triggered.connect(self.viewer.zoom_out)
+        self.action_fit_to_view.triggered.connect(self.viewer.fit_to_view)
         self.action_disease_predict.triggered.connect(self.run_disease_analysis)
 
     def open_img_file(self):

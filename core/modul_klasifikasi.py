@@ -279,24 +279,3 @@ class PlotDiseaseClassifier:
         
         return output_shp, disease_names
 
-
-if __name__ == "__main__":
-    from modul_utilitas import PlotDiseaseAnalyzer, PlantDiseaseAnalyzer
-
-    file_model = r"core/models/model_deteksi_penyakit_v1.keras"
-    file_scaler = r"core/scaler/MinMaxScaler_v1.joblib"
-    input_folder = r"C:\Users\acer_\Documents\Orthomosaic\tes program skripsi\hasil_msk2\hasil_ekstrak.csv"
-    path_tif = r"C:\Users\acer_\Documents\Orthomosaic\tes program skripsi\hasil_msk2\hasil_potong_masked.tif"
-    shp = r"C:\Users\acer_\Documents\Orthomosaic\tes program skripsi\tes main\Lahan 2_0_1500_komponen.shp"
-    output_folder = r"C:\Users\acer_\Documents\Orthomosaic\tes program skripsi\hasil_det2" 
-    # rumpun = PlantDiseaseClassifier() 
-    # analisis_rumpun = PlantDiseaseAnalyzer()  
-    # hasil_prediksi = rumpun.run(file_model, file_scaler, path_tif, output_folder)
-    # for hasil in hasil_prediksi:
-    #     hasil_analisis = analisis_rumpun.run(hasil, output_folder)
-    plot = PlotDiseaseClassifier()
-    analisis_plot = PlotDiseaseAnalyzer()
-    hasil_prediksi, penyakits = plot.run(file_model, file_scaler, input_folder, shp, output_folder)
-    for penyakit in penyakits:
-        hasil_analisis = analisis_plot.run(hasil_prediksi, penyakit, output_folder)
-

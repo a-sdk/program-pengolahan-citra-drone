@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, 
-    QGraphicsItemGroup, QGraphicsPixmapItem
+    QGraphicsItemGroup, QGraphicsPixmapItem, QFrame
 )
 from PyQt5.QtGui import (
     QPixmap, QImage, QPainter, 
@@ -32,8 +32,11 @@ class Viewer(QWidget):
         self.view.setScene(self.scene)
         self.view.setRenderHint(QPainter.Antialiasing)
         self.view.setDragMode(QGraphicsView.ScrollHandDrag)
+        self.view.setFrameShape(QFrame.NoFrame)
+        self.view.setLineWidth(0)
+        self.view.setStyleSheet("border: none;")
         self.layout.addWidget(self.view)
-        self.zoom = 0
+        self._zoom = 0
 
     def add_raster(self, path, isPrediction=False):
         logger.info("Membuka raster")
@@ -144,6 +147,18 @@ class Viewer(QWidget):
         rect = self.scene.itemsBoundingRect()
         self.view.fitInView(rect, Qt.KeepAspectRatio)
         self._zoom = 0
+
+    def set_pan_mode(self, enabled: bool):
+        if enabled:
+            self.setDragMode(self.view.ScrollHandDrag)
+        else:
+            self.setDragMode(self.view.NoDrag)
+
+    def zoom_in(self):
+        self.view.scale(1.25, 1.25)
+
+    def zoom_out(self):
+        self.view.scale(0.8, 0.8)
 
     def wheelEvent(self, event):
         if event.angleDelta().y() > 0:

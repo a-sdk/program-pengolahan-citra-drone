@@ -9,6 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import rasterio as rio
 import geopandas as gpd
+import fiona
 from shapely.geometry import Point, MultiPoint, Polygon
 from pyproj import database
 from pyproj.aoi import AreaOfInterest
@@ -94,8 +95,8 @@ class Splitter:
     def __init__(self):
         self.status = "Idle"
         self.last_result = None
-        self.n_poly = 1
-        self.n_subpoly = 2000
+        self.n_poly = None
+        self.n_subpoly = None
 
     def run(self, shp_path, output_folder, on_progress=None):
         self.status = "Processing"
@@ -125,7 +126,7 @@ class Splitter:
         """
 
         print("\nMembuat multipoligon...")
-        jml_cluster = self.n_poly * self.n_subpoly
+        
         output_folder = f"{output_folder}/multipoligon"
         os.makedirs(output_folder, exist_ok=True)
         filename = os.path.splitext(os.path.basename(shp_path))[0]
@@ -150,6 +151,16 @@ class Splitter:
         else:
             print(f"CRS sudah proyeksi: ({str(polygons.crs).upper()})")
 
+        # Menentukan jumlah komponen poligon berdasarkan luas 
+        with fiona.open(shp_path) as shp:
+            self.n_poly = len(shp)
+        poly_area = polygons.geometry.area.sum()
+        subpoly_area = 0.25 #m2
+        self.n_subpoly = (poly_area/subpoly_area).astype(int)
+        jml_cluster = self.n_poly * self.n_subpoly
+        print(f"Terdapat {self.n_poly} poligon, total luasan: {poly_area}")
+        print(f"Jumlah komponen: {self.n_subpoly}")
+        
         # ========================================
         # Tahap 2: Generate Random Points
         # ========================================
@@ -844,6 +855,7 @@ class PlantDiseaseAnalyzer:
         persen = {i: round((counts.get(i, 0) / jml_data_valid) * 100, 2) for i in range(1, 5)}
         # Mencetak hasil
         labels = ["sehat", "ringan", "sedang", "parah"]
+        print(f"Total piksel pada citra: {jml_data_valid}")
         for i, label in enumerate(labels, 1):
             print(f"Persentase tanaman {label}: {persen[i]}%")
         #Mengambil nilai persentase untuk logika
