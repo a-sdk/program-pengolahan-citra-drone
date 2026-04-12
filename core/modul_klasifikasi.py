@@ -32,7 +32,6 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, check
 
     print(f"Membuka tumpukan fitur...")
     with rio.open(stack_path) as src:
-        total_rows = src.height
         # Dapatkan metadata untuk file output
         profile = src.profile
         nodata = src.nodata
@@ -45,17 +44,19 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, check
         print(f"Memisahkan padi dengan gulma...")
         with rio.open(output_path, "w", **profile) as dest:
             # Proses citra dalam "potongan" (chunks/tiles) untuk menghemat RAM
+            total_blocks = len(list(src.block_windows(1)))
+            current_block = 0
             for ji, window in src.block_windows(1):
-                row = ji[0]
+                current_block += 1
                 # Memeriksa interupsi
                 if check_cancel and check_cancel():
                     logger.warning("Segmenter dihentikan")
                     return None
                 
                 # Perbarui progres internal 
-                if on_progress and row % 10 == 0:
-                    relative_prog = 40 + int((row/total_rows) * 10)
-                    on_progress(relative_prog, f"Separating vegetation ({row}/{total_rows})...")
+                if on_progress and current_block % 10 == 0:
+                    relative_prog = 40 + int((current_block/total_blocks) * 10)
+                    on_progress(relative_prog, f"Separating vegetation ({current_block}/{total_blocks})...")
                 # Baca data untuk potongan ini
                 stack_chunk = src.read(window=window)
                 
@@ -140,7 +141,6 @@ class PlantDiseaseClassifier:
         print(f"Memprediksi citra...")
         with rio.open(input_folder) as src:
             base_profile = src.profile
-            total_rows = src.height
             base_profile.update(
                 dtype=rio.uint8, 
                 count=1,          
@@ -152,25 +152,27 @@ class PlantDiseaseClassifier:
             for i, name in enumerate(output_names):
                 output_path = os.path.join(output_folder, f"peta_sebaran_penyakit_{name}.tif")
                 path_hasil.append(output_path)
-
                 output_profile = base_profile.copy()
-                mode = 'r+' if os.path.exists(output_path) else 'w'
-                output_dests[name] = rio.open(output_path, mode, **output_profile)
-
+                if os.path.exists(output_path):
+                    output_dests[name] = rio.open(output_path, 'r+')
+                else:
+                    output_dests[name] = rio.open(output_path, 'w', **output_profile)
+            total_blocks = len(list(src.block_windows(1)))
+            current_block = 0
             # Memproses lewat potongan (chunk)
             for ji, window in src.block_windows(1):
-                row = ji[0]
+                current_block += 1
                 # Memeriksa interupsi
                 if check_cancel and check_cancel():
                     logger.warning("Classifier dihentikan")
                     return None
                 
                 # Perbarui progres internal 
-                if on_progress and row % 10 == 0:
-                    relative_prog = 70 + int((row/total_rows) * 20)
-                    on_progress(relative_prog, f"Generating prediction ({row}/{total_rows})...")
+                if on_progress and current_block % 10 == 0:
+                    relative_prog = 70 + int((current_block/total_blocks) * 20)
+                    on_progress(relative_prog, f"Generating prediction ({current_block}/{total_blocks})...")
                 
-                print(f"Memproses potongan di {window}...")
+                # print(f"Memproses potongan di {window}...")
                 
                 # Baca per potongan
                 stack_chunk = src.read(window=window)

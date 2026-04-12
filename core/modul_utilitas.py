@@ -131,7 +131,7 @@ class Splitter:
         os.makedirs(output_folder, exist_ok=True)
         filename = os.path.splitext(os.path.basename(shp_path))[0]
         print(f"Memproses file: {filename}.shp")
-        output_intersection = os.path.join(output_folder, f"{filename}_{jml_cluster}_komponen.shp")
+        
         # ========================================
         # Tahap 1: Membaca & Konversi CRS
         # ========================================
@@ -158,15 +158,15 @@ class Splitter:
         subpoly_area = 0.25 #m2
         self.n_subpoly = (poly_area/subpoly_area).astype(int)
         jml_cluster = self.n_poly * self.n_subpoly
-        print(f"Terdapat {self.n_poly} poligon, total luasan: {poly_area}")
+        print(f"Terdapat {self.n_poly} poligon, total luasan: {poly_area:.2f} m2")
         print(f"Jumlah komponen: {self.n_subpoly}")
-        
+        output_intersection = os.path.join(output_folder, f"{filename}_{jml_cluster}_komponen.shp")
         # ========================================
         # Tahap 2: Generate Random Points
         # ========================================
         if on_progress:
             on_progress(12, f"Generating random points...")
-        point_count = jml_cluster * 5
+        point_count = jml_cluster * 3
         areas = polygons.area
         total_area = areas.sum()
         proportions = (areas / total_area) * point_count
