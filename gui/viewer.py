@@ -19,23 +19,24 @@ class Viewer(QWidget):
     mouseMoved = pyqtSignal(float, float)
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.layout = QVBoxLayout(self)
-        self.view = QGraphicsView()
+        self.main_layout = QVBoxLayout(self)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.viewer = QGraphicsView()
         self.scene = QGraphicsScene()
         self.layer_items = {}
         self._layer_id = 0
         self.raster_info = {}
         self.vector_info = {}
         self.setMouseTracking(True)
-        self.view.viewport().setMouseTracking(True)
-        self.view.setMouseTracking(True)
-        self.view.setScene(self.scene)
-        self.view.setRenderHint(QPainter.Antialiasing)
-        self.view.setDragMode(QGraphicsView.ScrollHandDrag)
-        self.view.setFrameShape(QFrame.NoFrame)
-        self.view.setLineWidth(0)
-        self.view.setStyleSheet("border: none;")
-        self.layout.addWidget(self.view)
+        self.viewer.viewport().setMouseTracking(True)
+        self.viewer.setMouseTracking(True)
+        self.viewer.setScene(self.scene)
+        self.viewer.setRenderHint(QPainter.Antialiasing)
+        self.viewer.setDragMode(QGraphicsView.ScrollHandDrag)
+        self.viewer.setFrameShape(QFrame.NoFrame)
+        self.viewer.setLineWidth(0)
+        self.viewer.setStyleSheet("border: none;")
+        self.main_layout.addWidget(self.viewer)
         self._zoom = 0
 
     def add_raster(self, path, isPrediction=False):
@@ -145,20 +146,20 @@ class Viewer(QWidget):
 
     def fit_to_view(self):
         rect = self.scene.itemsBoundingRect()
-        self.view.fitInView(rect, Qt.KeepAspectRatio)
+        self.viewer.fitInView(rect, Qt.KeepAspectRatio)
         self._zoom = 0
 
     def set_pan_mode(self, enabled: bool):
         if enabled:
-            self.setDragMode(self.view.ScrollHandDrag)
+            self.setDragMode(self.viewer.ScrollHandDrag)
         else:
-            self.setDragMode(self.view.NoDrag)
+            self.setDragMode(self.viewer.NoDrag)
 
     def zoom_in(self):
-        self.view.scale(1.25, 1.25)
+        self.viewer.scale(1.25, 1.25)
 
     def zoom_out(self):
-        self.view.scale(0.8, 0.8)
+        self.viewer.scale(0.8, 0.8)
 
     def wheelEvent(self, event):
         if event.angleDelta().y() > 0:
@@ -168,10 +169,10 @@ class Viewer(QWidget):
             factor = 0.8
             self._zoom -= 1
 
-        self.view.scale(factor, factor)
+        self.viewer.scale(factor, factor)
 
     def mouseMoveEvent(self, event):
-        pos = self.view.mapToScene(event.pos())
+        pos = self.viewer.mapToScene(event.pos())
         x = pos.x()
         y = pos.y()
         self.mouseMoved.emit(x, y)
@@ -182,7 +183,7 @@ class Viewer(QWidget):
         for z, lid in enumerate(ordered_ids):
             if lid in self.layer_items:
                 self.layer_items[lid].setZValue(z)
-        self.view.viewport().update()
+        self.viewer.viewport().update()
         
     def add_shapefile(self, path):
         logger.info("Membuka shapefile")

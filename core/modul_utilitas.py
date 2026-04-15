@@ -155,7 +155,7 @@ class Splitter:
         with fiona.open(shp_path) as shp:
             self.n_poly = len(shp)
         poly_area = polygons.geometry.area.sum()
-        subpoly_area = 0.25 #m2
+        subpoly_area = 0.5 #m2
         self.n_subpoly = (poly_area/subpoly_area).astype(int)
         jml_cluster = self.n_poly * self.n_subpoly
         print(f"Terdapat {self.n_poly} poligon, total luasan: {poly_area:.2f} m2")
@@ -775,6 +775,7 @@ class PlantDiseaseAnalyzer:
         try:
             # self.last_result.append(self.tampilkan_penyakit_rumpun(input_folder, output_folder))
             self.last_result = self.hitung_sebaran_rumpun(input_folder)
+            self.tampilkan_penyakit_rumpun(input_folder, output_folder)
             self.status = "Done"
             return self.last_result
         except Exception as e:
@@ -817,7 +818,7 @@ class PlantDiseaseAnalyzer:
             mpatch.Patch(color=merah, label="Parah", ec="black")
         ]
         # fig, ax = plt.subplots(1, 1, figsize=(10, 8))
-        plt.legend(handles=patches, loc="lower right", bbox_to_anchor=(1, 1), title="Tingkat Kerusakan")
+        plt.legend(handles=patches, loc="lower right", title="Tingkat Kerusakan")
         plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}", fontsize=14)
         with rio.open(input_folder) as src:
             data = src.read(1) 

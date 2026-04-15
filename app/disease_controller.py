@@ -12,7 +12,7 @@ import time
 
 logger = logging.getLogger(__name__)
 
-class AnalysisController:
+class DiseaseAnalysis:
     def __init__(self):
         self.splitter = Splitter()
         self.clipper = Clipper()
@@ -100,6 +100,13 @@ class AnalysisController:
             result.extraction_path = extracted_path
             result.prediction_path = classified_path
             result.statistic = stats
+            legends = {
+                "Healthy": (0, 128, 0),
+                "Low": (144, 238, 144),
+                "Mild": (255, 255, 116),
+                "Severe": (215, 25, 28)
+            }
+            result.legend = legends
             if hooks and "on_finished" in hooks:
                 hooks["on_finished"](result)
             return result

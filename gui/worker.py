@@ -16,7 +16,7 @@ class Worker(QThread):
         hooks = {
             "on_progress": lambda val, msg: self.progress_signal.emit(val, msg),
             "on_error": lambda err: self.error_signal.emit(err),
-            "on_finished": lambda path: self.finished_signal.emit(path), 
+            "on_finished": lambda result: self.finished_signal.emit(result), 
             "check_interruption": lambda: self.isInterruptionRequested()
         }
         self.controller.run(self.tif, self.shp, self.out, hooks)

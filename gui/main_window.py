@@ -4,13 +4,14 @@ from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QLabel, QVBoxLayout, 
     QFileDialog, QMessageBox, QProgressBar,
-    QProgressDialog, QDockWidget
+    QProgressDialog
 )
 from gui.viewer import Viewer
 from gui.layer_panel import LayerPanel
+from gui.legend_panel import LegendPanel
 from gui.dialog_disease import DiseasePredictDialog
 from gui.worker import Worker
-from app.controller import AnalysisController
+from app.disease_controller import DiseaseAnalysis
 from app.result_model import AnalysisResult
 import os
 import logging
@@ -27,21 +28,29 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Multispectral Image Processing Program")
         self.setWindowIcon(QIcon("assets/icon/edit-image.png"))
         
-        self.viewer = Viewer()
-        viewer_layout = QVBoxLayout(self.viewerPanel)
+        self.viewer = Viewer(self.containerViewer)
+        viewer_layout = QVBoxLayout(self.containerViewer)
         viewer_layout.setContentsMargins(0, 0, 0, 0)
         viewer_layout.addWidget(self.viewer)
+        logger.info(f"Viewer panel tipe: {type(self.viewer)}, parent: {self.viewer.parent()}")
 
-        self.layer_panel = LayerPanel(self.layerPanel, self.viewer)
-        layer_layout = QVBoxLayout(self.layerPanel)
+        self.layer_panel = LayerPanel(self.containerLayer, self.viewer)
+        layer_layout = QVBoxLayout(self.containerLayer)
         layer_layout.setContentsMargins(0, 0, 0, 0)
         layer_layout.addWidget(self.layer_panel)
-        
+        logger.info(f"Layer panel tipe: {type(self.layer_panel)}, parent: {self.layer_panel.parent()}")
+
+        self.legend_panel = LegendPanel(self.containerLegend)
+        legend_layout = QVBoxLayout(self.containerLegend)
+        legend_layout.setContentsMargins(0, 0, 0, 0)
+        legend_layout.addWidget(self.legend_panel)
+        logger.info(f"Legend panel tipe: {type(self.legend_panel)}, parent: {self.legend_panel.parent()}")
+
         self.progress_bar = QProgressBar()
         self.progress_bar.setMaximum(100)
         self.progress_bar.setVisible(False)
     
-        self.controller = AnalysisController()
+        self.controller = DiseaseAnalysis()
         self._setup_icons()
         self._setup_statusbar()
         self.statusBar().showMessage("Ready")
@@ -54,6 +63,16 @@ class MainWindow(QMainWindow):
         self.action_layer_panel.setCheckable(True)
         self.action_layer_panel.toggled.connect(self.dockLayers.setVisible)
         self.dockLayers.visibilityChanged.connect(self.action_layer_panel.setChecked)
+
+        self.dockLegend.setWindowTitle("Legend")
+        self.action_legend_panel.setCheckable(True)
+        self.action_legend_panel.toggled.connect(self.dockLegend.setVisible)
+        self.dockLegend.visibilityChanged.connect(self.action_legend_panel.setChecked)
+
+        self.dockLayers.show()
+        self.action_layer_panel.setChecked(True)
+        self.dockLegend.hide()
+        self.action_legend_panel.setChecked(False)
         
 
     def _setup_icons(self):
@@ -143,6 +162,7 @@ class MainWindow(QMainWindow):
 
     def on_analysis_finished(self, result: AnalysisResult):
         self.pd.close()
+        # Membuka file hasil prediksi
         if not os.path.exists(result.prediction_path[0]):
             self.show_error_msg(f"Hasil tidak ditemukan")
             return
@@ -152,6 +172,9 @@ class MainWindow(QMainWindow):
                 self.layer_panel.add_layer(file, isPrediction=True)
             except Exception as e:
                 self.show_error_msg(f"Gagal memuat hasil: {str(e)}")
+        # Menambah legenda ke panel
+        self.legend_panel.set_legend(result.legend)
+        self.dockLegend.show()
 
     def show_error_msg(self, error_msg):
         self.pd.close()

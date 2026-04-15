@@ -8,3 +8,4 @@ class AnalysisResult:
         self.extraction_path = None
         self.prediction_path = None
         self.statistic = None
+        self.legend = None

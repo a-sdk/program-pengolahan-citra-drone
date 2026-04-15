@@ -14,9 +14,10 @@ class LayerPanel(QWidget):
     def __init__(self, parent, viewer):
         super().__init__(parent)
         self.viewer = viewer
-        self.layout = QVBoxLayout(self)
+        self.main_layout = QVBoxLayout(self)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.tree = QTreeWidget()
-        self.layout.addWidget(self.tree)
+        self.main_layout.addWidget(self.tree)
         self._setup_tree()
         self._connect_signals()
 
