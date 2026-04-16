@@ -82,15 +82,14 @@ class DiseaseAnalysis:
                 output_folder, 
                 check_cancel=is_cancelled, 
                 on_progress=emit_progress
-                )   
-            if classified_path is None: 
-                emit_error(f"FileNotFoundError: No such file or directory: '{classified_path}'")
-                return None 
+                )    
             if is_cancelled(): return None
             emit_progress(90, "Calculating stats...")
+            stats = []
             for i, name in enumerate(classified_path):
                 if is_cancelled(): return None
-                stats = self.stats_calc.run(name, output_folder)
+                calc = self.stats_calc.run(name, output_folder)
+                stats.append(calc)
                 emit_progress(90+i, f"Calculating stats ({str(i)}/{str(len(classified_path))})...")
             logger.info(f"Stats: {stats}")
             result.clip_path = clipped_path
@@ -110,11 +109,6 @@ class DiseaseAnalysis:
             if hooks and "on_finished" in hooks:
                 hooks["on_finished"](result)
             return result
-        
-        except FileNotFoundError as e:
-            emit_error(f"File tidak ditemukan: {str(e)}")
-            logger.error(f"File tidak ditemukan: {str(e)}")
-            return None
         
         except Exception as e:
             emit_error(str(e))

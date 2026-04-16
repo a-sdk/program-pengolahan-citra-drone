@@ -213,7 +213,7 @@ class PlantDiseaseClassifier:
             for dest in output_dests.values():
                 dest.close()
                     
-        print(f"\nDeteksi selesai! 4 peta segmentasi disimpan di folder: {output_folder}")
+        print(f"\nDeteksi selesai! 4 peta disimpan di folder: {output_folder}")
         return path_hasil
 
 class PlotDiseaseClassifier:

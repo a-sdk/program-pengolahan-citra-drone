@@ -1,6 +1,6 @@
 from PyQt5 import uic
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QSize, Qt
+from PyQt5.QtCore import QSize, Qt, QTimer
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QLabel, QVBoxLayout, 
     QFileDialog, QMessageBox, QProgressBar,
@@ -24,10 +24,11 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi("ui/main_window.ui", self)
-
         self.setWindowTitle("Multispectral Image Processing Program")
         self.setWindowIcon(QIcon("assets/icon/edit-image.png"))
-        
+        self.elapsed_sec = 0
+        self.time_str = str(0)
+        self.current_msg = "Processing..."
         self.viewer = Viewer(self.containerViewer)
         viewer_layout = QVBoxLayout(self.containerViewer)
         viewer_layout.setContentsMargins(0, 0, 0, 0)
@@ -100,8 +101,6 @@ class MainWindow(QMainWindow):
         self.action_nutrient_predict.setIcon(icon_mineral)
         self.action_water_predict.setIcon(icon_water)
         self.action_disease_predict.setIcon(icon_disease)
-        
-
         self.layer_panel.tree.setIconSize(QSize(24, 24))
 
     def _setup_statusbar(self):
@@ -109,15 +108,27 @@ class MainWindow(QMainWindow):
         self.statusBar().addPermanentWidget(self.coord_label)
 
     def _setup_progress_dialog(self):
-        self.pd = QProgressDialog("Processing...", "Cancel", 0, 100, self)
-        self.pd.setWindowTitle("Processing file")
+        self.pd = QProgressDialog(self.current_msg, "Cancel", 0, 100, self)
+        self.pd.setWindowTitle("Please wait")
         self.pd.setWindowModality(Qt.WindowModal)
         self.pd.setMinimumDuration(0)
         self.pd.setValue(0)
+        self.elapsed_sec = 0
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self._update_timer_label)
+        self.timer.start(1000) # ms
 
     def handle_progress_dialog(self, val, msg):
+        self.current_msg = msg
         self.pd.setValue(val)
-        self.pd.setLabelText(msg)
+        self.pd.setLabelText(f"{self.current_msg}\nElapsed: {self.time_str}")
+
+    def _update_timer_label(self):
+        self.elapsed_sec += 1
+        self.mins = self.elapsed_sec // 60
+        self.secs = self.elapsed_sec % 60
+        self.time_str = f"{self.mins}m {self.secs}s" if self.mins > 0 else f"{self.secs}s"
+        self.pd.setLabelText(f"{self.current_msg}\nElapsed: {self.time_str}")
 
     def update_coord_label(self, x, y):
         self.coord_label.setText(f"X: {x:.2f}, Y: {y:.2f}")
@@ -136,6 +147,7 @@ class MainWindow(QMainWindow):
         self.action_zoom_out.triggered.connect(self.viewer.zoom_out)
         self.action_fit_to_view.triggered.connect(self.viewer.fit_to_view)
         self.action_disease_predict.triggered.connect(self.run_disease_analysis)
+        self.action_debug.triggered.connect(self.simulate_finished)
 
     def open_img_file(self):
         logger.info("Action: open_img ditekan")
@@ -161,22 +173,26 @@ class MainWindow(QMainWindow):
         logger.info(f"Progress {value}% - {msg}")
 
     def on_analysis_finished(self, result: AnalysisResult):
+        self.timer.stop()
         self.pd.close()
         # Membuka file hasil prediksi
         if not os.path.exists(result.prediction_path[0]):
-            self.show_error_msg(f"Hasil tidak ditemukan")
+            self.show_error_msg(f"File not found.")
             return
         
         for file in result.prediction_path:
             try:
                 self.layer_panel.add_layer(file, isPrediction=True)
             except Exception as e:
-                self.show_error_msg(f"Gagal memuat hasil: {str(e)}")
+                self.show_error_msg(f"{str(e)}")
         # Menambah legenda ke panel
         self.legend_panel.set_legend(result.legend)
+        # Menambah informasi statistik
+        self.legend_panel.set_info(result.statistic)
         self.dockLegend.show()
 
     def show_error_msg(self, error_msg):
+        self.timer.stop()
         self.pd.close()
         if hasattr(self, 'progress_bar'):
             self.progress_bar.setVisible(False) 
@@ -221,5 +237,34 @@ class MainWindow(QMainWindow):
                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
             QApplication.instance().quit() 
+
+    # DEBUGGING FINISH
+    def simulate_finished(self):
+        from app.result_model import AnalysisResult
+
+        fake = AnalysisResult()
+        fake.prediction_path = [
+            "C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_penyakit_bercak cokelat.tif",
+            "C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_penyakit_bercak sempit.tif",
+            "C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_penyakit_blas.tif",
+            "C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_penyakit_hdb.tif"
+        ]
+        fake.statistic = {
+            'Healthy': 5.29, 
+            'Low': 0.0, 
+            'Mild': 0.41, 
+            'Severe': 94.3, 
+            'rekomendasi': 'High severity level, immediate action required!'
+        }
+
+        fake.legend = {
+            "Healthy": (0, 128, 0),
+            "Low": (144, 238, 144),
+            "Mild": (255, 255, 116),
+            "Severe": (215, 25, 28)
+        }
+
+        # Panggil handler yang sama persis seperti saat worker selesai
+        self.on_analysis_finished(fake)
 
     

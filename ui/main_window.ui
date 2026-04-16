@@ -77,6 +77,7 @@
     <addaction name="menuOpen"/>
     <addaction name="separator"/>
     <addaction name="action_exit"/>
+    <addaction name="action_debug"/>
    </widget>
    <widget class="QMenu" name="menuProcessing">
     <property name="title">
@@ -220,6 +221,11 @@
    </property>
    <property name="text">
     <string>Legend</string>
+   </property>
+  </action>
+  <action name="action_debug">
+   <property name="text">
+    <string>Debug</string>
    </property>
   </action>
  </widget>

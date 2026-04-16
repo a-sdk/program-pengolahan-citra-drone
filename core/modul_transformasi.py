@@ -101,7 +101,7 @@ class Transformer:
             return self.last_result
         except Exception as e:
             self.status = "Error"
-            logger.error(f"ERROR: {e}")
+            logger.error(f"ERROR {type(e).__name__}: {e}", exc_info=True)
             return None
         
     # Fungsi untuk melakukan proses transformasi
@@ -161,7 +161,7 @@ class Segmenter:
             return self.last_result
         except Exception as e:
             self.status = "Error"
-            logger.error(f"ERROR: {e}")
+            logger.error(f"ERROR {type(e).__name__}: {e}", exc_info=True)
             return None
         
     # Fungsi untuk melakukan proses segmentasi

@@ -107,7 +107,7 @@ class Splitter:
             return self.last_result
         except Exception as e:
             self.status = "Error"
-            logger.error(f"ERROR: {e}")
+            logger.error(f"ERROR {type(e).__name__}: {e}", exc_info=True)
             return None
         
     # Fungsi untuk membuat multipoligon (shahiban)
@@ -780,7 +780,7 @@ class PlantDiseaseAnalyzer:
             return self.last_result
         except Exception as e:
             self.status = "Error"
-            logger.error(f"ERROR: {e}")
+            logger.error(f"ERROR {type(e).__name__}: {e}", exc_info=True)
             return None 
         
     # Fungsi menampilkan hasil prediksi model per rumpun
@@ -818,7 +818,7 @@ class PlantDiseaseAnalyzer:
             mpatch.Patch(color=merah, label="Parah", ec="black")
         ]
         # fig, ax = plt.subplots(1, 1, figsize=(10, 8))
-        plt.legend(handles=patches, loc="lower right", title="Tingkat Kerusakan")
+        # plt.legend(handles=patches, loc="lower right", title="Tingkat Kerusakan")
         plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}", fontsize=14)
         with rio.open(input_folder) as src:
             data = src.read(1) 
@@ -852,29 +852,32 @@ class PlantDiseaseAnalyzer:
         jml_data_valid = valid_data.size
         # Mengambil semua nilai unik
         counts = {k: v for k, v in zip(*np.unique(data, return_counts=True))}
+        labels = ["Healthy", "Low", "Mild", "Severe"]
         # Menghitung persentase
-        persen = {i: round((counts.get(i, 0) / jml_data_valid) * 100, 2) for i in range(1, 5)}
+        persen = {k: round((counts.get(i+1, 0) / jml_data_valid) * 100, 2) for i, k in enumerate(labels)}
         # Mencetak hasil
-        labels = ["sehat", "ringan", "sedang", "parah"]
         print(f"Total piksel pada citra: {jml_data_valid}")
         for i, label in enumerate(labels, 1):
-            print(f"Persentase tanaman {label}: {persen[i]}%")
+            print(f"{label}: {persen[label]}%")
         #Mengambil nilai persentase untuk logika
-        p_sehat = persen[1]
-        p_ringan = persen[2]
-        p_sedang = persen[3]
-        p_parah = persen[4]
+        p_sehat = persen[labels[0]]
+        p_ringan = persen[labels[1]]
+        p_sedang = persen[labels[2]]
+        p_parah = persen[labels[2]]
         p_parah_total = p_sedang + p_parah # Gabungan sedang dan parah
         # Logika Rekomendasi
         print("-" * 30)
         if p_parah_total > p_sehat or p_parah_total > p_ringan:
-            recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
+            # recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
+            recom = "High severity level, immediate action required!"
             print(f"Rekomendasi: {recom}")
         elif p_ringan > p_sehat:  
-            recom = "Lakukan pemantauan rutin dan tindakan pencegahan."  
+            # recom = "Lakukan pemantauan rutin dan tindakan pencegahan." 
+            recom = "Perform routine monitoring and take preventive action!" 
             print(f"Rekomendasi: {recom}")
         else:
-            recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
+            # recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
+            recom = "The majority of vegetation is healthy."
             print(f"{recom}")
 
         persen["rekomendasi"] = recom
@@ -899,7 +902,7 @@ class PlotDiseaseAnalyzer:
             return self.last_result
         except Exception as e:
             self.status = "Error"
-            logger.error(f"ERROR: {e}")
+            logger.error(f"ERROR {type(e).__name__}: {e}", exc_info=True)
             return None 
         
     # Fungsi menampilkan hasil prediksi model per petak 
