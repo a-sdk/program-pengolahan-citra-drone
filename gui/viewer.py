@@ -11,6 +11,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QPointF, QEvent
 import rasterio as rio
 import geopandas as gpd
 import numpy as np
+import json
 import logging
 
 logger = logging.getLogger(__name__)
@@ -55,9 +56,9 @@ class Viewer(QWidget):
                 count = src.count
                 crs = src.crs
                 nodata = src.nodata
+                tag = src.tags()
                 h, w = src.shape
                 t = src.transform
-                software_tag = src.tags().get('TIFFTAG_SOFTWARE', '')
                 pixel_width = abs(t.a)
                 img_max = bands.max()
                 img_min = bands.min()
@@ -122,8 +123,20 @@ class Viewer(QWidget):
         item = self.scene.addPixmap(pixmap)
         if isGeoTiff:
             item.setTransform(qt_transform)
+            # Memeriksa legend dan stats jika citra hasil prediksi
+            legend_dict = {}
+            stats_dict = {}
+            if isPrediction:
+                if "LEGEND" in tag:
+                    legend_dict = json.loads(tag.get("LEGEND", "{}"))
+                if "STATS" in tag:
+                    stats_dict = json.loads(tag.get("STATS", "{}"))
+
             # Simpan info raster
             self.raster_info[layer_id] = {
+                "path": path,
+                "legend": legend_dict,
+                "stats": stats_dict,
                 "dtype": str(dtype),
                 "crs": crs.to_string() if crs else "Non-Georeferenced",
                 "count": count,
@@ -180,7 +193,7 @@ class Viewer(QWidget):
             scene_pos = self.viewer.mapToScene(event.pos())
             x = round(scene_pos.x(), 2)
             y = round(scene_pos.y(), 2)
-            print(f"Detected via Filter: {x}, {y}")
+            # print(f"Detected via Filter: {x}, {y}")
             self.mouseMoved.emit(x, y)
         return super().eventFilter(source, event)
 

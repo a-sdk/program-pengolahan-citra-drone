@@ -33,19 +33,19 @@ class MainWindow(QMainWindow):
         viewer_layout = QVBoxLayout(self.containerViewer)
         viewer_layout.setContentsMargins(0, 0, 0, 0)
         viewer_layout.addWidget(self.viewer)
-        logger.info(f"Viewer panel tipe: {type(self.viewer)}, parent: {self.viewer.parent()}")
+        # logger.info(f"Viewer panel tipe: {type(self.viewer)}, parent: {self.viewer.parent()}")
 
         self.layer_panel = LayerPanel(self.containerLayer, self.viewer)
         layer_layout = QVBoxLayout(self.containerLayer)
         layer_layout.setContentsMargins(0, 0, 0, 0)
         layer_layout.addWidget(self.layer_panel)
-        logger.info(f"Layer panel tipe: {type(self.layer_panel)}, parent: {self.layer_panel.parent()}")
+        # logger.info(f"Layer panel tipe: {type(self.layer_panel)}, parent: {self.layer_panel.parent()}")
 
         self.legend_panel = LegendPanel(self.containerLegend)
         legend_layout = QVBoxLayout(self.containerLegend)
         legend_layout.setContentsMargins(0, 0, 0, 0)
         legend_layout.addWidget(self.legend_panel)
-        logger.info(f"Legend panel tipe: {type(self.legend_panel)}, parent: {self.legend_panel.parent()}")
+        # logger.info(f"Legend panel tipe: {type(self.legend_panel)}, parent: {self.legend_panel.parent()}")
 
         self.progress_bar = QProgressBar()
         self.progress_bar.setMaximum(100)
@@ -139,6 +139,7 @@ class MainWindow(QMainWindow):
     def _connect_signals(self):
         logger.info("Sinyal Action terhubung")
         self.layer_panel.fileLoaded.connect(self.update_status_bar)
+        self.layer_panel.layerSelected.connect(self.update_legend_from_layer)
         self.action_open_shp.triggered.connect(self.open_shp_file)
         self.action_open_img.triggered.connect(self.open_img_file)
         self.action_exit.triggered.connect(self.handle_exit)
@@ -163,6 +164,27 @@ class MainWindow(QMainWindow):
         
         if path:      
             self.layer_panel.add_layer(path)
+    
+    def update_legend_from_layer(self, layer_id):
+        info = self.viewer.raster_info.get(layer_id)
+        if not info:
+            self.legend_panel.clear()
+            return
+        legend = info.get("legend")
+        stats = info.get("stats")
+        if not legend and not stats:
+            self.legend_panel.clear()
+            return
+        if legend:
+            self.legend_panel.set_legend(legend)
+        else:
+            self.legend_panel.legend_list.clear()
+        if stats:
+            self.legend_panel.set_info(stats)
+        else:
+            self.legend_panel.info_list.clear()
+
+        self.dockLegend.show()
 
     def update_progress_bar(self, value, msg):
         if hasattr(self, 'progress_bar'):
@@ -173,8 +195,11 @@ class MainWindow(QMainWindow):
         logger.info(f"Progress {value}% - {msg}")
 
     def on_analysis_finished(self, result: AnalysisResult):
+        # Menutup timer dan dialog progress
         self.timer.stop()
         self.pd.close()
+        # Muncul dialog selesai
+        self.show_finished()
         # Membuka file hasil prediksi
         if not os.path.exists(result.prediction_path[0]):
             self.show_error_msg(f"File not found.")
@@ -185,20 +210,27 @@ class MainWindow(QMainWindow):
                 self.layer_panel.add_layer(file, isPrediction=True)
             except Exception as e:
                 self.show_error_msg(f"{str(e)}")
-        # Menambah legenda ke panel
-        self.legend_panel.set_legend(result.legend)
-        # Menambah informasi statistik
-        self.legend_panel.set_info(result.statistic)
-        self.dockLegend.show()
+
+    def show_finished(self):
+        self.timer.stop()
+        self.pd.close()
+        if hasattr(self, 'progress_bar'):
+            self.progress_bar.setVisible(False)
+        msg = QMessageBox(self)
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setWindowTitle("Finished")
+        msg.setText("All process finished.")
+        msg.setInformativeText(f"Duration: {self.time_str}") 
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
 
     def show_error_msg(self, error_msg):
         self.timer.stop()
         self.pd.close()
         if hasattr(self, 'progress_bar'):
             self.progress_bar.setVisible(False) 
-
         msg = QMessageBox(self)
-        msg.setIcon(QMessageBox.Critical)
+        msg.setIcon(QMessageBox.Icon.Critical)
         msg.setWindowTitle("ERROR")
         msg.setText("An error occured")
         msg.setInformativeText(str(error_msg)) 

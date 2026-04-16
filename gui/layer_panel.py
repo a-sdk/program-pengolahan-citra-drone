@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 class LayerPanel(QWidget):
     fileLoaded = pyqtSignal(str)
+    layerSelected = pyqtSignal(int)
+
     def __init__(self, parent, viewer):
         super().__init__(parent)
         self.viewer = viewer
@@ -36,7 +38,6 @@ class LayerPanel(QWidget):
     # Menambah layer
     def add_layer(self, path, isPrediction=False):
         file_name = os.path.basename(path)
-        file_ext = os.path.splitext(file_name)[1]
         if path.lower().endswith((".shp")):
             layer_id = self.viewer.add_shapefile(path)
         else:
@@ -93,6 +94,11 @@ class LayerPanel(QWidget):
         if action == prop_action:
             self._show_properties(item)
 
+    def on_item_clicked(self, item, col):
+        layer_id = item.data(0, Qt.UserRole)
+        self.layerSelected.emit(layer_id)
+        logger.info(f"Layer {layer_id} diklik")
+        
     # Menghapus layer
     def remove_layer(self, item):
         logger.info("Menghapus layer")
@@ -124,5 +130,7 @@ class LayerPanel(QWidget):
         # Menu right-click
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self._open_menu)
+        # Layer dipilih
+        self.tree.itemClicked.connect(self.on_item_clicked)
 
     

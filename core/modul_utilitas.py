@@ -3,6 +3,7 @@ Modul berisi fungsi-fungsi pembantu
 yang digunakan pada program utama
 '''
 import os
+import json
 import glob
 import numpy as np
 import pandas as pd
@@ -854,16 +855,16 @@ class PlantDiseaseAnalyzer:
         counts = {k: v for k, v in zip(*np.unique(data, return_counts=True))}
         labels = ["Healthy", "Low", "Mild", "Severe"]
         # Menghitung persentase
-        persen = {k: round((counts.get(i+1, 0) / jml_data_valid) * 100, 2) for i, k in enumerate(labels)}
+        stats = {k: round((counts.get(i+1, 0) / jml_data_valid) * 100, 2) for i, k in enumerate(labels)}
         # Mencetak hasil
         print(f"Total piksel pada citra: {jml_data_valid}")
         for i, label in enumerate(labels, 1):
-            print(f"{label}: {persen[label]}%")
-        #Mengambil nilai persentase untuk logika
-        p_sehat = persen[labels[0]]
-        p_ringan = persen[labels[1]]
-        p_sedang = persen[labels[2]]
-        p_parah = persen[labels[2]]
+            print(f"{label}: {stats[label]}%")
+        # Mengambil nilai untuk logika
+        p_sehat = stats[labels[0]]
+        p_ringan = stats[labels[1]]
+        p_sedang = stats[labels[2]]
+        p_parah = stats[labels[2]]
         p_parah_total = p_sedang + p_parah # Gabungan sedang dan parah
         # Logika Rekomendasi
         print("-" * 30)
@@ -880,8 +881,26 @@ class PlantDiseaseAnalyzer:
             recom = "The majority of vegetation is healthy."
             print(f"{recom}")
 
-        persen["rekomendasi"] = recom
-        return persen
+        stats["rekomendasi"] = recom
+
+        legenda = {
+            "Healthy": (0, 128, 0),
+            "Low": (144, 238, 144),
+            "Mild": (255, 255, 116),
+            "Severe": (215, 25, 28)
+        }
+
+        legend_json = json.dumps(legenda)
+        stats_json = json.dumps(stats)
+
+        # Menyimpan legenda dan stats sebagai metadata
+        with rio.open(input_folder, "r+") as dest:
+            dest.update_tags(
+                LEGEND=legend_json,
+                STATS=stats_json
+                )
+        return stats
+        
 
 
 class PlotDiseaseAnalyzer:

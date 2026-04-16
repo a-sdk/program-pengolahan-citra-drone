@@ -20,6 +20,9 @@ class LegendPanel(QWidget):
         self.main_layout.addWidget(self.legend_list, stretch=1)
         self.main_layout.addWidget(self.info_list, stretch=1)
 
+    def clear(self):
+        self.legend_list.clear()
+        self.info_list.clear()
 
     def add_legend_item(self, label, color):
         item = QListWidgetItem(label)

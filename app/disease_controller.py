@@ -88,8 +88,7 @@ class DiseaseAnalysis:
             stats = []
             for i, name in enumerate(classified_path):
                 if is_cancelled(): return None
-                calc = self.stats_calc.run(name, output_folder)
-                stats.append(calc)
+                stats = self.stats_calc.run(name, output_folder)
                 emit_progress(90+i, f"Calculating stats ({str(i)}/{str(len(classified_path))})...")
             logger.info(f"Stats: {stats}")
             result.clip_path = clipped_path
@@ -98,14 +97,6 @@ class DiseaseAnalysis:
             result.mask_path = masked_path
             result.extraction_path = extracted_path
             result.prediction_path = classified_path
-            result.statistic = stats
-            legends = {
-                "Healthy": (0, 128, 0),
-                "Low": (144, 238, 144),
-                "Mild": (255, 255, 116),
-                "Severe": (215, 25, 28)
-            }
-            result.legend = legends
             if hooks and "on_finished" in hooks:
                 hooks["on_finished"](result)
             return result
