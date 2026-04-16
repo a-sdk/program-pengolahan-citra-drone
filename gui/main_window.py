@@ -121,7 +121,7 @@ class MainWindow(QMainWindow):
     def handle_progress_dialog(self, val, msg):
         self.current_msg = msg
         self.pd.setValue(val)
-        self.pd.setLabelText(f"{self.current_msg}\nElapsed: {self.time_str}")
+        self.pd.setLabelText(f"{msg}\nElapsed: {self.time_str}")
 
     def _update_timer_label(self):
         self.elapsed_sec += 1

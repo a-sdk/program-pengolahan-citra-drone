@@ -182,6 +182,9 @@
    </property>
   </action>
   <action name="action_pan">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Pan</string>
    </property>

@@ -1,27 +1,12 @@
-2026-04-16 13:40:15,152 [INFO] main: Aplikasi dibuka!
-2026-04-16 13:40:15,180 [INFO] gui.main_window: Viewer panel tipe: <class 'gui.viewer.Viewer'>, parent: <PyQt5.QtWidgets.QFrame object at 0x000001FFA8D31630>
-2026-04-16 13:40:15,391 [INFO] gui.main_window: Layer panel tipe: <class 'gui.layer_panel.LayerPanel'>, parent: <PyQt5.QtWidgets.QWidget object at 0x000001FFA8D31BD0>
-2026-04-16 13:40:15,393 [INFO] gui.main_window: Legend panel tipe: <class 'gui.legend_panel.LegendPanel'>, parent: <PyQt5.QtWidgets.QWidget object at 0x000001FFA8D31D80>
-2026-04-16 13:40:15,421 [INFO] gui.main_window: Sinyal Action terhubung
-2026-04-16 13:40:17,194 [INFO] gui.viewer: Membuka raster
-2026-04-16 13:40:17,491 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-16 13:40:17,491 [INFO] gui.layer_panel: Layer IDs di panel: [1]
-2026-04-16 13:40:17,491 [INFO] gui.viewer: Mengatur z-order: [1]
-2026-04-16 13:40:17,491 [INFO] gui.layer_panel: Berhasil menambah 'peta_sebaran_penyakit_bercak cokelat.tif' dengan ID: 1
-2026-04-16 13:40:17,492 [INFO] gui.viewer: Membuka raster
-2026-04-16 13:40:17,767 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-16 13:40:17,767 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2]
-2026-04-16 13:40:17,767 [INFO] gui.viewer: Mengatur z-order: [1, 2]
-2026-04-16 13:40:17,768 [INFO] gui.layer_panel: Berhasil menambah 'peta_sebaran_penyakit_bercak sempit.tif' dengan ID: 2
-2026-04-16 13:40:17,769 [INFO] gui.viewer: Membuka raster
-2026-04-16 13:40:18,055 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-16 13:40:18,056 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2, 3]
-2026-04-16 13:40:18,056 [INFO] gui.viewer: Mengatur z-order: [1, 2, 3]
-2026-04-16 13:40:18,056 [INFO] gui.layer_panel: Berhasil menambah 'peta_sebaran_penyakit_blas.tif' dengan ID: 3
-2026-04-16 13:40:18,057 [INFO] gui.viewer: Membuka raster
-2026-04-16 13:40:18,362 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-16 13:40:18,363 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2, 3, 4]
-2026-04-16 13:40:18,363 [INFO] gui.viewer: Mengatur z-order: [1, 2, 3, 4]
-2026-04-16 13:40:18,363 [INFO] gui.layer_panel: Berhasil menambah 'peta_sebaran_penyakit_hdb.tif' dengan ID: 4
-2026-04-16 13:40:34,161 [INFO] gui.layer_panel: Mengubah visibilitas layer 4
-2026-04-16 13:40:45,082 [INFO] gui.main_window: Action: exit ditekan
+2026-04-16 14:54:58,276 [INFO] main: Aplikasi dibuka!
+2026-04-16 14:54:58,306 [INFO] gui.main_window: Viewer panel tipe: <class 'gui.viewer.Viewer'>, parent: <PyQt5.QtWidgets.QFrame object at 0x000001F525A616C0>
+2026-04-16 14:54:58,494 [INFO] gui.main_window: Layer panel tipe: <class 'gui.layer_panel.LayerPanel'>, parent: <PyQt5.QtWidgets.QWidget object at 0x000001F525A61C60>
+2026-04-16 14:54:58,496 [INFO] gui.main_window: Legend panel tipe: <class 'gui.legend_panel.LegendPanel'>, parent: <PyQt5.QtWidgets.QWidget object at 0x000001F525A61E10>
+2026-04-16 14:54:58,524 [INFO] gui.main_window: Sinyal Action terhubung
+2026-04-16 14:54:59,864 [INFO] gui.main_window: Action: open_img ditekan
+2026-04-16 14:55:05,297 [INFO] gui.viewer: Membuka raster
+2026-04-16 14:55:05,990 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-16 14:55:05,990 [INFO] gui.layer_panel: Layer IDs di panel: [1]
+2026-04-16 14:55:05,990 [INFO] gui.viewer: Mengatur z-order: [1]
+2026-04-16 14:55:05,991 [INFO] gui.layer_panel: Berhasil menambah 'hasil_potong.tif' dengan ID: 1
+2026-04-16 14:55:11,617 [INFO] gui.main_window: Action: exit ditekan

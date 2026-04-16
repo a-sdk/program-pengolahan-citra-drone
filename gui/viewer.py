@@ -7,7 +7,7 @@ from PyQt5.QtGui import (
     QPolygonF, QPen, QColor,
     QTransform
 )
-from PyQt5.QtCore import Qt, pyqtSignal, QPointF
+from PyQt5.QtCore import Qt, pyqtSignal, QPointF, QEvent
 import rasterio as rio
 import geopandas as gpd
 import numpy as np
@@ -28,11 +28,12 @@ class Viewer(QWidget):
         self.raster_info = {}
         self.vector_info = {}
         self.setMouseTracking(True)
-        self.viewer.viewport().setMouseTracking(True)
         self.viewer.setMouseTracking(True)
+        self.viewer.viewport().setMouseTracking(True)
+        self.viewer.viewport().installEventFilter(self)
         self.viewer.setScene(self.scene)
         self.viewer.setRenderHint(QPainter.Antialiasing)
-        self.viewer.setDragMode(QGraphicsView.ScrollHandDrag)
+        self.viewer.setDragMode(QGraphicsView.DragMode.NoDrag)
         self.viewer.setFrameShape(QFrame.NoFrame)
         self.viewer.setLineWidth(0)
         self.viewer.setStyleSheet("border: none;")
@@ -151,9 +152,11 @@ class Viewer(QWidget):
 
     def set_pan_mode(self, enabled: bool):
         if enabled:
-            self.setDragMode(self.viewer.ScrollHandDrag)
+            logger.info("action_pan: ON")
+            self.viewer.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
         else:
-            self.setDragMode(self.viewer.NoDrag)
+            logger.info("action_pan: OFF")
+            self.viewer.setDragMode(QGraphicsView.DragMode.NoDrag)
 
     def zoom_in(self):
         self.viewer.scale(1.25, 1.25)
@@ -171,12 +174,15 @@ class Viewer(QWidget):
 
         self.viewer.scale(factor, factor)
 
-    def mouseMoveEvent(self, event):
-        pos = self.viewer.mapToScene(event.pos())
-        x = pos.x()
-        y = pos.y()
-        self.mouseMoved.emit(x, y)
-        super().mouseMoveEvent(event)
+    def eventFilter(self, source, event):
+        if source is self.viewer.viewport() and event.type() == QEvent.Type.MouseMove:
+            # Ambil posisi dan konversi ke scene
+            scene_pos = self.viewer.mapToScene(event.pos())
+            x = round(scene_pos.x(), 2)
+            y = round(scene_pos.y(), 2)
+            print(f"Detected via Filter: {x}, {y}")
+            self.mouseMoved.emit(x, y)
+        return super().eventFilter(source, event)
 
     def set_z_order(self, ordered_ids):
         logger.info(f"Mengatur z-order: {ordered_ids}")
