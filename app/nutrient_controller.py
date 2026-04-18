@@ -3,14 +3,14 @@ from core.modul_klip import Clipper
 from core.modul_transformasi import Transformer, Segmenter
 from core.modul_mask import Masker
 from core.modul_ekstraksi import Extractor
-from core.modul_klasifikasi import PlantDiseaseClassifier
-from core.modul_utilitas import Splitter, PlantDiseaseAnalyzer
+from core.modul_klasifikasi import PlotDiseaseClassifier
+from core.modul_utilitas import Splitter, PlotDiseaseAnalyzer
 
 import logging
 
 logger = logging.getLogger(__name__)
 
-class DiseaseAnalysis:
+class NutrientAnalysis:
     def __init__(self):
         self.splitter = Splitter()
         self.clipper = Clipper()
@@ -18,8 +18,8 @@ class DiseaseAnalysis:
         self.segmenter = Segmenter()
         self.masker = Masker()
         self.extractor = Extractor()
-        self.classifier = PlantDiseaseClassifier()
-        self.stats_calc = PlantDiseaseAnalyzer()
+        self.classifier = PlotDiseaseClassifier()
+        self.stats_calc = PlotDiseaseAnalyzer()
         self.on_progress = None
         self.on_error = None
         self.on_finished = None

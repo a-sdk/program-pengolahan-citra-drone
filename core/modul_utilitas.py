@@ -4,6 +4,7 @@ yang digunakan pada program utama
 '''
 import os
 import json
+import sqlite3
 import glob
 import numpy as np
 import pandas as pd
@@ -249,10 +250,6 @@ class Splitter:
         gdf_inter = gdf_inter.drop(columns=['index_right'])
         # Menyiapkan kolom untuk prediksi model
         gdf_inter["no_urut"] = gdf_inter.groupby("id").cumcount() + 1
-        gdf_inter["blas"] = None
-        gdf_inter["blb"] = None
-        gdf_inter["bs"] = None
-        gdf_inter["nbs"] = None
         # === Simpan langsung ke folder utama tanpa subfolder ===
         gdf_inter.to_file(output_intersection, driver="ESRI Shapefile")
 
@@ -884,10 +881,10 @@ class PlantDiseaseAnalyzer:
         stats["rekomendasi"] = recom
 
         legenda = {
-            "Healthy": (0, 128, 0),
-            "Low": (144, 238, 144),
-            "Mild": (255, 255, 116),
-            "Severe": (215, 25, 28)
+            1: {"label": "Healthy", "color": (0,128,0)},
+            2: {"label": "Low",     "color": (144,238,144)},
+            3: {"label": "Mild",    "color": (255,255,116)},
+            4: {"label": "Severe",  "color": (215,25,28)}
         }
 
         legend_json = json.dumps(legenda)
@@ -909,14 +906,14 @@ class PlotDiseaseAnalyzer:
     """ 
     def __init__(self):
         self.status = "Idle"
-        self.last_result = []
+        self.last_result = None
 
-    def run(self, shp_path, penyakit, output_folder):
+    def run(self, gpkg_path):
         self.status = "Processing"
         logger.info("Menghitung sebaran dan memunculkan hasil...") 
         try:
-            self.last_result.append(self.tampilkan_penyakit_petak(shp_path, penyakit, output_folder))
-            self.last_result.append(self.hitung_sebaran_petak(shp_path, penyakit))
+            # self.tampilkan_penyakit_petak(gpkg_path, penyakit, output_folder)
+            self.last_result = self.hitung_sebaran_petak(gpkg_path)
             self.status = "Done"
             return self.last_result
         except Exception as e:
@@ -954,16 +951,16 @@ class PlotDiseaseAnalyzer:
         norms = mcolor.BoundaryNorm(bounds, 5)
 
         gdf = gpd.read_file(shp_path)
-        fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+        # fig, ax = plt.subplots(1, 1, figsize=(10, 8))
 
-        gdf.plot(
-            column=penyakit,  
-            cmap=cmaps, 
-            norm=norms,
-            ax=ax,
-            edgecolor='black', 
-            linewidth=0.3
-            )
+        # gdf.plot(
+        #     column=penyakit,  
+        #     cmap=cmaps, 
+        #     norm=norms,
+        #     ax=ax,
+        #     edgecolor='black', 
+        #     linewidth=0.3
+        #     )
         
         patches = [
             mpatch.Patch(color=hg, label="Sehat", ec="black"),
@@ -971,61 +968,114 @@ class PlotDiseaseAnalyzer:
             mpatch.Patch(color=kuning, label="Sedang", ec="black"),
             mpatch.Patch(color=merah, label="Parah", ec="black")
         ]
-        ax.legend(handles=patches, loc="lower right", bbox_to_anchor=(1, 1), title="Tingkat Kerusakan")
+        # ax.legend(handles=patches, loc="lower right", bbox_to_anchor=(1, 1), title="Tingkat Kerusakan")
         plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}", fontsize=14)
         # plt.show()
         plt.savefig(output_path)
-        return output_path
+        
         
     # Fungsi untuk menghitung sebaran penyakit per petak
-    def hitung_sebaran_petak(self, shp_path, penyakit):
+    def hitung_sebaran_petak(self, gpkg_path):
         """
         Menghitung sebaran penyakit.
         
         Parameters:
-            shp_path (str): Lokasi shapefile hasil prediksi model.
+            gpkg_path (str): Lokasi shapefile hasil prediksi model.
             penyakit (str): Nama penyakit.
 
         Returns:
             dict: Hasil analisis.
         """
-        print(f"\nMenghitung sebaran penyakit {penyakit.title()}...")
-        gdf = gpd.read_file(shp_path)
-        data = gdf[penyakit]
+        try:
+            layers = fiona.listlayers(gpkg_path)
+        except Exception as e:
+            print(f"ERROR: {e}")
+            return None
+        # Siapkan tabel database gpkg
+        conn = sqlite3.connect(gpkg_path)
+        cur = conn.cursor()
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS app_layer_metadata (
+            layer_name TEXT PRIMARY KEY,
+            legend_json TEXT,
+            stats_json TEXT
+        )
+        """)
+        hasil = {}
+        legenda = {
+            1: {"label": "Healthy", "color": (0,128,0)},
+            2: {"label": "Low",     "color": (144,238,144)},
+            3: {"label": "Mild",    "color": (255,255,116)},
+            4: {"label": "Severe",  "color": (215,25,28)}
+        }
+        # Hitung sebaran per nama layer
+        for layer_name in layers:
+            print(f"\n=== Menganalisis Layer: {layer_name} ===")
+            # Membaca layer spesifik
+            gdf = gpd.read_file(gpkg_path, layer=layer_name)
+            
+            if "class" not in gdf.columns:
+                print(f"Kolom 'class' tidak ditemukan di layer {layer_name}")
+                continue
 
-        # Menghitung jumlah data
-        jml_data = np.count_nonzero(data)
-        # Mengambil semua nilai unik
-        counts = data.value_counts()
+            data = gdf["class"]
+            jml_data = np.count_nonzero(data)
+            
+            if jml_data == 0:
+                print(f"Tidak ada data penyakit pada layer {layer_name}")
+                continue
 
-        # Mencetak hasil
-        labels = ["sehat", "ringan", "sedang", "parah"]
-        persen = {}
-        for i, label in enumerate(labels, 1):
-            jumlah_spesifik = counts.get(i, 0)
-            hasil_persen = round((jumlah_spesifik / jml_data) * 100, 2)
-            persen[i] = hasil_persen
-            print(f"Persentase tanaman {label}: {persen[i]}%")
-        #Mengambil nilai persentase untuk logika
-        p_sehat = persen[1]
-        p_ringan = persen[2]
-        p_sedang = persen[3]
-        p_parah = persen[4]
-        p_parah_total = p_sedang + p_parah # Gabungan sedang dan parah
-        # Logika Rekomendasi
-        print("-" * 30)
-        if p_parah_total > p_sehat or p_parah_total > p_ringan:
-            recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
+            counts = data.value_counts()
+            labels = ["Healthy", "Low", "Mild", "Severe"]
+            stats = {}
+
+            # Kalkulasi persentase per kategori (1-4)
+            for i, label in enumerate(labels, 1):
+                jumlah_spesifik = counts.get(i, 0)
+                hasil_persen = round((jumlah_spesifik / jml_data) * 100, 2)
+                stats[label] = hasil_persen
+                print(f"Persentase tanaman {label}: {hasil_persen}%")
+
+            # Logika Rekomendasi
+            p_sehat = stats.get(labels[0])
+            p_ringan = stats.get(labels[1])
+            p_sedang = stats.get(labels[2])
+            p_parah = stats.get(labels[3])
+            p_parah_total = p_sedang + p_parah
+
+            print("-" * 30)
+            if p_parah_total > p_sehat or p_parah_total > p_ringan:
+                recom = "High severity level, immediate action required!"
+                # recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
+            elif p_ringan > p_sehat: 
+                recom =  "Perform routine monitoring and take preventive action!"
+                # recom = "Lakukan pemantauan rutin dan tindakan pencegahan."  
+            else:
+                recom = "The majority of vegetation is healthy."
+                # recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
+            
             print(f"Rekomendasi: {recom}")
-        elif p_ringan > p_sehat:  
-            recom = "Lakukan pemantauan rutin dan tindakan pencegahan."  
-            print(f"Rekomendasi: {recom}")
-        else:
-            recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
-            print(f"{recom}")
+            
+            # Simpan hasil per layer ke dictionary utama
+            stats["rekomendasi"] = recom
+            legend = legenda
 
-        persen["rekomendasi"] = recom
-        return persen
+            # Masukkan ke database
+            cur.execute("""
+            INSERT OR REPLACE INTO app_layer_metadata
+            (layer_name, legend_json, stats_json)
+            VALUES (?, ?, ?)
+            """, (
+                layer_name,
+                json.dumps(legend),
+                json.dumps(stats)
+            ))
+            hasil[layer_name] = stats
+
+        # Menutup database
+        conn.commit()
+        conn.close()
+        return hasil
     
 
 if __name__ == "__main__":

@@ -163,7 +163,7 @@
   </action>
   <action name="action_open_shp">
    <property name="text">
-    <string>Shapefile</string>
+    <string>Vector</string>
    </property>
   </action>
   <action name="action_water_predict">

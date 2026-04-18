@@ -53,7 +53,9 @@ class LegendPanel(QWidget):
 
     def set_legend(self, legend_dict):
         self.legend_list.clear()
-        for label, color in legend_dict.items():
+        for value, item in legend_dict.items():
+            label = item["label"]
+            color = item["color"]
             self.add_legend_item(label, color)
 
     def set_info(self, info_dict):

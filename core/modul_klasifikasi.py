@@ -136,7 +136,7 @@ class PlantDiseaseClassifier:
         """
         self._load_model()
         
-        output_names = ["blas", "hdb", "bercak cokelat", "bercak sempit"] 
+        output_names = ["blas", "blb", "bs", "nbs"] 
         path_hasil = []
         print(f"Memprediksi citra...")
         with rio.open(input_folder) as src:
@@ -222,13 +222,28 @@ class PlotDiseaseClassifier:
     """ 
     def __init__(self):
         self.status = "Idle"
+        self.scaler = None
+        self.model = None
         self.last_result = None
 
-    def run(self, model_path, scaler_path, input_folder, shp_path, output_folder):
+    def _load_model(self):
+        if self.model is not None:
+            return
+        import tensorflow as tf
+        import joblib
+
+        model_path = "core/models/deteksi_penyakit/model_deteksi_penyakit.h5"
+        scaler_path = "core/scaler/model_deteksi_penyakit_Scaler.joblib"
+        self.scaler = joblib.load(scaler_path)
+        logger.info("Memuat scaler")
+        self.model = tf.keras.models.load_model(model_path, compile=False)
+        logger.info(f"Model dimuat bertipe: {type(self.model)}")
+
+    def run(self, input_folder, shp_path, output_folder):
         self.status = "Processing"
         logger.info("Memprediksi penyakit...") 
         try:
-            self.last_result = self.deteksi_penyakit_petak(model_path, scaler_path, input_folder, shp_path, output_folder) 
+            self.last_result = self.deteksi_penyakit_petak(input_folder, shp_path, output_folder) 
             self.status = "Done"
             return self.last_result
         except Exception as e:
@@ -249,7 +264,7 @@ class PlotDiseaseClassifier:
         Returns:
             str: Output path.
         """
-
+        self._load_model()
         df = pd.read_csv(input_folder)
         gdf = gpd.read_file(shp_path)
 
@@ -257,12 +272,18 @@ class PlotDiseaseClassifier:
         X_inf = df[fitur]
         X_inf_array = X_inf.values
         print("Menormalisasi data...")
-        X_inf_scaled = self.scaler_disease.transform(X_inf_array)
+        X_inf_scaled = self.scaler.transform(X_inf_array)
         print("Memprediksi penyakit...")
-        raw_preds = self.model_disease.predict(X_inf_scaled)
+        raw_preds = self.model.predict(X_inf_scaled)
 
         map_label = {1: "Sehat", 2: "Ringan", 3: "Sedang", 4: "Parah"}
         disease_names = ["blas", "blb", "bs", "nbs"]
+        output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Petak"
+        os.makedirs(output_folder, exist_ok=True)
+        output_xlsx = os.path.join(output_folder, "Hasil_Prediksi.xlsx")
+        output_shp = os.path.join(output_folder, "Hasil_Prediksi.shp")
+        output_gpkg = os.path.join(output_folder, "Hasil_Prediksi.gpkg")
+        gdf_single = gdf.copy()
 
         for i, name in enumerate(disease_names):
             # Ambil index kelas tertinggi
@@ -270,14 +291,25 @@ class PlotDiseaseClassifier:
             # Masukkan ke dataframe
             df[f"Prediksi_{name}"] = [map_label[idx] for idx in class_idx]
             gdf[name] = [idx for idx in class_idx]
+            gdf_single["class"] = class_idx
+            gdf_single.to_file(output_gpkg,
+                               layer=name,
+                               driver="GPKG")
 
-        output_folder = f"{output_folder}/Sebaran_Petak"
-        os.makedirs(output_folder, exist_ok=True)
-        output_path = os.path.join(output_folder, "Hasil_Prediksi.xlsx")
-        output_shp = os.path.join(output_folder, "Hasil_Prediksi.shp")
         print(f"Menyimpan hasil prediksi di {output_folder}")
-        df.to_excel(output_path, index=False)
+        df.to_excel(output_xlsx, index=False)
         gdf.to_file(output_shp, driver="ESRI Shapefile")
         
-        return output_shp, disease_names
+        return output_gpkg
+
+if __name__ == "__main__":
+    from modul_utilitas import PlantDiseaseAnalyzer
+    import glob
+    input_folder = r"C:\Users\acer_\Documents\Orthomosaic\tes aplikasi\Lahan percobaan\Hasil_Prediksi\Sebaran_Rumpun"
+    shp_path = r"C:\Users\acer_\Documents\Orthomosaic\tes aplikasi\Lahan percobaan\multipoligon\Lahan 2_0_1029_komponen.shp"
+    output_folder = r"C:\Users\acer_\Documents\Orthomosaic\tes aplikasi\Lahan percobaan"
+    usep = PlantDiseaseAnalyzer()
+    files = glob.glob(f"{input_folder}/*.tif")
+    for file in files:
+        hasil = usep.run(file, output_folder)
 

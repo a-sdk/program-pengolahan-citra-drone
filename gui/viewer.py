@@ -1,11 +1,12 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, 
-    QGraphicsItemGroup, QGraphicsPixmapItem, QFrame
+    QGraphicsItemGroup, QGraphicsPixmapItem, QFrame,
+    QGraphicsPathItem
 )
 from PyQt5.QtGui import (
     QPixmap, QImage, QPainter, 
-    QPolygonF, QPen, QColor,
-    QTransform
+    QPolygonF, QBrush, QPen, QColor,
+    QTransform, QPainterPath
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QPointF, QEvent
 import rasterio as rio
@@ -151,6 +152,83 @@ class Viewer(QWidget):
         self.fit_to_view()
         return layer_id
     
+    def _draw_polygon(self, coords, group, color):
+        points = [QPointF(x, y) for x, y in coords]
+        polygon_item = self.scene.addPolygon(QPolygonF(points))
+        pen = QPen(QColor(0, 0, 0, 150))
+        pen.setWidth(1)
+        pen.setCosmetic(True)
+        polygon_item.setPen(pen)
+        polygon_item.setBrush(QColor(*color))
+        group.addToGroup(polygon_item)
+
+    def _add_vector(self, gdf, group, legend_dict=None, class_col=None):
+        for _, feature in gdf.iterrows():
+            geom = feature.geometry
+            # Warna berdasarkan atribut
+            color = (255, 0, 0, 50)
+            if legend_dict and class_col:
+                val = str(feature[class_col])
+                if val in legend_dict:
+                    color = legend_dict[val]["color"]
+                    print(color)
+
+            if geom is None or geom.is_empty:
+                continue
+            if geom.geom_type == 'Polygon':
+                self._draw_polygon(geom.exterior.coords, group, color)
+            elif geom.geom_type == 'MultiPolygon':
+                for poly in geom.geoms:
+                    self._draw_polygon(poly.exterior.coords, group, color)
+            self.fit_to_view()
+
+    def add_shapefile(self, path):
+        logger.info("Membuka shapefile")
+        self._layer_id += 1
+        layer_id = self._layer_id
+        gdf = gpd.read_file(path)
+        group = QGraphicsItemGroup()
+        self.scene.addItem(group)
+        self.layer_items[layer_id] = group
+        self.vector_info[layer_id] = {
+            "type": "shp",
+            "path": path,
+            "crs": gdf.crs.to_string() if gdf.crs else "Unknown",
+            "geom_type": str(gdf.geom_type.iloc[0]),
+            "count": len(gdf)
+        }
+
+        self._add_vector(gdf, group)
+        return layer_id
+    
+    def add_gpkg_layer(self, path, layer_name):
+        logger.info(f"Membuka GPKG: {layer_name}")
+        self._layer_id += 1
+        layer_id = self._layer_id
+        legend, stats = self.read_gpkg_metadata(path, layer_name)
+        gdf = gpd.read_file(path, layer=layer_name)
+        group = QGraphicsItemGroup()
+        self.scene.addItem(group)
+        self.layer_items[layer_id] = group
+        self.vector_info[layer_id] = {
+            "type": "gpkg",
+            "path": path,
+            "layer_name": layer_name,
+            "crs": gdf.crs.to_string() if gdf.crs else "Unknown",
+            "geom_type": str(gdf.geom_type.iloc[0]),
+            "count": len(gdf),
+            "legend": legend,
+            "stats": stats
+        }
+
+        self._add_vector(
+            gdf, 
+            group,
+            legend,
+            "class"
+        )
+        return layer_id
+    
     def set_visible(self, layer_id, visible):
         self.layer_items[layer_id].setVisible(visible)
 
@@ -202,45 +280,7 @@ class Viewer(QWidget):
         for z, lid in enumerate(ordered_ids):
             if lid in self.layer_items:
                 self.layer_items[lid].setZValue(z)
-        self.viewer.viewport().update()
-        
-    def add_shapefile(self, path):
-        logger.info("Membuka shapefile")
-        gdf = gpd.read_file(path)
-        
-        group = QGraphicsItemGroup()
-        self.scene.addItem(group)
-
-        for _, feature in gdf.iterrows():
-            geom = feature.geometry
-            if geom.geom_type == 'Polygon':
-                self._draw_polygon_to_group(geom.exterior.coords, group)
-            elif geom.geom_type == 'MultiPolygon':
-                for poly in geom.geoms:
-                    self._draw_polygon_to_group(poly.exterior.coords, group)
-        
-        self._layer_id += 1
-        layer_id = self._layer_id
-
-        self.layer_items[layer_id] = group
-
-        self.vector_info[layer_id] = {
-            "crs": gdf.crs.to_string() if gdf.crs else "Unknown",
-            "geom_type": str(gdf.geom_type.iloc[0]),
-            "count": len(gdf)
-        }
-        return layer_id
-
-    def _draw_polygon_to_group(self, coords, group):
-        # Konversi koordinat Geopandas ke QPolygonF milik Qt
-        points = [QPointF(x, y) for x, y in coords]
-        polygon_item = self.scene.addPolygon(QPolygonF(points))
-        pen = QPen(QColor(255, 0, 0, 150))
-        pen.setWidth(2)
-        pen.setCosmetic(True)
-        polygon_item.setPen(pen)
-        polygon_item.setBrush(QColor(255, 0, 0, 30))
-        group.addToGroup(polygon_item)
+        self.viewer.viewport().update()       
 
     def get_metadata(self, layer_id):
         # Ambil item dari dictionary layer_items
@@ -267,11 +307,31 @@ class Viewer(QWidget):
         elif isinstance(item, QGraphicsItemGroup):
             info = self.vector_info.get(layer_id, {})
             metadata.update({
-                "Type": "Vector (Shapefile)",
-                "Geometry": info.get("geom_type", "Polygon"),
-                "CRS": info.get("crs", "Unknown"),
-                "Feature Count": info.get("count", "0")
+                        "Type": "GeoPackage Layer" if info.get("type") == "gpkg" else "Shapefile",
+                        "Layer Name": info.get("layer_name", "-"),
+                        "Geometry": info.get("geom_type", "Polygon"),
+                        "CRS": info.get("crs", "Unknown"),
+                        "Feature Count": info.get("count", "0")
             })  
             
         return metadata
 
+    def read_gpkg_metadata(self, path, layer_name):
+        import sqlite3
+
+        conn = sqlite3.connect(path)
+        cur = conn.cursor()
+
+        cur.execute("""
+        SELECT legend_json, stats_json
+        FROM app_layer_metadata
+        WHERE layer_name = ?
+        """, (layer_name,))
+
+        row = cur.fetchone()
+        conn.close()
+
+        if row:
+            return json.loads(row[0]), json.loads(row[1])
+
+        return None, None

@@ -9,9 +9,11 @@ from PyQt5.QtWidgets import (
 from gui.viewer import Viewer
 from gui.layer_panel import LayerPanel
 from gui.legend_panel import LegendPanel
-from gui.dialog_disease import DiseasePredictDialog
+from gui.input_dialog import InputDialog
 from gui.worker import Worker
 from app.disease_controller import DiseaseAnalysis
+from app.water_controller import WaterAnalysis
+from app.nutrient_controller import NutrientAnalysis
 from app.result_model import AnalysisResult
 import os
 import logging
@@ -51,7 +53,9 @@ class MainWindow(QMainWindow):
         self.progress_bar.setMaximum(100)
         self.progress_bar.setVisible(False)
     
-        self.controller = DiseaseAnalysis()
+        self.disease_ctrl = DiseaseAnalysis()
+        self.water_ctrl = WaterAnalysis()
+        self.nutrient_ctrl = NutrientAnalysis()
         self._setup_icons()
         self._setup_statusbar()
         self.statusBar().showMessage("Ready")
@@ -82,9 +86,9 @@ class MainWindow(QMainWindow):
         icon_open = QIcon("assets/icon/folder.png")
         icon_exit = QIcon("assets/icon/exit.png")
         icon_model = QIcon("assets/icon/deep-learning.png")
-        icon_disease = QIcon("assets/icon/virus.png")
-        icon_mineral = QIcon("assets/icon/nutrients.png")
-        icon_water = QIcon("assets/icon/drop.png")
+        self.icon_disease = QIcon("assets/icon/virus.png")
+        self.icon_mineral = QIcon("assets/icon/nutrients.png")
+        self.icon_water = QIcon("assets/icon/drop.png")
         icon_hand = QIcon("assets/icon/hand.png")
         icon_zoom_in = QIcon("assets/icon/zoom-in.png")
         icon_zoom_out = QIcon("assets/icon/zoom-out.png")
@@ -98,9 +102,9 @@ class MainWindow(QMainWindow):
         self.action_zoom_out.setIcon(icon_zoom_out)
         self.action_fit_to_view.setIcon(icon_fit_to_view)
         self.menuModel.setIcon(icon_model)
-        self.action_nutrient_predict.setIcon(icon_mineral)
-        self.action_water_predict.setIcon(icon_water)
-        self.action_disease_predict.setIcon(icon_disease)
+        self.action_nutrient_predict.setIcon(self.icon_mineral)
+        self.action_water_predict.setIcon(self.icon_water)
+        self.action_disease_predict.setIcon(self.icon_disease)
         self.layer_panel.tree.setIconSize(QSize(24, 24))
 
     def _setup_statusbar(self):
@@ -140,15 +144,17 @@ class MainWindow(QMainWindow):
         logger.info("Sinyal Action terhubung")
         self.layer_panel.fileLoaded.connect(self.update_status_bar)
         self.layer_panel.layerSelected.connect(self.update_legend_from_layer)
-        self.action_open_shp.triggered.connect(self.open_shp_file)
+        self.action_open_shp.triggered.connect(self.open_vector_file)
         self.action_open_img.triggered.connect(self.open_img_file)
         self.action_exit.triggered.connect(self.handle_exit)
         self.action_pan.toggled.connect(self.viewer.set_pan_mode)
         self.action_zoom_in.triggered.connect(self.viewer.zoom_in)
         self.action_zoom_out.triggered.connect(self.viewer.zoom_out)
         self.action_fit_to_view.triggered.connect(self.viewer.fit_to_view)
-        self.action_disease_predict.triggered.connect(self.run_disease_analysis)
-        self.action_debug.triggered.connect(self.simulate_finished)
+        self.action_disease_predict.triggered.connect(self.run_disease_prediction)
+        self.action_water_predict.triggered.connect(self.run_water_prediction)
+        self.action_nutrient_predict.triggered.connect(self.run_nutrient_prediction)
+        # self.action_debug.triggered.connect(self.simulate_finished)
 
     def open_img_file(self):
         logger.info("Action: open_img ditekan")
@@ -158,31 +164,47 @@ class MainWindow(QMainWindow):
         if path:
             self.layer_panel.add_layer(path)
 
-    def open_shp_file(self):
+    def open_vector_file(self):
         logger.info("Action: open_shp ditekan")
-        path, _ = QFileDialog.getOpenFileName(self, "Pilih Shapefile", "", "Shapefile (*.shp)")
+        path, _ = QFileDialog.getOpenFileName(self, "Pilih Vektor", "", "Shapefile (*.shp);;Geopackage (*.gpkg)")
         
         if path:      
             self.layer_panel.add_layer(path)
     
     def update_legend_from_layer(self, layer_id):
-        info = self.viewer.raster_info.get(layer_id)
+        logger.info("Legenda diperbarui!")
+        info = (
+            self.viewer.raster_info.get(layer_id)
+            or
+            self.viewer.vector_info.get(layer_id)
+        )
+
         if not info:
             self.legend_panel.clear()
             return
-        legend = info.get("legend")
-        stats = info.get("stats")
+
+        legend = None
+        stats = None
+
+        
+        if info.get("type") == "gpkg":
+            legend, stats = self.viewer.read_gpkg_metadata(
+                info["path"],
+                info["layer_name"]
+            )
+        else:
+            legend = info.get("legend")
+            stats = info.get("stats")
+
         if not legend and not stats:
             self.legend_panel.clear()
             return
+
         if legend:
             self.legend_panel.set_legend(legend)
-        else:
-            self.legend_panel.legend_list.clear()
+
         if stats:
             self.legend_panel.set_info(stats)
-        else:
-            self.legend_panel.info_list.clear()
 
         self.dockLegend.show()
 
@@ -193,6 +215,28 @@ class MainWindow(QMainWindow):
 
         self.statusBar().showMessage(msg, 1000*60*10) 
         logger.info(f"Progress {value}% - {msg}")
+
+    def run_analysis(self, controller, tif, shp, out):
+        # Menambah tif ke layer panel
+        self.layer_panel.add_layer(tif)
+        # Menambah shp ke layer panel
+        self.layer_panel.add_layer(shp)
+        # Inisiasi worker thread
+        self.worker = Worker(controller, tif, shp, out)
+        # Inisiasi progress dialog
+        self._setup_progress_dialog()
+        # Menghubungkan sinyal worker ke progress dialog
+        self.worker.progress_signal.connect(self.handle_progress_dialog)
+        self.worker.progress_signal.connect(self.update_progress_bar)
+        self.worker.finished_signal.connect(self.on_analysis_finished)
+        self.worker.error_signal.connect(self.show_error_msg)
+        # Menghubungkan tombol 'cancel'
+        self.pd.canceled.connect(self.worker.requestInterruption)
+        # Memulai proses
+        self.worker.start()
+        self.progress_bar.setVisible(True)
+        self.progress_bar.setValue(0)
+        self.statusBar().showMessage("Ready")
 
     def on_analysis_finished(self, result: AnalysisResult):
         # Menutup timer dan dialog progress
@@ -237,31 +281,26 @@ class MainWindow(QMainWindow):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
 
-    def run_disease_analysis(self):
+    def run_disease_prediction(self):
         logger.info("action_disease_predict ditekan")
-        dialog = DiseasePredictDialog(self)
-        
+        dialog = InputDialog(self, title="Disease Detection", icon=self.icon_disease)
         if dialog.exec_():
             tif, shp, out = dialog.get_values()
-            # Menambah tif ke layer panel
-            self.layer_panel.add_layer(tif)
-            # Menambah shp ke layer panel
-            self.layer_panel.add_layer(shp)
-            # Inisiasi worker thread
-            self.worker = Worker(self.controller, tif, shp, out)
-            # Inisiasi progress dialog
-            self._setup_progress_dialog()
-            # Menghubungkan sinyal worker ke progress dialog
-            self.worker.progress_signal.connect(self.handle_progress_dialog)
-            self.worker.progress_signal.connect(self.update_progress_bar)
-            self.worker.finished_signal.connect(self.on_analysis_finished)
-            self.worker.error_signal.connect(self.show_error_msg)
-            # Menghubungkan tombol 'cancel'
-            self.pd.canceled.connect(self.worker.requestInterruption)
-            self.worker.start()
-            self.progress_bar.setVisible(True)
-            self.progress_bar.setValue(0)
-            self.statusBar().showMessage("Ready")
+            self.run_analysis(self.disease_ctrl, tif, shp, out)
+
+    def run_water_prediction(self):
+        logger.info("action_water_predict ditekan")
+        dialog = InputDialog(self, title="Water Availability", icon=self.icon_water)
+        if dialog.exec_():
+            tif, shp, out = dialog.get_values()
+            self.run_analysis(tif, shp, out)
+
+    def run_nutrient_prediction(self):
+        logger.info("action_disease_predict ditekan")
+        dialog = InputDialog(self, title="Nutrient Availability", icon=self.icon_mineral)
+        if dialog.exec_():
+            tif, shp, out = dialog.get_values()
+            self.run_analysis(tif, shp, out)
 
     def handle_exit(self):
         logger.info("Action: exit ditekan")
