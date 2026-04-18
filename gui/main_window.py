@@ -20,8 +20,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
-        
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -245,13 +243,18 @@ class MainWindow(QMainWindow):
         # Muncul dialog selesai
         self.show_finished()
         # Membuka file hasil prediksi
-        if not os.path.exists(result.prediction_path[0]):
-            self.show_error_msg(f"File not found.")
-            return
-        
-        for file in result.prediction_path:
+        if isinstance(result.prediction_path, list):
+            if not os.path.exists(result.prediction_path[0]):
+                self.show_error_msg(f"File not found.")
+                return
+            for file in result.prediction_path:
+                try:
+                    self.layer_panel.add_layer(file, isPrediction=True)
+                except Exception as e:
+                    self.show_error_msg(f"{str(e)}")
+        else:
             try:
-                self.layer_panel.add_layer(file, isPrediction=True)
+                self.layer_panel.add_layer(result.prediction_path)
             except Exception as e:
                 self.show_error_msg(f"{str(e)}")
 
@@ -293,14 +296,14 @@ class MainWindow(QMainWindow):
         dialog = InputDialog(self, title="Water Availability", icon=self.icon_water)
         if dialog.exec_():
             tif, shp, out = dialog.get_values()
-            self.run_analysis(tif, shp, out)
+            self.run_analysis(self.water_ctrl, tif, shp, out)
 
     def run_nutrient_prediction(self):
         logger.info("action_disease_predict ditekan")
         dialog = InputDialog(self, title="Nutrient Availability", icon=self.icon_mineral)
         if dialog.exec_():
             tif, shp, out = dialog.get_values()
-            self.run_analysis(tif, shp, out)
+            self.run_analysis(self.nutrient_ctrl, tif, shp, out)
 
     def handle_exit(self):
         logger.info("Action: exit ditekan")
@@ -314,12 +317,13 @@ class MainWindow(QMainWindow):
         from app.result_model import AnalysisResult
 
         fake = AnalysisResult()
-        fake.prediction_path = [
-            "C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_penyakit_bercak cokelat.tif",
-            "C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_penyakit_bercak sempit.tif",
-            "C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_penyakit_blas.tif",
-            "C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_penyakit_hdb.tif"
-        ]
+        fake.prediction_path = r"C:\Users\acer_\Documents\Orthomosaic\tes aplikasi\Lahan percobaan\Hasil_Prediksi\Sebaran_Petak\Hasil_Prediksi.gpkg"
+        # fake.prediction_path = [
+        #     "C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_penyakit_bercak cokelat.tif",
+        #     "C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_penyakit_bercak sempit.tif",
+        #     "C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_penyakit_blas.tif",
+        #     "C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/Hasil_Prediksi/Sebaran_Rumpun/peta_sebaran_penyakit_hdb.tif"
+        # ]
         fake.statistic = {
             'Healthy': 5.29, 
             'Low': 0.0, 
@@ -329,10 +333,10 @@ class MainWindow(QMainWindow):
         }
 
         fake.legend = {
-            "Healthy": (0, 128, 0),
-            "Low": (144, 238, 144),
-            "Mild": (255, 255, 116),
-            "Severe": (215, 25, 28)
+            1: {"label": "Healthy", "color": (0,128,0)},
+            2: {"label": "Low",     "color": (144,238,144)},
+            3: {"label": "Mild",    "color": (255,255,116)},
+            4: {"label": "Severe",  "color": (215,25,28)}
         }
 
         # Panggil handler yang sama persis seperti saat worker selesai

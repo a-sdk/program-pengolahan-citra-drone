@@ -5,8 +5,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 class InputDialog(QDialog):
-    def __init__(self, title, icon, parent=None):
-        super().__init__()
+    def __init__(self, parent=None, title="", icon=None):
+        super().__init__(parent)
         uic.loadUi("ui/input_dialog.ui", self)
 
         self.setWindowTitle(title)

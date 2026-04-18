@@ -1,10 +1,12 @@
 from app.result_model import AnalysisResult
-from core.modul_klip import Clipper
-from core.modul_transformasi import Transformer, Segmenter
-from core.modul_mask import Masker
-from core.modul_ekstraksi import Extractor
-from core.modul_klasifikasi import PlantDiseaseClassifier
-from core.modul_utilitas import Splitter, PlantDiseaseAnalyzer
+from core.clipper import Clipper
+from core.transformer import Transformer
+from core.segmenter import Segmenter
+from core.masker import Masker
+from core.extractor import Extractor
+from core.classifier import PlantDiseaseClassifier
+from core.splitter import Splitter
+from core.stats_calculator import PlantCalculator
 
 import logging
 
@@ -19,7 +21,7 @@ class DiseaseAnalysis:
         self.masker = Masker()
         self.extractor = Extractor()
         self.classifier = PlantDiseaseClassifier()
-        self.stats_calc = PlantDiseaseAnalyzer()
+        self.stats_calc = PlantCalculator()
         self.on_progress = None
         self.on_error = None
         self.on_finished = None
@@ -76,17 +78,17 @@ class DiseaseAnalysis:
             if is_cancelled(): return None
             emit_progress(70, "Detecting disease...")
             classified_path = self.classifier.run(
-                masked_path, 
-                output_folder, 
+                input_folder=masked_path, 
+                output_folder=output_folder, 
                 check_cancel=is_cancelled, 
                 on_progress=emit_progress
                 )    
             if is_cancelled(): return None
             emit_progress(90, "Calculating stats...")
             stats = []
-            for i, name in enumerate(classified_path):
+            for i, path in enumerate(classified_path):
                 if is_cancelled(): return None
-                stats = self.stats_calc.run(name, output_folder)
+                stats = self.stats_calc.run(path)
                 emit_progress(90+i, f"Calculating stats ({str(i)}/{str(len(classified_path))})...")
             logger.info(f"Stats: {stats}")
             result.clip_path = clipped_path

@@ -89,173 +89,149 @@ def ambil_file(ekstensi):
                 print(f"\t {c}) {nf}")
                 c += 1
             return file_target, lokasi_folder
-
-class Splitter:
+        
+# Fungsi untuk membuat multipoligon (shahiban)
+def buat_multipoligon(shp_path, output_folder, on_progress):
     """
-    Kelas untuk memecah poligon.
+    Membuat multipoligon dari shapefile poligon.
+
+    Parameters:
+        shp_path (str): Lokasi shapefile yang menjadi acuan.
+        output_folder (str): Nama folder tempat hasil klip disimpan.
+        
+    Returns:
+        str: Output path.
     """
-    def __init__(self):
-        self.status = "Idle"
-        self.last_result = None
-        self.n_poly = None
-        self.n_subpoly = None
 
-    def run(self, shp_path, output_folder, on_progress=None):
-        self.status = "Processing"
-        logger.info("Memulai pembuatan multipoligon...") 
-        try:
-            self.last_result = self.buat_multipoligon(shp_path, output_folder, on_progress) 
-            self.status = "Done"
-            return self.last_result
-        except Exception as e:
-            self.status = "Error"
-            logger.error(f"ERROR {type(e).__name__}: {e}", exc_info=True)
-            return None
-        
-    # Fungsi untuk membuat multipoligon (shahiban)
-    def buat_multipoligon(self, shp_path, output_folder, on_progress):
-        """
-        Membuat multipoligon dari shapefile poligon.
+    print("\nMembuat multipoligon...")
+    
+    output_folder = f"{output_folder}/multipoligon"
+    os.makedirs(output_folder, exist_ok=True)
+    filename = os.path.splitext(os.path.basename(shp_path))[0]
+    print(f"Memproses file: {filename}.shp")
+    
+    # ========================================
+    # Tahap 1: Membaca & Konversi CRS
+    # ========================================
+    if on_progress:
+        on_progress(11, f"Loading polygon crs...")
+    polygons = gpd.read_file(shp_path)
+    crs_asal = polygons.crs.to_string()
+    if polygons.crs is None:
+        raise ValueError(f"File {filename} tidak memiliki CRS. Harap periksa file.")
 
-        Parameters:
-            shp_path (str): Lokasi shapefile yang menjadi acuan.
-            jml_poligon (int): Jumlah poligon dalam satu shapefile.
-            jml_komponen (int): Jumlah komponen/pecahan per poligon.
-            output_folder (str): Nama folder tempat hasil klip disimpan.
-            
-        Returns:
-            str: Output path.
-        """
+    if polygons.crs.is_geographic:
+        overall_geometry = polygons.unary_union
+        centroid = overall_geometry.centroid
+        epsg_code = lonlat_to_utm_epsg(centroid.x, centroid.y)
+        polygons = polygons.to_crs(epsg=epsg_code)
+        print(f"CRS diubah dari {crs_asal} ke UTM (EPSG:{epsg_code})")
+    else:
+        print(f"CRS sudah proyeksi: ({str(polygons.crs).upper()})")
 
-        print("\nMembuat multipoligon...")
-        
-        output_folder = f"{output_folder}/multipoligon"
-        os.makedirs(output_folder, exist_ok=True)
-        filename = os.path.splitext(os.path.basename(shp_path))[0]
-        print(f"Memproses file: {filename}.shp")
-        
-        # ========================================
-        # Tahap 1: Membaca & Konversi CRS
-        # ========================================
-        if on_progress:
-            on_progress(11, f"Loading polygon crs...")
-        polygons = gpd.read_file(shp_path)
-        crs_asal = polygons.crs.to_string()
-        if polygons.crs is None:
-            raise ValueError(f"File {filename} tidak memiliki CRS. Harap periksa file.")
+    # Menentukan jumlah komponen poligon berdasarkan luas 
+    with fiona.open(shp_path) as shp:
+        jml_poligon = len(shp)
+    poly_area = polygons.geometry.area.sum()
+    subpoly_area = 0.5 #m2
+    jml_komponen = (poly_area/subpoly_area).astype(int)
+    jml_cluster = jml_poligon * jml_komponen
+    print(f"Terdapat {jml_poligon} poligon, total luasan: {poly_area:.2f} m2")
+    print(f"Jumlah komponen: {jml_komponen}")
+    output_intersection = os.path.join(output_folder, f"{filename}_{jml_cluster}_komponen.shp")
+    # ========================================
+    # Tahap 2: Generate Random Points
+    # ========================================
+    if on_progress:
+        on_progress(12, f"Generating random points...")
+    point_count = jml_cluster * 3
+    areas = polygons.area
+    total_area = areas.sum()
+    proportions = (areas / total_area) * point_count
 
-        if polygons.crs.is_geographic:
-            overall_geometry = polygons.unary_union
-            centroid = overall_geometry.centroid
-            epsg_code = lonlat_to_utm_epsg(centroid.x, centroid.y)
-            polygons = polygons.to_crs(epsg=epsg_code)
-            print(f"CRS diubah dari {crs_asal} ke UTM (EPSG:{epsg_code})")
-        else:
-            print(f"CRS sudah proyeksi: ({str(polygons.crs).upper()})")
+    int_parts = proportions.astype(int)
+    residuals = proportions - int_parts
+    remaining = point_count - int_parts.sum()
+    extra_idx = residuals.nlargest(remaining).index
 
-        # Menentukan jumlah komponen poligon berdasarkan luas 
-        with fiona.open(shp_path) as shp:
-            self.n_poly = len(shp)
-        poly_area = polygons.geometry.area.sum()
-        subpoly_area = 0.5 #m2
-        self.n_subpoly = (poly_area/subpoly_area).astype(int)
-        jml_cluster = self.n_poly * self.n_subpoly
-        print(f"Terdapat {self.n_poly} poligon, total luasan: {poly_area:.2f} m2")
-        print(f"Jumlah komponen: {self.n_subpoly}")
-        output_intersection = os.path.join(output_folder, f"{filename}_{jml_cluster}_komponen.shp")
-        # ========================================
-        # Tahap 2: Generate Random Points
-        # ========================================
-        if on_progress:
-            on_progress(12, f"Generating random points...")
-        point_count = jml_cluster * 3
-        areas = polygons.area
-        total_area = areas.sum()
-        proportions = (areas / total_area) * point_count
+    int_parts.loc[extra_idx] += 1
 
-        int_parts = proportions.astype(int)
-        residuals = proportions - int_parts
-        remaining = point_count - int_parts.sum()
-        extra_idx = residuals.nlargest(remaining).index
+    all_points = []
+    for idx, row in polygons.iterrows():
+        pts = generate_grid_points(row.geometry, int_parts[idx])
+        all_points.extend(pts)
 
-        int_parts.loc[extra_idx] += 1
+    gdf_points = gpd.GeoDataFrame(geometry=all_points, crs=polygons.crs)
+    print(f"{len(gdf_points)} titik acak dihasilkan")
 
-        all_points = []
-        for idx, row in polygons.iterrows():
-            pts = generate_grid_points(row.geometry, int_parts[idx])
-            all_points.extend(pts)
+    # ========================================
+    # Tahap 3: K-Means Clustering
+    # ========================================
+    if on_progress:
+        on_progress(13, f"Clustering points...")
+    coords = [(p.x, p.y) for p in gdf_points.geometry]
+    kmeans = KMeans(n_clusters=jml_cluster, random_state=42, n_init=20)
+    gdf_points["CLUSTER_ID"] = kmeans.fit_predict(coords)
+    print("K-Means clustering selesai")
 
-        gdf_points = gpd.GeoDataFrame(geometry=all_points, crs=polygons.crs)
-        print(f"{len(gdf_points)} titik acak dihasilkan")
+    # ========================================
+    # Tahap 4: Aggregate per Cluster
+    # ========================================
+    if on_progress:
+        on_progress(14, f"Generating aggregates...")
+    agg = gdf_points.dissolve(by="CLUSTER_ID", aggfunc="first").reset_index()
+    print("Aggregate selesai")
 
-        # ========================================
-        # Tahap 3: K-Means Clustering
-        # ========================================
-        if on_progress:
-            on_progress(13, f"Clustering points...")
-        coords = [(p.x, p.y) for p in gdf_points.geometry]
-        kmeans = KMeans(n_clusters=jml_cluster, random_state=42, n_init=20)
-        gdf_points["CLUSTER_ID"] = kmeans.fit_predict(coords)
-        print("K-Means clustering selesai")
+    # ========================================
+    # Tahap 5: Hitung Centroid
+    # ========================================
+    if on_progress:
+        on_progress(15, f"Calculating centroids...")
+    agg["geometry"] = agg.geometry.centroid
+    centroids = agg.copy()
+    print(f"{len(centroids)} centroid dihasilkan")
 
-        # ========================================
-        # Tahap 4: Aggregate per Cluster
-        # ========================================
-        if on_progress:
-            on_progress(14, f"Generating aggregates...")
-        agg = gdf_points.dissolve(by="CLUSTER_ID", aggfunc="first").reset_index()
-        print("Aggregate selesai")
+    # ========================================
+    # Tahap 6: Voronoi Polygon
+    # ========================================
+    if on_progress:
+        on_progress(16, f"Generating voronoi polygons...")
+    points = MultiPoint(list(centroids.geometry))
+    buffer_union = centroids.buffer(100).unary_union
+    boundary = buffer_union.convex_hull
 
-        # ========================================
-        # Tahap 5: Hitung Centroid
-        # ========================================
-        if on_progress:
-            on_progress(15, f"Calculating centroids...")
-        agg["geometry"] = agg.geometry.centroid
-        centroids = agg.copy()
-        print(f"{len(centroids)} centroid dihasilkan")
+    vor = ops.voronoi_diagram(points, envelope=boundary, tolerance=0)
+    polys = [poly for poly in vor.geoms if poly.is_valid]
 
-        # ========================================
-        # Tahap 6: Voronoi Polygon
-        # ========================================
-        if on_progress:
-            on_progress(16, f"Generating voronoi polygons...")
-        points = MultiPoint(list(centroids.geometry))
-        buffer_union = centroids.buffer(100).unary_union
-        boundary = buffer_union.convex_hull
+    gdf_voronoi = gpd.GeoDataFrame(geometry=polys, crs=centroids.crs)
+    gdf_voronoi = gpd.sjoin_nearest(
+        gdf_voronoi, centroids, how="left", distance_col="dist"
+    )
 
-        vor = ops.voronoi_diagram(points, envelope=boundary, tolerance=0)
-        polys = [poly for poly in vor.geoms if poly.is_valid]
+    print("Voronoi polygons selesai")
 
-        gdf_voronoi = gpd.GeoDataFrame(geometry=polys, crs=centroids.crs)
-        gdf_voronoi = gpd.sjoin_nearest(
-            gdf_voronoi, centroids, how="left", distance_col="dist"
-        )
+    # ========================================
+    # Tahap 7: Intersection
+    # ========================================
+    if on_progress:
+        on_progress(19, f"Performing intersection...")
+    if polygons.crs != gdf_voronoi.crs:
+        gdf_voronoi = gdf_voronoi.to_crs(polygons.crs)
+        print("CRS berbeda, disamakan dulu.")
 
-        print("Voronoi polygons selesai")
+    gdf_inter = gpd.overlay(polygons, gdf_voronoi, how="intersection")
+    gdf_inter = gdf_inter[
+        ~gdf_inter.geometry.is_empty & gdf_inter.geometry.is_valid
+    ]
+    gdf_inter = gdf_inter.drop(columns=['index_right'])
+    # Menyiapkan kolom untuk prediksi model
+    gdf_inter["no_urut"] = gdf_inter.groupby("id").cumcount() + 1
+    # === Simpan langsung ke folder utama tanpa subfolder ===
+    gdf_inter.to_file(output_intersection, driver="ESRI Shapefile")
 
-        # ========================================
-        # Tahap 7: Intersection
-        # ========================================
-        if on_progress:
-            on_progress(19, f"Performing intersection...")
-        if polygons.crs != gdf_voronoi.crs:
-            gdf_voronoi = gdf_voronoi.to_crs(polygons.crs)
-            print("CRS berbeda, disamakan dulu.")
+    print(f"Intersection selesai")
 
-        gdf_inter = gpd.overlay(polygons, gdf_voronoi, how="intersection")
-        gdf_inter = gdf_inter[
-            ~gdf_inter.geometry.is_empty & gdf_inter.geometry.is_valid
-        ]
-        gdf_inter = gdf_inter.drop(columns=['index_right'])
-        # Menyiapkan kolom untuk prediksi model
-        gdf_inter["no_urut"] = gdf_inter.groupby("id").cumcount() + 1
-        # === Simpan langsung ke folder utama tanpa subfolder ===
-        gdf_inter.to_file(output_intersection, driver="ESRI Shapefile")
-
-        print(f"Intersection selesai")
-
-        return output_intersection
+    return output_intersection
 
 # Fungsi untuk memeriksa ukuran raster
 def cek_ukuran_raster(input_raster):
@@ -758,324 +734,279 @@ def buat_petak_sebaran(input_geotiff, file_metadata, folder_verteks, output_fold
 
 
     print(f"\nBerhasil membuat {len(penyakit)} peta sebaran penyakit.")
-
-class PlantDiseaseAnalyzer:
+        
+# Fungsi menampilkan hasil prediksi model per rumpun
+def tampilkan_penyakit_rumpun(input_folder, output_folder):
     """
-    Kelas untuk memunculkan hasil analisis per rumpun.
-    """ 
-    def __init__(self):
-        self.status = "Idle"
-        self.last_result = None
+    Menampilkan peta sebaran pada grafik.
+    
+    Parameters:
+        input_folder (str): Lokasi file GeoTIFF hasil prediksi model.
+        penyakit (str): Nama penyakit.
 
-    def run(self, input_folder, output_folder):
-        self.status = "Processing"
-        logger.info("Menghitung sebaran dan memunculkan hasil...") 
-        try:
-            # self.last_result.append(self.tampilkan_penyakit_rumpun(input_folder, output_folder))
-            self.last_result = self.hitung_sebaran_rumpun(input_folder)
-            self.tampilkan_penyakit_rumpun(input_folder, output_folder)
-            self.status = "Done"
-            return self.last_result
-        except Exception as e:
-            self.status = "Error"
-            logger.error(f"ERROR {type(e).__name__}: {e}", exc_info=True)
-            return None 
+    Returns:
+        str: Output path.
+    """
+    nf = os.path.splitext(os.path.basename(input_folder))[0]
+    penyakit = nf.split("_")[-1]
+    output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Rumpun"
+    output_path = f"{output_folder}/peta_sebaran_{penyakit}.png"
+    print(f"\nMenampilkan peta sebaran penyakit {penyakit.title()}...")
+    os.makedirs(output_folder, exist_ok=True)
+    alpha = "#00000000"
+    hg = "#008000ff"
+    ht = "#90ee90ff"
+    kuning = "#ffff74ff"
+    merah = "#d7191cff"
+    warna = [alpha, hg, ht, kuning, merah]
+    cmaps = mcolor.ListedColormap(warna)
+
+    bounds = np.arange(-0.5, 5, 1)
+    norms = mcolor.BoundaryNorm(bounds, 5)
+    patches = [
+        mpatch.Patch(color=hg, label="Sehat", ec="black"),
+        mpatch.Patch(color=ht, label="Ringan", ec="black"),
+        mpatch.Patch(color=kuning, label="Sedang", ec="black"),
+        mpatch.Patch(color=merah, label="Parah", ec="black")
+    ]
+    # fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+    # plt.legend(handles=patches, loc="lower right", title="Tingkat Kerusakan")
+    plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}", fontsize=14)
+    with rio.open(input_folder) as src:
+        data = src.read(1) 
+        plt.imshow(data, cmap=cmaps, norm=norms) 
+        # plt.show() 
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    return output_path
+
+# Fungsi untuk menghitung sebaran penyakit per rumpun
+def hitung_sebaran_rumpun(input_folder):
+    """
+    Menghitung sebaran penyakit.
+    
+    Parameters:
+        input_folder (str): Lokasi file GeoTIFF hasil prediksi model.
+        penyakit (str): Nama penyakit.
+
+    Returns:
+        None.
+    """
+    nf = os.path.splitext(os.path.basename(input_folder))[0]
+    penyakit = nf.split("_")[-1]
+    print(f"\nMenghitung sebaran penyakit {penyakit.title()}...")
+    with rio.open(input_folder) as src:
+        data = src.read(1)
+        nodata = src.nodata
+    # Mengecualikan nodata
+    mask_valid = (data != nodata)
+    valid_data = data[mask_valid]
+    # Menghitung total piksel valid
+    jml_data_valid = valid_data.size
+    # Mengambil semua nilai unik
+    counts = {k: v for k, v in zip(*np.unique(data, return_counts=True))}
+    labels = ["Healthy", "Low", "Mild", "Severe"]
+    # Menghitung persentase
+    stats = {k: round((counts.get(i+1, 0) / jml_data_valid) * 100, 2) for i, k in enumerate(labels)}
+    # Mencetak hasil
+    print(f"Total piksel pada citra: {jml_data_valid}")
+    for i, label in enumerate(labels, 1):
+        print(f"{label}: {stats[label]}%")
+    # Mengambil nilai untuk logika
+    p_sehat = stats[labels[0]]
+    p_ringan = stats[labels[1]]
+    p_sedang = stats[labels[2]]
+    p_parah = stats[labels[2]]
+    p_parah_total = p_sedang + p_parah # Gabungan sedang dan parah
+    # Logika Rekomendasi
+    print("-" * 30)
+    if p_parah_total > p_sehat or p_parah_total > p_ringan:
+        # recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
+        recom = "High severity level, immediate action required!"
+        print(f"Rekomendasi: {recom}")
+    elif p_ringan > p_sehat:  
+        # recom = "Lakukan pemantauan rutin dan tindakan pencegahan." 
+        recom = "Perform routine monitoring and take preventive action!" 
+        print(f"Rekomendasi: {recom}")
+    else:
+        # recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
+        recom = "The majority of vegetation is healthy."
+        print(f"{recom}")
+
+    stats["rekomendasi"] = recom
+
+    legenda = {
+        1: {"label": "Healthy", "color": (0,128,0)},
+        2: {"label": "Low",     "color": (144,238,144)},
+        3: {"label": "Mild",    "color": (255,255,116)},
+        4: {"label": "Severe",  "color": (215,25,28)}
+    }
+
+    legend_json = json.dumps(legenda)
+    stats_json = json.dumps(stats)
+
+    # Menyimpan legenda dan stats sebagai metadata
+    with rio.open(input_folder, "r+") as dest:
+        dest.update_tags(
+            LEGEND=legend_json,
+            STATS=stats_json
+            )
+    return stats   
         
-    # Fungsi menampilkan hasil prediksi model per rumpun
-    def tampilkan_penyakit_rumpun(self, input_folder, output_folder):
-        """
-        Menampilkan peta sebaran pada grafik.
+# Fungsi menampilkan hasil prediksi model per petak 
+def tampilkan_penyakit_petak(gpkg_path, penyakit, output_folder):
+    """
+    Menampilkan peta sebaran pada grafik.
+    
+    Parameters:
+        gpkg_path (str): Lokasi shapefile hasil prediksi model.
+        penyakit (str): Nama penyakit.
+        output_folder (str): Nama folder tempat file akan disimpan.
+
+    Returns:
+        str: Output path.
+    """
+
+    print(f"\nMenampilkan peta sebaran penyakit {penyakit.title()}...")
+    output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Rumpun"
+    output_path = f"{output_folder}/peta_sebaran_{penyakit}.png"
+    os.makedirs(output_folder, exist_ok=True)
+    alpha = "#00000000"
+    hg = "#008000ff"
+    ht = "#90ee90ff"
+    kuning = "#ffff74ff"
+    merah = "#d7191cff"
+    warna = [alpha, hg, ht, kuning, merah]
+    cmaps = mcolor.ListedColormap(warna)
+
+    bounds = np.arange(-0.5, 5, 1)
+    norms = mcolor.BoundaryNorm(bounds, 5)
+
+    gdf = gpd.read_file(gpkg_path)
+    # fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+
+    # gdf.plot(
+    #     column=penyakit,  
+    #     cmap=cmaps, 
+    #     norm=norms,
+    #     ax=ax,
+    #     edgecolor='black', 
+    #     linewidth=0.3
+    #     )
+    
+    patches = [
+        mpatch.Patch(color=hg, label="Sehat", ec="black"),
+        mpatch.Patch(color=ht, label="Ringan", ec="black"),
+        mpatch.Patch(color=kuning, label="Sedang", ec="black"),
+        mpatch.Patch(color=merah, label="Parah", ec="black")
+    ]
+    # ax.legend(handles=patches, loc="lower right", bbox_to_anchor=(1, 1), title="Tingkat Kerusakan")
+    plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}", fontsize=14)
+    # plt.show()
+    plt.savefig(output_path)
+    
+    
+# Fungsi untuk menghitung sebaran penyakit per petak
+def hitung_sebaran_petak(gpkg_path):
+    """
+    Menghitung sebaran penyakit.
+    
+    Parameters:
+        gpkg_path (str): Lokasi shapefile hasil prediksi model.
+        penyakit (str): Nama penyakit.
+
+    Returns:
+        dict: Hasil analisis.
+    """
+    try:
+        layers = fiona.listlayers(gpkg_path)
+    except Exception as e:
+        print(f"ERROR: {e}")
+        return None
+    # Siapkan tabel database gpkg
+    conn = sqlite3.connect(gpkg_path)
+    cur = conn.cursor()
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS app_layer_metadata (
+        layer_name TEXT PRIMARY KEY,
+        legend_json TEXT,
+        stats_json TEXT
+    )
+    """)
+    hasil = {}
+    legenda = {
+        1: {"label": "Healthy", "color": (0,128,0)},
+        2: {"label": "Low",     "color": (144,238,144)},
+        3: {"label": "Mild",    "color": (255,255,116)},
+        4: {"label": "Severe",  "color": (215,25,28)}
+    }
+    # Hitung sebaran per nama layer
+    for layer_name in layers:
+        print(f"\n=== Menganalisis Layer: {layer_name} ===")
+        # Membaca layer spesifik
+        gdf = gpd.read_file(gpkg_path, layer=layer_name)
         
-        Parameters:
-            input_folder (str): Lokasi file GeoTIFF hasil prediksi model.
-            penyakit (str): Nama penyakit.
+        if "class" not in gdf.columns:
+            print(f"Kolom 'class' tidak ditemukan di layer {layer_name}")
+            continue
 
-        Returns:
-            str: Output path.
-        """
-        nf = os.path.splitext(os.path.basename(input_folder))[0]
-        penyakit = nf.split("_")[-1]
-        output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Rumpun"
-        output_path = f"{output_folder}/peta_sebaran_{penyakit}.png"
-        print(f"\nMenampilkan peta sebaran penyakit {penyakit.title()}...")
-        os.makedirs(output_folder, exist_ok=True)
-        alpha = "#00000000"
-        hg = "#008000ff"
-        ht = "#90ee90ff"
-        kuning = "#ffff74ff"
-        merah = "#d7191cff"
-        warna = [alpha, hg, ht, kuning, merah]
-        cmaps = mcolor.ListedColormap(warna)
-
-        bounds = np.arange(-0.5, 5, 1)
-        norms = mcolor.BoundaryNorm(bounds, 5)
-        patches = [
-            mpatch.Patch(color=hg, label="Sehat", ec="black"),
-            mpatch.Patch(color=ht, label="Ringan", ec="black"),
-            mpatch.Patch(color=kuning, label="Sedang", ec="black"),
-            mpatch.Patch(color=merah, label="Parah", ec="black")
-        ]
-        # fig, ax = plt.subplots(1, 1, figsize=(10, 8))
-        # plt.legend(handles=patches, loc="lower right", title="Tingkat Kerusakan")
-        plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}", fontsize=14)
-        with rio.open(input_folder) as src:
-            data = src.read(1) 
-            plt.imshow(data, cmap=cmaps, norm=norms) 
-            # plt.show() 
-            plt.savefig(output_path, dpi=300, bbox_inches='tight')
-        return output_path
-
-    # Fungsi untuk menghitung sebaran penyakit per rumpun
-    def hitung_sebaran_rumpun(self, input_folder):
-        """
-        Menghitung sebaran penyakit.
+        data = gdf["class"]
+        jml_data = np.count_nonzero(data)
         
-        Parameters:
-            input_folder (str): Lokasi file GeoTIFF hasil prediksi model.
-            penyakit (str): Nama penyakit.
+        if jml_data == 0:
+            print(f"Tidak ada data penyakit pada layer {layer_name}")
+            continue
 
-        Returns:
-            None.
-        """
-        nf = os.path.splitext(os.path.basename(input_folder))[0]
-        penyakit = nf.split("_")[-1]
-        print(f"\nMenghitung sebaran penyakit {penyakit.title()}...")
-        with rio.open(input_folder) as src:
-            data = src.read(1)
-            nodata = src.nodata
-        # Mengecualikan nodata
-        mask_valid = (data != nodata)
-        valid_data = data[mask_valid]
-        # Menghitung total piksel valid
-        jml_data_valid = valid_data.size
-        # Mengambil semua nilai unik
-        counts = {k: v for k, v in zip(*np.unique(data, return_counts=True))}
+        counts = data.value_counts()
         labels = ["Healthy", "Low", "Mild", "Severe"]
-        # Menghitung persentase
-        stats = {k: round((counts.get(i+1, 0) / jml_data_valid) * 100, 2) for i, k in enumerate(labels)}
-        # Mencetak hasil
-        print(f"Total piksel pada citra: {jml_data_valid}")
+        stats = {}
+
+        # Kalkulasi persentase per kategori (1-4)
         for i, label in enumerate(labels, 1):
-            print(f"{label}: {stats[label]}%")
-        # Mengambil nilai untuk logika
-        p_sehat = stats[labels[0]]
-        p_ringan = stats[labels[1]]
-        p_sedang = stats[labels[2]]
-        p_parah = stats[labels[2]]
-        p_parah_total = p_sedang + p_parah # Gabungan sedang dan parah
+            jumlah_spesifik = counts.get(i, 0)
+            hasil_persen = round((jumlah_spesifik / jml_data) * 100, 2)
+            stats[label] = hasil_persen
+            print(f"Persentase tanaman {label}: {hasil_persen}%")
+
         # Logika Rekomendasi
+        p_sehat = stats.get(labels[0])
+        p_ringan = stats.get(labels[1])
+        p_sedang = stats.get(labels[2])
+        p_parah = stats.get(labels[3])
+        p_parah_total = p_sedang + p_parah
+
         print("-" * 30)
         if p_parah_total > p_sehat or p_parah_total > p_ringan:
-            # recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
             recom = "High severity level, immediate action required!"
-            print(f"Rekomendasi: {recom}")
-        elif p_ringan > p_sehat:  
-            # recom = "Lakukan pemantauan rutin dan tindakan pencegahan." 
-            recom = "Perform routine monitoring and take preventive action!" 
-            print(f"Rekomendasi: {recom}")
+            # recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
+        elif p_ringan > p_sehat: 
+            recom =  "Perform routine monitoring and take preventive action!"
+            # recom = "Lakukan pemantauan rutin dan tindakan pencegahan."  
         else:
-            # recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
             recom = "The majority of vegetation is healthy."
-            print(f"{recom}")
-
+            # recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
+        
+        print(f"Rekomendasi: {recom}")
+        
+        # Simpan hasil per layer ke dictionary utama
         stats["rekomendasi"] = recom
+        legend = legenda
 
-        legenda = {
-            1: {"label": "Healthy", "color": (0,128,0)},
-            2: {"label": "Low",     "color": (144,238,144)},
-            3: {"label": "Mild",    "color": (255,255,116)},
-            4: {"label": "Severe",  "color": (215,25,28)}
-        }
-
-        legend_json = json.dumps(legenda)
-        stats_json = json.dumps(stats)
-
-        # Menyimpan legenda dan stats sebagai metadata
-        with rio.open(input_folder, "r+") as dest:
-            dest.update_tags(
-                LEGEND=legend_json,
-                STATS=stats_json
-                )
-        return stats
-        
-
-
-class PlotDiseaseAnalyzer:
-    """
-    Kelas untuk memunculkan hasil analisis per plot/petak.
-    """ 
-    def __init__(self):
-        self.status = "Idle"
-        self.last_result = None
-
-    def run(self, gpkg_path):
-        self.status = "Processing"
-        logger.info("Menghitung sebaran dan memunculkan hasil...") 
-        try:
-            # self.tampilkan_penyakit_petak(gpkg_path, penyakit, output_folder)
-            self.last_result = self.hitung_sebaran_petak(gpkg_path)
-            self.status = "Done"
-            return self.last_result
-        except Exception as e:
-            self.status = "Error"
-            logger.error(f"ERROR {type(e).__name__}: {e}", exc_info=True)
-            return None 
-        
-    # Fungsi menampilkan hasil prediksi model per petak 
-    def tampilkan_penyakit_petak(self, shp_path, penyakit, output_folder):
-        """
-        Menampilkan peta sebaran pada grafik.
-        
-        Parameters:
-            shp_path (str): Lokasi shapefile hasil prediksi model.
-            penyakit (str): Nama penyakit.
-            output_folder (str): Nama folder tempat file akan disimpan.
-
-        Returns:
-            str: Output path.
-        """
-
-        print(f"\nMenampilkan peta sebaran penyakit {penyakit.title()}...")
-        output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Rumpun"
-        output_path = f"{output_folder}/peta_sebaran_{penyakit}.png"
-        os.makedirs(output_folder, exist_ok=True)
-        alpha = "#00000000"
-        hg = "#008000ff"
-        ht = "#90ee90ff"
-        kuning = "#ffff74ff"
-        merah = "#d7191cff"
-        warna = [alpha, hg, ht, kuning, merah]
-        cmaps = mcolor.ListedColormap(warna)
-
-        bounds = np.arange(-0.5, 5, 1)
-        norms = mcolor.BoundaryNorm(bounds, 5)
-
-        gdf = gpd.read_file(shp_path)
-        # fig, ax = plt.subplots(1, 1, figsize=(10, 8))
-
-        # gdf.plot(
-        #     column=penyakit,  
-        #     cmap=cmaps, 
-        #     norm=norms,
-        #     ax=ax,
-        #     edgecolor='black', 
-        #     linewidth=0.3
-        #     )
-        
-        patches = [
-            mpatch.Patch(color=hg, label="Sehat", ec="black"),
-            mpatch.Patch(color=ht, label="Ringan", ec="black"),
-            mpatch.Patch(color=kuning, label="Sedang", ec="black"),
-            mpatch.Patch(color=merah, label="Parah", ec="black")
-        ]
-        # ax.legend(handles=patches, loc="lower right", bbox_to_anchor=(1, 1), title="Tingkat Kerusakan")
-        plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}", fontsize=14)
-        # plt.show()
-        plt.savefig(output_path)
-        
-        
-    # Fungsi untuk menghitung sebaran penyakit per petak
-    def hitung_sebaran_petak(self, gpkg_path):
-        """
-        Menghitung sebaran penyakit.
-        
-        Parameters:
-            gpkg_path (str): Lokasi shapefile hasil prediksi model.
-            penyakit (str): Nama penyakit.
-
-        Returns:
-            dict: Hasil analisis.
-        """
-        try:
-            layers = fiona.listlayers(gpkg_path)
-        except Exception as e:
-            print(f"ERROR: {e}")
-            return None
-        # Siapkan tabel database gpkg
-        conn = sqlite3.connect(gpkg_path)
-        cur = conn.cursor()
+        # Masukkan ke database
         cur.execute("""
-        CREATE TABLE IF NOT EXISTS app_layer_metadata (
-            layer_name TEXT PRIMARY KEY,
-            legend_json TEXT,
-            stats_json TEXT
-        )
-        """)
-        hasil = {}
-        legenda = {
-            1: {"label": "Healthy", "color": (0,128,0)},
-            2: {"label": "Low",     "color": (144,238,144)},
-            3: {"label": "Mild",    "color": (255,255,116)},
-            4: {"label": "Severe",  "color": (215,25,28)}
-        }
-        # Hitung sebaran per nama layer
-        for layer_name in layers:
-            print(f"\n=== Menganalisis Layer: {layer_name} ===")
-            # Membaca layer spesifik
-            gdf = gpd.read_file(gpkg_path, layer=layer_name)
-            
-            if "class" not in gdf.columns:
-                print(f"Kolom 'class' tidak ditemukan di layer {layer_name}")
-                continue
+        INSERT OR REPLACE INTO app_layer_metadata
+        (layer_name, legend_json, stats_json)
+        VALUES (?, ?, ?)
+        """, (
+            layer_name,
+            json.dumps(legend),
+            json.dumps(stats)
+        ))
+        hasil[layer_name] = stats
 
-            data = gdf["class"]
-            jml_data = np.count_nonzero(data)
-            
-            if jml_data == 0:
-                print(f"Tidak ada data penyakit pada layer {layer_name}")
-                continue
-
-            counts = data.value_counts()
-            labels = ["Healthy", "Low", "Mild", "Severe"]
-            stats = {}
-
-            # Kalkulasi persentase per kategori (1-4)
-            for i, label in enumerate(labels, 1):
-                jumlah_spesifik = counts.get(i, 0)
-                hasil_persen = round((jumlah_spesifik / jml_data) * 100, 2)
-                stats[label] = hasil_persen
-                print(f"Persentase tanaman {label}: {hasil_persen}%")
-
-            # Logika Rekomendasi
-            p_sehat = stats.get(labels[0])
-            p_ringan = stats.get(labels[1])
-            p_sedang = stats.get(labels[2])
-            p_parah = stats.get(labels[3])
-            p_parah_total = p_sedang + p_parah
-
-            print("-" * 30)
-            if p_parah_total > p_sehat or p_parah_total > p_ringan:
-                recom = "High severity level, immediate action required!"
-                # recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
-            elif p_ringan > p_sehat: 
-                recom =  "Perform routine monitoring and take preventive action!"
-                # recom = "Lakukan pemantauan rutin dan tindakan pencegahan."  
-            else:
-                recom = "The majority of vegetation is healthy."
-                # recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
-            
-            print(f"Rekomendasi: {recom}")
-            
-            # Simpan hasil per layer ke dictionary utama
-            stats["rekomendasi"] = recom
-            legend = legenda
-
-            # Masukkan ke database
-            cur.execute("""
-            INSERT OR REPLACE INTO app_layer_metadata
-            (layer_name, legend_json, stats_json)
-            VALUES (?, ?, ?)
-            """, (
-                layer_name,
-                json.dumps(legend),
-                json.dumps(stats)
-            ))
-            hasil[layer_name] = stats
-
-        # Menutup database
-        conn.commit()
-        conn.close()
-        return hasil
+    # Menutup database
+    conn.commit()
+    conn.close()
+    return hasil
     
 
 if __name__ == "__main__":

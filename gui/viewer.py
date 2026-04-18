@@ -171,7 +171,6 @@ class Viewer(QWidget):
                 val = str(feature[class_col])
                 if val in legend_dict:
                     color = legend_dict[val]["color"]
-                    print(color)
 
             if geom is None or geom.is_empty:
                 continue
