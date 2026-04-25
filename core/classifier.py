@@ -1,27 +1,45 @@
-from core.logic.modul_klasifikasi import deteksi_rumpun, deteksi_petakan
+from core.logic.modul_klasifikasi import (
+    deteksi_penyakit_rumpun, 
+    deteksi_penyakit_petak,
+    deteksi_air_petak,
+    deteksi_nutrisi_petak
+)
 import logging
 logger = logging.getLogger(__name__)
 
 class BaseClassifier:
-    MODEL_PATH = None
-    SCALER_PATH = None
+    MODEL1_PATH = None
+    MODEL2_PATH = None
+    MODEL3_PATH = None
+    SCALER1_PATH = None
+    SCALER2_PATH = None
+    SCALER3_PATH = None
 
     def __init__(self):
-        self.scaler = None
-        self.model = None
+        self.scaler_1 = None
+        self.scaler_2 = None
+        self.scaler_3 = None
+        self.model_1 = None
+        self.model_2 = None
+        self.model_3 = None
         self.result = None
 
     def _load_model(self):
-        if self.MODEL_PATH is None or self.SCALER_PATH is None:
+        if self.MODEL1_PATH is None or self.SCALER1_PATH is None:
             raise ValueError("Path model belum ditentukan di child class!")
-        if self.model is not None:
+        if self.model_1 is not None:
             return
         
         import tensorflow as tf
         import joblib
-        self.scaler = joblib.load(self.SCALER_PATH)
-        self.model = tf.keras.models.load_model(self.MODEL_PATH, compile=False)
-        logger.info(f"Model dimuat bertipe: {type(self.model)}")
+        self.scaler_1 = joblib.load(self.SCALER1_PATH)
+        self.model_1 = tf.keras.models.load_model(self.MODEL1_PATH, compile=False)
+        if self.MODEL2_PATH is not None and self.SCALER2_PATH is not None:
+            self.scaler_2 = joblib.load(self.SCALER2_PATH)
+            self.model_2 = tf.keras.models.load_model(self.MODEL2_PATH, compile=False)
+        if self.MODEL3_PATH is not None and self.SCALER3_PATH is not None:
+            self.scaler_3 = joblib.load(self.SCALER3_PATH)
+            self.model_3 = tf.keras.models.load_model(self.MODEL3_PATH, compile=False)
 
     def run(self, input_folder, output_folder, shp_path=None, check_cancel=None, on_progress=None):
         logger.info(f"Memulai prediksi dengan {self.__class__.__name__}...")
@@ -39,37 +57,37 @@ class PlantDiseaseClassifier(BaseClassifier):
     """
     Kelas untuk deteksi penyakit per rumpun.
     """ 
-    MODEL_PATH = "core/models/deteksi_penyakit/model_deteksi_penyakit.h5"
-    SCALER_PATH = "core/scaler/model_deteksi_penyakit_Scaler.joblib"
+    MODEL1_PATH = "core/models/disease_detection/disease_classification_model.h5"
+    SCALER1_PATH = "core/scaler/disease_classification_scaler.joblib"
     def __init__(self):
         super().__init__()
 
     def _do_prediction(self, input_folder, output_folder, shp_path, check_cancel, on_progress):
         self._load_model()
-        output_path = deteksi_rumpun(
-            self.scaler, 
-            self.model, 
-            input_folder, 
-            output_folder, 
-            check_cancel, 
-            on_progress
+        output_path = deteksi_penyakit_rumpun(
+            scaler=self.scaler_1, 
+            model=self.model_1, 
+            input_folder=input_folder, 
+            output_folder=output_folder, 
+            check_cancel=check_cancel, 
+            on_progress=on_progress
             )
         return output_path
     
-class PlotDiseaseClassifier(BaseClassifier):
+class DiseasePlotClassifier(BaseClassifier):
     """
     Kelas untuk deteksi penyakit per plot/petak.
     """ 
-    MODEL_PATH = "core/models/deteksi_penyakit/model_deteksi_penyakit.h5"
-    SCALER_PATH = "core/scaler/model_deteksi_penyakit_Scaler.joblib"
+    MODEL1_PATH = "core/models/disease_detection/disease_classification_model.h5"
+    SCALER1_PATH = "core/scaler/disease_classification_scaler.joblib"
     def __init__(self):
         super().__init__()
 
     def _do_prediction(self, input_folder, output_folder, shp_path, check_cancel, on_progress):
         self._load_model()
-        output_gpkg = deteksi_petakan(
-            self.scaler, 
-            self.model, 
+        output_gpkg = deteksi_penyakit_petak(
+            self.scaler_1, 
+            self.model_1, 
             input_folder, 
             shp_path, 
             output_folder, 
@@ -78,46 +96,54 @@ class PlotDiseaseClassifier(BaseClassifier):
             )
         return output_gpkg
     
-class PlotWaterClassifier(BaseClassifier):
+class WaterPlotClassifier(BaseClassifier):
     """
     Kelas untuk deteksi ketersedian air per plot/petak.
     """ 
-    MODEL_PATH = "core/models/deteksi_penyakit/model_deteksi_penyakit.h5"
-    SCALER_PATH = "core/scaler/model_deteksi_penyakit_Scaler.joblib"
+    MODEL1_PATH = "core/models/water_availability/water_regression_model.h5"
+    MODEL2_PATH = "core/models/water_availability/water_regression_model.h5"
+    SCALER1_PATH = "core/scaler/water_regression_polynom.joblib"
+    SCALER2_PATH = "core/scaler/water_regression_scaler.joblib"
     def __init__(self):
         super().__init__()
 
     def _do_prediction(self, input_folder, output_folder, shp_path, check_cancel, on_progress):
         self._load_model()
-        output_gpkg = deteksi_petakan(
-            self.scaler, 
-            self.model, 
-            input_folder, 
-            shp_path, 
-            output_folder, 
-            check_cancel,
-            on_progress
+        output_gpkg = deteksi_air_petak(
+            polynom=self.scaler_1, 
+            scaler=self.scaler_2,
+            model_reg=self.model_1, 
+            input_folder=input_folder, 
+            shp_path=shp_path, 
+            output_folder=output_folder, 
+            check_cancel=check_cancel,
+            on_progress=on_progress
             )
         return output_gpkg
     
-class PlotNutrientClassifier(BaseClassifier):
+class NutrientPlotClassifier(BaseClassifier):
     """
     Kelas untuk deteksi ketersediaan nitrogen per plot/petak.
     """ 
-    MODEL_PATH = "core/models/deteksi_penyakit/model_deteksi_penyakit.h5"
-    SCALER_PATH = "core/scaler/model_deteksi_penyakit_Scaler.joblib"
+    MODEL1_PATH = "core/models/nutrient_availability/nitrogen_classification_model.h5"
+    SCALER1_PATH = "core/scaler/disease_classification_scaler.joblib"
+
     def __init__(self):
         super().__init__()
 
     def _do_prediction(self, input_folder, output_folder, shp_path, check_cancel, on_progress):
         self._load_model()
-        output_gpkg = deteksi_petakan(
-            self.scaler, 
-            self.model, 
-            input_folder, 
-            shp_path, 
-            output_folder, 
-            check_cancel,
-            on_progress
+        output_gpkg = deteksi_nutrisi_petak(
+            scaler_n=self.scaler_1, 
+            scaler_p=self.scaler_1,
+            scaler_k=self.scaler_1,
+            model_n=self.model_1,
+            model_p=self.model_1, 
+            model_k=self.model_1,
+            input_folder=input_folder, 
+            shp_path=shp_path, 
+            output_folder=output_folder, 
+            check_cancel=check_cancel,
+            on_progress=on_progress
             )
         return output_gpkg

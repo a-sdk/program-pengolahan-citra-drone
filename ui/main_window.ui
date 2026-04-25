@@ -111,7 +111,22 @@
     <addaction name="separator"/>
     <addaction name="menuPanels"/>
    </widget>
+   <widget class="QMenu" name="menuLayer">
+    <property name="title">
+     <string>Layer</string>
+    </property>
+    <widget class="QMenu" name="menuAdd_Layer">
+     <property name="title">
+      <string>Add Layer</string>
+     </property>
+     <addaction name="action_add_raster_layer"/>
+     <addaction name="action_add_vector_layer"/>
+    </widget>
+    <addaction name="menuAdd_Layer"/>
+    <addaction name="action_new_shp_layer"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuLayer"/>
    <addaction name="menuView"/>
    <addaction name="menuProcessing"/>
   </widget>
@@ -124,7 +139,7 @@
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>Toolbar</string>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -135,10 +150,16 @@
    <addaction name="action_open_img"/>
    <addaction name="action_open_shp"/>
    <addaction name="separator"/>
+   <addaction name="action_new_shp_layer"/>
+   <addaction name="separator"/>
    <addaction name="action_pan"/>
    <addaction name="action_zoom_in"/>
    <addaction name="action_zoom_out"/>
    <addaction name="action_fit_to_view"/>
+   <addaction name="separator"/>
+   <addaction name="action_nutrient_predict"/>
+   <addaction name="action_water_predict"/>
+   <addaction name="action_disease_predict"/>
   </widget>
   <widget class="QDockWidget" name="dockLegend">
    <attribute name="dockWidgetArea">
@@ -158,12 +179,12 @@
   </action>
   <action name="action_open_img">
    <property name="text">
-    <string>Image</string>
+    <string>Add Raster</string>
    </property>
   </action>
   <action name="action_open_shp">
    <property name="text">
-    <string>Vector</string>
+    <string>Add Vector</string>
    </property>
   </action>
   <action name="action_water_predict">
@@ -229,6 +250,21 @@
   <action name="action_debug">
    <property name="text">
     <string>Debug</string>
+   </property>
+  </action>
+  <action name="action_add_raster_layer">
+   <property name="text">
+    <string>Add Raster Layer</string>
+   </property>
+  </action>
+  <action name="action_add_vector_layer">
+   <property name="text">
+    <string>Add Vector Layer</string>
+   </property>
+  </action>
+  <action name="action_new_shp_layer">
+   <property name="text">
+    <string>Create New Shapefile Layer</string>
    </property>
   </action>
  </widget>

@@ -4,9 +4,9 @@ from core.transformer import Transformer
 from core.segmenter import Segmenter
 from core.masker import Masker
 from core.extractor import Extractor
-from core.classifier import PlotNutrientClassifier
+from core.classifier import NutrientPlotClassifier
 from core.splitter import Splitter
-from core.stats_calculator import PlotCalculator
+from core.stats_calculator import NutrientPlotCalculator
 
 import logging
 
@@ -20,8 +20,8 @@ class NutrientAnalysis:
         self.segmenter = Segmenter()
         self.masker = Masker()
         self.extractor = Extractor()
-        self.classifier = PlotNutrientClassifier()
-        self.stats_calc = PlotCalculator()
+        self.classifier = NutrientPlotClassifier()
+        self.stats_calc = NutrientPlotCalculator()
         self.on_progress = None
         self.on_error = None
         self.on_finished = None
@@ -76,7 +76,7 @@ class NutrientAnalysis:
             emit_progress(60, "Extracting pixel...")
             extracted_path = self.extractor.run(multipolygon_path, masked_path, output_folder)
             if is_cancelled(): return None
-            emit_progress(70, "Detecting disease...")
+            emit_progress(70, "Detecting nutrient availability...")
             classified_path = self.classifier.run(
                 input_folder=extracted_path, 
                 shp_path=multipolygon_path,
@@ -86,11 +86,9 @@ class NutrientAnalysis:
                 )    
             if is_cancelled(): return None
             emit_progress(90, "Calculating stats...")
-            stats = []
-            for i, path in enumerate(classified_path):
-                if is_cancelled(): return None
-                stats = self.stats_calc.run(path)
-                emit_progress(90+i, f"Calculating stats ({str(i)}/{str(len(classified_path))})...")
+            if is_cancelled(): return None
+            stats = self.stats_calc.run(classified_path)
+            emit_progress(95, "Calculating stats...")
             logger.info(f"Stats: {stats}")
             result.clip_path = clipped_path
             result.transform_path = transformed_path

@@ -17,18 +17,18 @@ class InputDialog(QDialog):
 
     def _handle_browse_tif(self):
         logger.info("btn_browse_tif ditekan")
-        path, _ = QFileDialog.getOpenFileName(self, "Pilih Citra", "", "GeoTiff (*.tif *.tiff)")
+        path, _ = QFileDialog.getOpenFileName(self, "Open Supported Raster", "", "GeoTiff (*.tif *.tiff)")
         if path: self.lineEdit_tif.setText(path)
 
 
     def _handle_browse_shp(self):
         logger.info("btn_browse_shp ditekan")
-        path, _ = QFileDialog.getOpenFileName(self, "Pilih Shapefile", "", "Shapefile (*.shp)")
+        path, _ = QFileDialog.getOpenFileName(self, "Open Supported Vector", "", "ESRI Shapefile (*.shp)")
         if path: self.lineEdit_shp.setText(path)
 
     def _handle_browse_out(self):
         logger.info("btn_browse_out ditekan")
-        path = QFileDialog.getExistingDirectory(self, "Pilih Folder Output")
+        path = QFileDialog.getExistingDirectory(self, "Save In")
         if path: self.lineEdit_out.setText(path)   
 
     def get_values(self):

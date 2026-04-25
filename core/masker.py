@@ -11,7 +11,6 @@ class Masker:
         self.result = None
 
     def run(self, input_folder, mask_path, output_folder):
-        self.status = "Processing"
         logger.info("Memulai proses masking...") 
         try:
             self.result = mask_tumpukan_fitur(input_folder, mask_path, output_folder) 

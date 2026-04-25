@@ -780,7 +780,7 @@ def tampilkan_penyakit_rumpun(input_folder, output_folder):
     return output_path
 
 # Fungsi untuk menghitung sebaran penyakit per rumpun
-def hitung_sebaran_rumpun(input_folder):
+def hitung_sebaran_rumpun(input_folder, legend_dict):
     """
     Menghitung sebaran penyakit.
     
@@ -804,26 +804,23 @@ def hitung_sebaran_rumpun(input_folder):
     jml_data_valid = valid_data.size
     # Mengambil semua nilai unik
     counts = {k: v for k, v in zip(*np.unique(data, return_counts=True))}
-    labels = ["Healthy", "Low", "Mild", "Severe"]
+    labels = [info["label"] for info in legend_dict.values()]
     # Menghitung persentase
     stats = {k: round((counts.get(i+1, 0) / jml_data_valid) * 100, 2) for i, k in enumerate(labels)}
-    # Mencetak hasil
-    print(f"Total piksel pada citra: {jml_data_valid}")
-    for i, label in enumerate(labels, 1):
-        print(f"{label}: {stats[label]}%")
+
     # Mengambil nilai untuk logika
-    p_sehat = stats[labels[0]]
-    p_ringan = stats[labels[1]]
-    p_sedang = stats[labels[2]]
-    p_parah = stats[labels[2]]
-    p_parah_total = p_sedang + p_parah # Gabungan sedang dan parah
+    val_1 = stats.get(labels[0], 0)
+    val_2 = stats.get(labels[1], 0)
+    val_3 = stats.get(labels[2], 0)
+    val_4 = stats.get(labels[3], 0)
+    val_ = val_3 + val_4 
     # Logika Rekomendasi
     print("-" * 30)
-    if p_parah_total > p_sehat or p_parah_total > p_ringan:
+    if val_ > val_1 and val_ > val_2:
         # recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
         recom = "High severity level, immediate action required!"
         print(f"Rekomendasi: {recom}")
-    elif p_ringan > p_sehat:  
+    elif val_2 > val_1 and val_2 > val_ :  
         # recom = "Lakukan pemantauan rutin dan tindakan pencegahan." 
         recom = "Perform routine monitoring and take preventive action!" 
         print(f"Rekomendasi: {recom}")
@@ -834,14 +831,7 @@ def hitung_sebaran_rumpun(input_folder):
 
     stats["rekomendasi"] = recom
 
-    legenda = {
-        1: {"label": "Healthy", "color": (0,128,0)},
-        2: {"label": "Low",     "color": (144,238,144)},
-        3: {"label": "Mild",    "color": (255,255,116)},
-        4: {"label": "Severe",  "color": (215,25,28)}
-    }
-
-    legend_json = json.dumps(legenda)
+    legend_json = json.dumps(legend_dict)
     stats_json = json.dumps(stats)
 
     # Menyimpan legenda dan stats sebagai metadata
@@ -905,8 +895,8 @@ def tampilkan_penyakit_petak(gpkg_path, penyakit, output_folder):
     plt.savefig(output_path)
     
     
-# Fungsi untuk menghitung sebaran penyakit per petak
-def hitung_sebaran_petak(gpkg_path):
+# Fungsi untuk menghitung sebaran per petak
+def hitung_sebaran_petak(gpkg_path, legend_dict):
     """
     Menghitung sebaran penyakit.
     
@@ -933,63 +923,80 @@ def hitung_sebaran_petak(gpkg_path):
     )
     """)
     hasil = {}
-    legenda = {
-        1: {"label": "Healthy", "color": (0,128,0)},
-        2: {"label": "Low",     "color": (144,238,144)},
-        3: {"label": "Mild",    "color": (255,255,116)},
-        4: {"label": "Severe",  "color": (215,25,28)}
-    }
+    
     # Hitung sebaran per nama layer
     for layer_name in layers:
         print(f"\n=== Menganalisis Layer: {layer_name} ===")
         # Membaca layer spesifik
         gdf = gpd.read_file(gpkg_path, layer=layer_name)
         
-        if "class" not in gdf.columns:
-            print(f"Kolom 'class' tidak ditemukan di layer {layer_name}")
+        if "preds" not in gdf.columns:
+            print(f"Kolom 'preds' tidak ditemukan di layer {layer_name}")
             continue
 
-        data = gdf["class"]
-        jml_data = np.count_nonzero(data)
+        data = gdf["preds"]
+        jml_data = len(data)
         
         if jml_data == 0:
-            print(f"Tidak ada data penyakit pada layer {layer_name}")
+            print(f"Tidak ada data pada layer {layer_name}")
             continue
 
-        counts = data.value_counts()
-        labels = ["Healthy", "Low", "Mild", "Severe"]
         stats = {}
-
-        # Kalkulasi persentase per kategori (1-4)
-        for i, label in enumerate(labels, 1):
-            jumlah_spesifik = counts.get(i, 0)
-            hasil_persen = round((jumlah_spesifik / jml_data) * 100, 2)
-            stats[label] = hasil_persen
-            print(f"Persentase tanaman {label}: {hasil_persen}%")
-
-        # Logika Rekomendasi
-        p_sehat = stats.get(labels[0])
-        p_ringan = stats.get(labels[1])
-        p_sedang = stats.get(labels[2])
-        p_parah = stats.get(labels[3])
-        p_parah_total = p_sedang + p_parah
-
-        print("-" * 30)
-        if p_parah_total > p_sehat or p_parah_total > p_ringan:
-            recom = "High severity level, immediate action required!"
-            # recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
-        elif p_ringan > p_sehat: 
-            recom =  "Perform routine monitoring and take preventive action!"
-            # recom = "Lakukan pemantauan rutin dan tindakan pencegahan."  
+        if layer_name == "water":
+            # LOGIKA REGRESI
+            for i, info in legend_dict.items():
+                low, high = info["range"]
+                # Menghitung berapa banyak nilai yang masuk dalam rentang ini
+                count = data[(data >= low) & (data < high)].count()
+                hasil_persen = round((count / jml_data) * 100, 2)
+                stats[info["label"]] = hasil_persen
         else:
-            recom = "The majority of vegetation is healthy."
-            # recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
+            # LOGIKA KLASIFIKASI
+            counts = data.value_counts()
+            for i, info in legend_dict.items():
+                jumlah_spesifik = counts.get(i, 0)
+                hasil_persen = round((jumlah_spesifik / jml_data) * 100, 2)
+                stats[info["label"]] = hasil_persen
+
+        labels = [info["label"] for info in legend_dict.values()]
+        # Logika Rekomendasi
+        val_1 = stats.get(labels[0], 0)
+        val_2 = stats.get(labels[1], 0)
+        if len(labels) == 2: # Air (cukup, kurang)
+            if val_1 > val_2:
+                recom = "Irrigation should be applied only as needed to maintain soil moisture near field capacity and to avoid unnecessary water application."
+            elif val_2 > val_1:
+                recom = "More frequent irrigation with appropriate water volumes is recommended to restore soil moisture toward field capacity."
+
+        elif len(labels) == 3: # Nutrisi (kurang, cukup, berlebih)
+            val_3 = stats.get(labels[2], 0)
+            val_ = val_2 + val_3 # gabungan cukup + berlebih
+            if val_1 > val_2 and val_1 > val_3:
+                recom = "Increase fertilizer application rate to restore nutrient balance!"
+            elif val_2 > val_1 and val_2 > val_3:
+                recom = "Fertilizer should be applied at a maintenance rate to sustain current nutrient levels without causing accumulation."
+            else:
+                recom = "Reduce or temporarily withhold fertilizer application to prevent nutrient buildup, leaching, and potential environmental impact!"
         
-        print(f"Rekomendasi: {recom}")
-        
+        elif len(labels) == 4: # Penyakit (sehat, ringan, sedang, parah)
+            val_3 = stats.get(labels[2], 0)
+            val_4 = stats.get(labels[3], 0) # kelas parah
+            val_ = val_3 + val_4 # gabungan sedang + parah
+
+            if val_ > val_1 and val_ > val_2:
+                recom = "High severity level, immediate action required!"
+                # recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
+            elif val_2 > val_1 and val_2 > val_: 
+                recom =  "Perform routine monitoring and take preventive action!"
+                # recom = "Lakukan pemantauan rutin dan tindakan pencegahan."  
+            else:
+                recom = "The majority of vegetation is healthy."
+                # recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
+ 
+
         # Simpan hasil per layer ke dictionary utama
         stats["rekomendasi"] = recom
-        legend = legenda
+        legend = legend_dict
 
         # Masukkan ke database
         cur.execute("""

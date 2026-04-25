@@ -11,7 +11,6 @@ class Clipper:
         self.result = None
 
     def run(self, input_folder, shp_path, output_folder):
-        self.status = "Processing"
         logger.info("Memulai clipping...") 
         try:
             self.result = potong_raster(input_folder, shp_path, output_folder) 

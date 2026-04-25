@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, 
     QGraphicsItemGroup, QGraphicsPixmapItem, QFrame,
-    QGraphicsPathItem
+    QGraphicsPolygonItem
 )
 from PyQt5.QtGui import (
     QPixmap, QImage, QPainter, 
@@ -11,6 +11,7 @@ from PyQt5.QtGui import (
 from PyQt5.QtCore import Qt, pyqtSignal, QPointF, QEvent
 import rasterio as rio
 import geopandas as gpd
+from shapely.geometry import Point, LineString, Polygon
 import numpy as np
 import json
 import logging
@@ -19,6 +20,9 @@ logger = logging.getLogger(__name__)
 
 class Viewer(QWidget):
     mouseMoved = pyqtSignal(float, float)
+    infoMsg = pyqtSignal(str)
+    drawFinished = pyqtSignal(bool, str)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.main_layout = QVBoxLayout(self)
@@ -26,6 +30,13 @@ class Viewer(QWidget):
         self.viewer = QGraphicsView()
         self.scene = QGraphicsScene()
         self.layer_items = {}
+        self.temp_shp_points = []
+        self.temp_shp_type = None
+        self.temp_shp_path = None
+        self.temp_shp_crs = None
+        self.active_poly_item = None
+        self.geo_coords = []
+        self.isDrawing = False
         self._layer_id = 0
         self.raster_info = {}
         self.vector_info = {}
@@ -39,6 +50,7 @@ class Viewer(QWidget):
         self.viewer.setFrameShape(QFrame.NoFrame)
         self.viewer.setLineWidth(0)
         self.viewer.setStyleSheet("border: none;")
+        self.viewer.setFocusPolicy(Qt.StrongFocus)
         self.main_layout.addWidget(self.viewer)
         self._zoom = 0
 
@@ -152,7 +164,7 @@ class Viewer(QWidget):
         self.fit_to_view()
         return layer_id
     
-    def _draw_polygon(self, coords, group, color):
+    def _draw_poly_feature(self, coords, group, color):
         points = [QPointF(x, y) for x, y in coords]
         polygon_item = self.scene.addPolygon(QPolygonF(points))
         pen = QPen(QColor(0, 0, 0, 150))
@@ -162,23 +174,57 @@ class Viewer(QWidget):
         polygon_item.setBrush(QColor(*color))
         group.addToGroup(polygon_item)
 
+    def _draw_line_feature(self, coords, group, color):
+        path = QPainterPath()
+        points = [QPointF(x, y) for x, y in coords]
+        if points:
+            path.moveTo(points[0])
+            for pt in points[1:]:
+                path.lineTo(pt)
+        
+        line_item = self.scene.addPath(path)
+        pen = QPen(QColor(*color))
+        pen.setWidth(5)
+        pen.setCosmetic(True)
+        line_item.setPen(pen)
+        group.addToGroup(line_item)
+
+    def _draw_point_feature(self, x, y, group, color):
+        r = 0.2
+        point_item = self.scene.addEllipse(x-r, y-r, r*2, r*2)
+        point_item.setPen(QPen(Qt.black, 0))
+        point_item.setBrush(QColor(*color))
+        group.addToGroup(point_item)
+
     def _add_vector(self, gdf, group, legend_dict=None, class_col=None):
         for _, feature in gdf.iterrows():
             geom = feature.geometry
-            # Warna berdasarkan atribut
-            color = (255, 0, 0, 50)
+            color = (255, 255, 116, 80)
             if legend_dict and class_col:
                 val = str(feature[class_col])
-                if val in legend_dict:
+                if float(val) < 1: # Cek jika hasil prediksi berupa regresi (0-1)
+                    for key, data in legend_dict.items():
+                        low, high = data["range"]
+                        if low <= float(val) < high:
+                            color = data["color"] # Warna berdasarkan rentang nilai
+                            logger.info(f"Value: {val} | Label: {data['label']} | Color: {color}")
+                            break
+                elif val in legend_dict:
                     color = legend_dict[val]["color"]
+                    label = legend_dict[val]["label"]
+                    logger.info(f"Value: {val} | Label: {label} | Color: {color}")
 
             if geom is None or geom.is_empty:
                 continue
-            if geom.geom_type == 'Polygon':
-                self._draw_polygon(geom.exterior.coords, group, color)
-            elif geom.geom_type == 'MultiPolygon':
+            if geom.geom_type == "Polygon":
+                self._draw_poly_feature(geom.exterior.coords, group, color)
+            elif geom.geom_type == "MultiPolygon":
                 for poly in geom.geoms:
-                    self._draw_polygon(poly.exterior.coords, group, color)
+                    self._draw_poly_feature(poly.exterior.coords, group, color)
+            elif geom.geom_type == "LineString":
+                self._draw_line_feature(geom.coords, group, color)
+            elif geom.geom_type == "Point":
+                self._draw_point_feature(geom.x, geom.y, group, color)
             self.fit_to_view()
 
     def add_shapefile(self, path):
@@ -202,10 +248,10 @@ class Viewer(QWidget):
     
     def add_gpkg_layer(self, path, layer_name):
         logger.info(f"Membuka GPKG: {layer_name}")
+        gdf = gpd.read_file(path, layer=layer_name)
         self._layer_id += 1
         layer_id = self._layer_id
         legend, stats = self.read_gpkg_metadata(path, layer_name)
-        gdf = gpd.read_file(path, layer=layer_name)
         group = QGraphicsItemGroup()
         self.scene.addItem(group)
         self.layer_items[layer_id] = group
@@ -224,7 +270,7 @@ class Viewer(QWidget):
             gdf, 
             group,
             legend,
-            "class"
+            "preds"
         )
         return layer_id
     
@@ -274,6 +320,67 @@ class Viewer(QWidget):
             self.mouseMoved.emit(x, y)
         return super().eventFilter(source, event)
 
+    def update_draw_polygon(self):
+        if not self.temp_shp_points:
+            return
+        
+        if self.active_poly_item:
+            self.scene.removeItem(self.active_poly_item)
+
+        polygon_data = QPolygonF(self.temp_shp_points)
+        self.active_poly_item = QGraphicsPolygonItem(polygon_data)
+        pen = QPen(QColor(255, 0, 0, 150))
+        pen.setWidth(1)
+        pen.setCosmetic(True)
+        self.active_poly_item.setPen(pen)
+        self.active_poly_item.setBrush(QColor(255, 0, 0, 50))
+        self.scene.addItem(self.active_poly_item)
+
+    def mousePressEvent(self, event):
+        if self.isDrawing and event.button() == Qt.LeftButton:
+            logger.info("Mode gambar: Kursor di klik")
+            # Tambah titik sudut
+            pixel_pos = event.pos()
+            scene_pos = self.viewer.mapToScene(pixel_pos)
+            self.temp_shp_points.append(scene_pos)
+            coords = (scene_pos.x(), scene_pos.y())
+            self.geo_coords.append(coords)
+            if self.temp_shp_type == "Point":
+                self.finalize_polygon()
+            else:
+                self.update_draw_polygon()
+            
+        elif event.button() == Qt.RightButton:
+            logger.info("Mode gambar: selesai")
+            num_points = len(self.temp_shp_points)
+            if self.temp_shp_type == "Polygon" and num_points < 3:
+                self.infoMsg.emit("Polygon require 3 or more points!")
+            elif self.temp_shp_type == "LineString" and num_points < 2:
+                self.infoMsg.emit("Line require 2 or more points!")
+            elif self.temp_shp_type == "Point" and num_points < 1:
+                self.infoMsg.emit("Point not defined!")
+            else:
+                self.finalize_polygon()
+                    
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            logger.info("Mode gambar: keluar")
+            if self.isDrawing:
+                self.del_drawing()
+
+    def del_drawing(self):
+        self.viewer.unsetCursor()
+        self.viewer.setCursor(Qt.ArrowCursor)
+        self.infoMsg.emit("Draw polygon mode disabled")
+        self.viewer.setFocus(False)
+        self.isDrawing = False
+        if self.active_poly_item:
+            self.scene.removeItem(self.active_poly_item)
+            self.active_poly_item = None
+        self.temp_shp_points = []
+        self.geo_coords = []
+        self.viewer.viewport().update()
+
     def set_z_order(self, ordered_ids):
         logger.info(f"Mengatur z-order: {ordered_ids}")
         for z, lid in enumerate(ordered_ids):
@@ -316,6 +423,7 @@ class Viewer(QWidget):
         return metadata
 
     def read_gpkg_metadata(self, path, layer_name):
+
         import sqlite3
 
         conn = sqlite3.connect(path)
@@ -334,3 +442,33 @@ class Viewer(QWidget):
             return json.loads(row[0]), json.loads(row[1])
 
         return None, None
+    
+    def finalize_polygon(self):
+        GEOM_MAPPING = {
+            "Point": Point,
+            "LineString": LineString,
+            "Polygon": Polygon
+        }
+        dtype = GEOM_MAPPING.get(self.temp_shp_type)
+        if not dtype:
+            return
+        try:
+            if dtype == "Point":
+                geom = dtype(self.geo_coords[0])
+            else:
+                geom = dtype(self.geo_coords)
+            if not geom.is_valid:
+                self.infoMsg.emit("Geometry is not valid")
+                logger.info("Geometri tidak valid")
+                return
+            
+            if self.active_poly_item:
+                self.scene.removeItem(self.active_poly_item)
+                self.active_poly_item = None
+
+            gdf = gpd.GeoDataFrame({'id':[1]}, crs=self.temp_shp_crs, geometry=[geom])
+            gdf.to_file(self.temp_shp_path, driver="ESRI Shapefile")
+            self.drawFinished.emit(True, self.temp_shp_path)
+
+        except Exception as e:
+            logger.error(f"ERROR: {type(e).__name__}: {e}", exc_info=True)

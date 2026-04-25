@@ -10,6 +10,7 @@ from gui.viewer import Viewer
 from gui.layer_panel import LayerPanel
 from gui.legend_panel import LegendPanel
 from gui.input_dialog import InputDialog
+from gui.new_shp_dialog import CreateShapefileDialog
 from gui.worker import Worker
 from app.disease_controller import DiseaseAnalysis
 from app.water_controller import WaterAnalysis
@@ -50,7 +51,7 @@ class MainWindow(QMainWindow):
         self.progress_bar = QProgressBar()
         self.progress_bar.setMaximum(100)
         self.progress_bar.setVisible(False)
-    
+        
         self.disease_ctrl = DiseaseAnalysis()
         self.water_ctrl = WaterAnalysis()
         self.nutrient_ctrl = NutrientAnalysis()
@@ -76,6 +77,8 @@ class MainWindow(QMainWindow):
         self.action_layer_panel.setChecked(True)
         self.dockLegend.hide()
         self.action_legend_panel.setChecked(False)
+
+        self.temp_shp_coords = []
         
 
     def _setup_icons(self):
@@ -91,9 +94,13 @@ class MainWindow(QMainWindow):
         icon_zoom_in = QIcon("assets/icon/zoom-in.png")
         icon_zoom_out = QIcon("assets/icon/zoom-out.png")
         icon_fit_to_view = QIcon("assets/icon/width.png")
+        icon_new_shp = QIcon("assets/icon/edit_poly.png")
         self.menuOpen.setIcon(icon_open)
         self.action_open_img.setIcon(icon_tif)
         self.action_open_shp.setIcon(icon_shp)
+        self.action_add_raster_layer.setIcon(icon_tif)
+        self.action_add_vector_layer.setIcon(icon_shp)
+        self.action_new_shp_layer.setIcon(icon_new_shp)
         self.action_exit.setIcon(icon_exit)
         self.action_pan.setIcon(icon_hand)
         self.action_zoom_in.setIcon(icon_zoom_in)
@@ -135,15 +142,23 @@ class MainWindow(QMainWindow):
     def update_coord_label(self, x, y):
         self.coord_label.setText(f"X: {x:.2f}, Y: {y:.2f}")
 
-    def update_status_bar(self, file_name):
-        self.statusBar().showMessage(f"Memuat: {file_name}...", 3000)
+    def _status_bar_loadfile(self, filename):
+        self.statusBar().showMessage(f"Loading: {filename}...", 3000)
+
+    def _status_bar_info(self, msg):
+        self.statusBar().showMessage(f"{msg}", 3000)
 
     def _connect_signals(self):
         logger.info("Sinyal Action terhubung")
-        self.layer_panel.fileLoaded.connect(self.update_status_bar)
+        self.layer_panel.fileLoaded.connect(self._status_bar_loadfile)
         self.layer_panel.layerSelected.connect(self.update_legend_from_layer)
+        self.viewer.infoMsg.connect(self._status_bar_info)
+        self.viewer.drawFinished.connect(self.draw_shp_finished)
         self.action_open_shp.triggered.connect(self.open_vector_file)
         self.action_open_img.triggered.connect(self.open_img_file)
+        self.action_add_raster_layer.triggered.connect(self.open_img_file)
+        self.action_add_vector_layer.triggered.connect(self.open_vector_file)
+        self.action_new_shp_layer.triggered.connect(self.create_new_shapefile)
         self.action_exit.triggered.connect(self.handle_exit)
         self.action_pan.toggled.connect(self.viewer.set_pan_mode)
         self.action_zoom_in.triggered.connect(self.viewer.zoom_in)
@@ -157,18 +172,40 @@ class MainWindow(QMainWindow):
     def open_img_file(self):
         logger.info("Action: open_img ditekan")
         path, _ = QFileDialog.getOpenFileName(
-            self, "Pilih Citra", "", "GeoTIFF (*.tif *.tiff);;Images (*.jpg *.png)"
+            self, "Open Supported Raster", "", "GeoTIFF (*.tif *.tiff);;Images (*.jpg *.png)"
         )
         if path:
             self.layer_panel.add_layer(path)
 
     def open_vector_file(self):
         logger.info("Action: open_shp ditekan")
-        path, _ = QFileDialog.getOpenFileName(self, "Pilih Vektor", "", "Shapefile (*.shp);;Geopackage (*.gpkg)")
+        path, _ = QFileDialog.getOpenFileName(self, "Open Supported Vector", "", "ESRI Shapefile (*.shp);;Geopackage (*.gpkg)")
         
         if path:      
             self.layer_panel.add_layer(path)
     
+    def create_new_shapefile(self):
+        logger.info("Action: action_new_shp_layer ditekan")
+        dialog = CreateShapefileDialog(self)
+        if dialog.exec_():
+            path, dtype, crs = dialog.get_values()
+            logger.info(f"Tipe geometri: {dtype}, CRS: {crs}")
+            
+            if path:
+                self.viewer.temp_shp_path = path
+                self.viewer.temp_shp_type = dtype
+                self.viewer.temp_shp_crs = crs
+                self.viewer.isDrawing = True
+                self.viewer.setFocus(True)
+                self.viewer.setCursor(Qt.CrossCursor)
+                self.statusBar().showMessage("Draw polygon mode enabled. Left click to add points, right click to finish", 5000)
+    
+    def draw_shp_finished(self, conds, path):
+        if conds:
+            self.viewer.del_drawing()
+            if path:
+                self.layer_panel.add_layer(path)
+
     def update_legend_from_layer(self, layer_id):
         logger.info("Legenda diperbarui!")
         info = (
@@ -215,10 +252,10 @@ class MainWindow(QMainWindow):
         logger.info(f"Progress {value}% - {msg}")
 
     def run_analysis(self, controller, tif, shp, out):
-        # Menambah tif ke layer panel
-        self.layer_panel.add_layer(tif)
-        # Menambah shp ke layer panel
-        self.layer_panel.add_layer(shp)
+        # # Menambah tif ke layer panel
+        # self.layer_panel.add_layer(tif)
+        # # Menambah shp ke layer panel
+        # self.layer_panel.add_layer(shp)
         # Inisiasi worker thread
         self.worker = Worker(controller, tif, shp, out)
         # Inisiasi progress dialog

@@ -5,6 +5,7 @@ import logging
 import geopandas as gpd
 import pandas as pd
 
+
 logger = logging.getLogger(__name__)
 
 def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, check_cancel, on_progress):
@@ -87,7 +88,7 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, check
     print(f"Pemisahan selesai! Peta segmentasi disimpan di: {output_folder}")
     return output_path
 
-def deteksi_rumpun(scaler, model, input_folder, output_folder, check_cancel, on_progress):
+def deteksi_penyakit_rumpun(scaler, model, input_folder, output_folder, check_cancel, on_progress):
     """
     Menerapkan model multi-output ke raster dan menghasilkan 4 peta sebaran terpisah.
 
@@ -117,9 +118,9 @@ def deteksi_rumpun(scaler, model, input_folder, output_folder, check_cancel, on_
             path_hasil.append(output_path)
             output_profile = base_profile.copy()
             if os.path.exists(output_path):
-                output_dests[name] = rio.open(output_path, 'r+')
+                output_dests[name] = rio.open(output_path, "r+")
             else:
-                output_dests[name] = rio.open(output_path, 'w', **output_profile)
+                output_dests[name] = rio.open(output_path, "w", **output_profile)
         total_blocks = len(list(src.block_windows(1)))
         current_block = 0
         # Memproses lewat potongan (chunk)
@@ -179,10 +180,10 @@ def deteksi_rumpun(scaler, model, input_folder, output_folder, check_cancel, on_
     print(f"\nDeteksi selesai! 4 peta disimpan di folder: {output_folder}")
     return path_hasil
 
-def deteksi_petakan(scaler, model, input_folder, shp_path, output_folder, check_cancel, on_progress):
+def deteksi_penyakit_petak(scaler, model, input_folder, shp_path, output_folder, check_cancel, on_progress):
     """
-    Menerapkan model multi-output ke untuk memprediksi
-    penyakit dari dataset.
+    Menerapkan model untuk prediksi
+    penyakit.
 
     Parameters:
         input_folder (str): Lokasi folder hasil ekstraksi nilai piksel.
@@ -194,18 +195,18 @@ def deteksi_petakan(scaler, model, input_folder, shp_path, output_folder, check_
     """
     df = pd.read_csv(input_folder)
     gdf = gpd.read_file(shp_path)
+ 
+    fitur = ["RED", "GREEN", "BLUE", "M_GREEN", "M_RED", "RED_EDGE", "NIR"] 
 
-    fitur = ["RED", "GREEN", "BLUE", "M_GREEN", "M_RED", "RED_EDGE", "NIR"]
     X_inf = df[fitur]
     X_inf_array = X_inf.values
-    print("Menormalisasi data...")
     X_inf_scaled = scaler.transform(X_inf_array)
-    print("Memprediksi penyakit...")
     raw_preds = model.predict(X_inf_scaled)
-
-    map_label = {1: "Sehat", 2: "Ringan", 3: "Sedang", 4: "Parah"}
+    
     disease_names = ["blas", "blb", "bs", "nbs"]
-    output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Petak"
+    map_label = {1: "Sehat", 2: "Ringan", 3: "Sedang", 4: "Parah"}
+
+    output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Petak/Penyakit"
     os.makedirs(output_folder, exist_ok=True)
     output_xlsx = os.path.join(output_folder, "Hasil_Prediksi.xlsx")
     output_shp = os.path.join(output_folder, "Hasil_Prediksi.shp")
@@ -229,10 +230,11 @@ def deteksi_petakan(scaler, model, input_folder, shp_path, output_folder, check_
         # Masukkan ke dataframe
         df[f"Prediksi_{name}"] = [map_label[idx] for idx in class_idx]
         gdf[name] = [idx for idx in class_idx]
-        gdf_single["class"] = class_idx
+        gdf_single["preds"] = class_idx
         gdf_single.to_file(output_gpkg,
                             layer=name,
-                            driver="GPKG")
+                            driver="GPKG"
+                            )
 
     print(f"Menyimpan hasil prediksi di {output_folder}")
     df.to_excel(output_xlsx, index=False)
@@ -240,9 +242,126 @@ def deteksi_petakan(scaler, model, input_folder, shp_path, output_folder, check_
     
     return output_gpkg
 
-        
-    
+def deteksi_air_petak(polynom, scaler, model_reg, input_folder, shp_path, output_folder, check_cancel, on_progress):
+    """
+    Menerapkan model untuk prediksi
+    ketersediaan air.
 
+    Parameters:
+        input_folder (str): Lokasi folder hasil ekstraksi nilai piksel.
+        shp_path (str): Lokasi shapefile yang menjadi acuan.
+        output_folder (str): Nama folder tempat file akan disimpan.
+
+    Returns:
+        str: Output path.
+    """
+    df = pd.read_csv(input_folder)
+    gdf = gpd.read_file(shp_path) 
+
+    fitur = ["M_GREEN", "M_RED", "NDVI", "NDRE", "GNDVI", "EVI", "VIDVI", "CIVE"] 
+    X_inf = df[fitur]
+    X_poly = polynom.transform(X_inf)
+    X_poly_scaled = scaler.transform(X_poly)
+    reg_raw_preds = np.round(model_reg.predict(X_poly_scaled).flatten(), 4)
+    # model = ["klasifikasi", "regresi"]
+    map_label = {1: "Cukup", 2: "Kurang"}
+    output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Petak/Air Tersedia"
+    # preds = [class_idx, reg_raw_preds]
+    os.makedirs(output_folder, exist_ok=True)
+    output_xlsx = os.path.join(output_folder, "Hasil_Prediksi.xlsx")
+    output_shp = os.path.join(output_folder, "Hasil_Prediksi.shp")
+    output_gpkg = os.path.join(output_folder, "Hasil_Prediksi.gpkg")
+    gdf_single = gdf.copy()
+    for i in range(5):
+        # Memeriksa interupsi
+        if check_cancel and check_cancel():
+            logger.warning("Classifier dihentikan")
+            return None
+            
+        # Perbarui progres internal 
+        if on_progress:
+            relative_prog = 80 + int(((i+1)/5) * 10)
+            on_progress(relative_prog, f"Generating prediction ({i+1}/5)...")
+        # Masukkan ke dataframe
+        df[f"prediksi_air_regresi "] = reg_raw_preds
+        gdf["regresi"] = reg_raw_preds
+        gdf_single["preds"] = reg_raw_preds
+        gdf_single.to_file(output_gpkg,
+                            layer="water",
+                            driver="GPKG"
+                            )
+        
+    print(f"Menyimpan hasil prediksi di {output_folder}")
+    df.to_excel(output_xlsx, index=False)
+    gdf.to_file(output_shp, driver="ESRI Shapefile")
+    
+    return output_gpkg
+    
+def deteksi_nutrisi_petak(scaler_n, scaler_p, scaler_k, model_n, model_p, model_k, input_folder, shp_path, output_folder, check_cancel, on_progress):
+    """
+    Menerapkan model memprediksi
+    ketersediaan nutrisi.
+
+    Parameters:
+        input_folder (str): Lokasi folder hasil ekstraksi nilai piksel.
+        shp_path (str): Lokasi shapefile yang menjadi acuan.
+        output_folder (str): Nama folder tempat file akan disimpan.
+
+    Returns:
+        str: Output path.
+    """
+    df = pd.read_csv(input_folder)
+    gdf = gpd.read_file(shp_path)
+ 
+    fitur = ["RED", "GREEN", "BLUE", "M_GREEN", "M_RED", "RED_EDGE", "NIR"] 
+
+    X_inf = df[fitur]
+    X_inf_array = X_inf.values
+    X_n_scaled = scaler_n.transform(X_inf_array)
+    X_p_scaled = scaler_p.transform(X_inf_array)
+    X_k_scaled = scaler_k.transform(X_inf_array)
+    n_preds = model_n.predict(X_n_scaled)
+    p_preds = model_p.predict(X_p_scaled)
+    k_preds = model_k.predict(X_k_scaled)
+    # Ambil index kelas tertinggi
+    n_class_idx = np.argmax(n_preds, axis=1) + 1
+    p_class_idx = np.argmax(p_preds, axis=1) + 1
+    k_class_idx = np.argmax(k_preds, axis=1) + 1
+    
+    map_label = {1: "Kurang", 2: "Cukup", 3: "Berlebih"}
+    nutrient = ["nitrogen", "phospor", "kalium"]
+    output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Petak/Nutrisi"
+    os.makedirs(output_folder, exist_ok=True)
+    output_xlsx = os.path.join(output_folder, "Hasil_Prediksi.xlsx")
+    output_shp = os.path.join(output_folder, "Hasil_Prediksi.shp")
+    output_gpkg = os.path.join(output_folder, "Hasil_Prediksi.gpkg")
+    gdf_single = gdf.copy()
+    prediciton = [n_class_idx, p_class_idx, k_class_idx]
+    for i, name in enumerate(nutrient):
+        # Memeriksa interupsi
+        if check_cancel and check_cancel():
+            logger.warning("Classifier dihentikan")
+            return None
+            
+        # Perbarui progres internal 
+        if on_progress:
+            relative_prog = 70 + int(((i+1)/len(nutrient)) * 20)
+            on_progress(relative_prog, f"Generating prediction ({i+1}/{len(nutrient)})...")
+
+        # Masukkan ke dataframe
+        df[f"Prediksi_{name}"] = [map_label[idx] for idx in prediciton[i]]
+        gdf[name] = [idx for idx in prediciton[i]]
+        gdf_single["preds"] = prediciton[i]
+        gdf_single.to_file(output_gpkg,
+                            layer=name,
+                            driver="GPKG"
+                            )
+
+    print(f"Menyimpan hasil prediksi di {output_folder}")
+    df.to_excel(output_xlsx, index=False)
+    gdf.to_file(output_shp, driver="ESRI Shapefile")
+    
+    return output_gpkg
 if __name__ == "__main__":
     from modul_utilitas import PlantDiseaseAnalyzer
     import glob
