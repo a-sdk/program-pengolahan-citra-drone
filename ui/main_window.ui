@@ -77,7 +77,6 @@
     <addaction name="menuOpen"/>
     <addaction name="separator"/>
     <addaction name="action_exit"/>
-    <addaction name="action_debug"/>
    </widget>
    <widget class="QMenu" name="menuProcessing">
     <property name="title">

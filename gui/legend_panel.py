@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QListWidget, QListWidgetItem, QVBoxLayout, QLabel
+from PyQt5.QtWidgets import QWidget, QListWidget, QListWidgetItem, QVBoxLayout, QLabel, QTextBrowser
 from PyQt5.QtGui import QColor, QIcon, QPixmap
 
 
@@ -14,8 +14,10 @@ class LegendPanel(QWidget):
         self.legend_list.setStyleSheet("QListWidget { border: none; border-bottom: 1px solid #ccc; }")
 
         # List info
-        self.info_list = QListWidget()
-        self.info_list.setStyleSheet("QListWidget { border: none; }")
+        self.info_list = QTextBrowser()
+        self.info_list.setReadOnly(True)
+        self.info_list.setOpenExternalLinks(True)
+        self.info_list.setStyleSheet("QTextBrowser { border: none; }")
 
         self.main_layout.addWidget(self.legend_list, stretch=1)
         self.main_layout.addWidget(self.info_list, stretch=1)
@@ -32,24 +34,18 @@ class LegendPanel(QWidget):
         self.legend_list.addItem(item)
 
     def _add_rich_info_item(self, text, is_header=False, is_highlight=False):
-            """Fungsi pembantu untuk membuat item dengan format teks khusus"""
-            list_item = QListWidgetItem(self.info_list)
-            label = QLabel()
-            indent = "&nbsp;&nbsp;" if not is_header else ""
             # Logika formatting
             if is_header:
-                formatted_text = f"<b>{text}</b>"
-                label.setStyleSheet("background-color: #f0f0f0; border-bottom: 1px solid #ddd; padding: 2px;")
+                top_margin = "15px" if text.lower() == "recommendation:" else "0px"
+                html = (f"<div style='font-weight: bold; font-size: 14px; "
+                                f"margin-top: {top_margin}; margin-bottom: 5px; "
+                                f"border-bottom: 1px solid #ddd;'>{text}</div>")
             elif is_highlight:
-                formatted_text = f"<span>{indent}{text}</span>"
-                label.setStyleSheet("background-color: #d1e8ff; color: #000;")
+                html = f"<div style='color: #000; margin: 0px; padding: 0px;'>{text}</div>"
             else:
-                formatted_text = f"<span>{indent}{text}</span>"
-                label.setStyleSheet("padding: 1px;")
-            label.setText(formatted_text)
-        
-            self.info_list.addItem(list_item)
-            self.info_list.setItemWidget(list_item, label)
+                html = f"<div style='margin: 0px; padding: 0px;'>{text}</div>"
+            
+            self.info_list.append(html)
 
     def set_legend(self, legend_dict):
         self.legend_list.clear()
@@ -63,7 +59,7 @@ class LegendPanel(QWidget):
         self._add_rich_info_item("Information:", is_header=True)
         for key, value in info_dict.items():
             if key.lower() != "rekomendasi":
-                self._add_rich_info_item(f"{key}: <b>{value:.2f} %</b>")
+                self._add_rich_info_item(f"{key}: {value:.2f} %")
         self._add_rich_info_item("Recommendation:", is_header=True)
         recom = info_dict.get("rekomendasi", "-")
         self._add_rich_info_item(recom, is_highlight=True)

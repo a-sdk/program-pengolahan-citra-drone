@@ -159,7 +159,7 @@ class MainWindow(QMainWindow):
         self.action_add_raster_layer.triggered.connect(self.open_img_file)
         self.action_add_vector_layer.triggered.connect(self.open_vector_file)
         self.action_new_shp_layer.triggered.connect(self.create_new_shapefile)
-        self.action_exit.triggered.connect(self.handle_exit)
+        self.action_exit.triggered.connect(self.close)
         self.action_pan.toggled.connect(self.viewer.set_pan_mode)
         self.action_zoom_in.triggered.connect(self.viewer.zoom_in)
         self.action_zoom_out.triggered.connect(self.viewer.zoom_out)
@@ -257,18 +257,18 @@ class MainWindow(QMainWindow):
         # # Menambah shp ke layer panel
         # self.layer_panel.add_layer(shp)
         # Inisiasi worker thread
-        self.worker = Worker(controller, tif, shp, out)
+        self.worker_thread = Worker(controller, tif, shp, out)
         # Inisiasi progress dialog
         self._setup_progress_dialog()
         # Menghubungkan sinyal worker ke progress dialog
-        self.worker.progress_signal.connect(self.handle_progress_dialog)
-        self.worker.progress_signal.connect(self.update_progress_bar)
-        self.worker.finished_signal.connect(self.on_analysis_finished)
-        self.worker.error_signal.connect(self.show_error_msg)
+        self.worker_thread.progress_signal.connect(self.handle_progress_dialog)
+        self.worker_thread.progress_signal.connect(self.update_progress_bar)
+        self.worker_thread.finished_signal.connect(self.on_analysis_finished)
+        self.worker_thread.error_signal.connect(self.show_error_msg)
         # Menghubungkan tombol 'cancel'
-        self.pd.canceled.connect(self.worker.requestInterruption)
+        self.pd.canceled.connect(self.worker_thread.requestInterruption)
         # Memulai proses
-        self.worker.start()
+        self.worker_thread.start()
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(0)
         self.statusBar().showMessage("Ready")
@@ -342,12 +342,25 @@ class MainWindow(QMainWindow):
             tif, shp, out = dialog.get_values()
             self.run_analysis(self.nutrient_ctrl, tif, shp, out)
 
-    def handle_exit(self):
-        logger.info("Action: exit ditekan")
-        reply = QMessageBox.question(self, 'Exit', 'Are you sure?', 
-                                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if reply == QMessageBox.Yes:
-            QApplication.instance().quit() 
+    def closeEvent(self, event):
+        logger.info("Mencoba menutup aplikasi...")
+        reply = QMessageBox.question(self, 'Exit', 'Are you sure?',
+                                     QMessageBox.StandardButton.Yes |
+                                     QMessageBox.StandardButton.No,
+                                     QMessageBox.StandardButton.No)
+        if reply == QMessageBox.StandardButton.Yes:
+            if hasattr(self, 'worker_thread') and self.worker_thread.isRunning():
+                logger.info("Menghentikan worker thread sebelum keluar...")
+                self.worker_thread.requestInterruption()
+                if hasattr(self, 'pd'):
+                    self.pd.close()
+                if not self.worker_thread.wait(2000):
+                    logger.warning("Worker thread tidak merespon interupsi tepat waktu")
+            logger.info("Cleanup selesai. Aplikasi ditutup")
+            event.accept()
+        else:
+            logger.info("Batal keluar.")
+            event.ignore()
 
     # DEBUGGING FINISH
     def simulate_finished(self):
