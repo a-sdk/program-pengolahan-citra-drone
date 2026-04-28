@@ -20,6 +20,7 @@ class LayerPanel(QWidget):
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.tree = QTreeWidget()
         self.main_layout.addWidget(self.tree)
+        self.layer_ids = []
         self._setup_tree()
         self._connect_signals()
 
@@ -44,7 +45,7 @@ class LayerPanel(QWidget):
 
             for lyr in layers:
                 if lyr != "app_layer_metadata":
-                    layer_id = self.viewer.add_gpkg_layer(path, lyr)
+                    layer_id = self.viewer.add_gpkg_layer(file_name, path, lyr)
 
                     item = QTreeWidgetItem([f"{file_name} | {lyr}"])
                     item.setData(0, Qt.UserRole, layer_id)
@@ -53,9 +54,9 @@ class LayerPanel(QWidget):
             return
         
         elif path.lower().endswith((".shp")):
-            layer_id = self.viewer.add_shapefile(path)
+            layer_id = self.viewer.add_shapefile(file_name, path)
         else:
-            layer_id = self.viewer.add_raster(path, isPrediction)
+            layer_id = self.viewer.add_raster(file_name, path, isPrediction)
             
         item = QTreeWidgetItem([file_name])
         item.setData(0, Qt.UserRole, layer_id)
@@ -81,12 +82,13 @@ class LayerPanel(QWidget):
             lid = item.data(0, Qt.UserRole)
 
             if lid is not None:
-                ids.append(lid)
+               ids.append(lid)
             
             iterator += 1
-        ids.reverse()
-        logger.info(f"Layer IDs di panel: {ids}")
-        self.viewer.set_z_order(ids)
+        self.layer_ids = ids
+        self.layer_ids.reverse()
+        logger.info(f"Layer IDs di panel: {self.layer_ids}")
+        self.viewer.set_z_order(self.layer_ids)
 
     # Context menu
     def _open_menu(self, pos):

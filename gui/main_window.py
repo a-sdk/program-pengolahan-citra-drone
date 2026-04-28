@@ -78,7 +78,6 @@ class MainWindow(QMainWindow):
         self.dockLegend.hide()
         self.action_legend_panel.setChecked(False)
 
-        self.temp_shp_coords = []
         
 
     def _setup_icons(self):
@@ -206,13 +205,26 @@ class MainWindow(QMainWindow):
             if path:
                 self.layer_panel.add_layer(path)
 
+    def get_pathname_layers(self):
+        logger.info("Update list layer combo box")
+        layer_dict = {}
+        if self.layer_panel.layer_ids:
+            for lid in self.layer_panel.layer_ids:
+                info = self.viewer.get_metadata(lid)
+                name = info.get("Filename", None)
+                path = info.get("Source", None)
+                layer_dict.update({
+                    lid: {
+                        "Filename": name, 
+                        "Source": path
+                    }
+                })
+            logger.info(f"Daftar layer: {layer_dict}")
+        return layer_dict 
+
     def update_legend_from_layer(self, layer_id):
         logger.info("Legenda diperbarui!")
-        info = (
-            self.viewer.raster_info.get(layer_id)
-            or
-            self.viewer.vector_info.get(layer_id)
-        )
+        info = self.viewer.get_metadata(layer_id)
 
         if not info:
             self.legend_panel.clear()
@@ -222,14 +234,14 @@ class MainWindow(QMainWindow):
         stats = None
 
         
-        if info.get("type") == "gpkg":
+        if info.get("Type") == "GeoPackage Layer":
             legend, stats = self.viewer.read_gpkg_metadata(
-                info["path"],
-                info["layer_name"]
+                info["Source"],
+                info["Layer Name"]
             )
         else:
-            legend = info.get("legend")
-            stats = info.get("stats")
+            legend = info.get("Legend")
+            stats = info.get("Stats")
 
         if not legend and not stats:
             self.legend_panel.clear()
@@ -323,21 +335,24 @@ class MainWindow(QMainWindow):
 
     def run_disease_prediction(self):
         logger.info("action_disease_predict ditekan")
-        dialog = InputDialog(self, title="Disease Detection", icon=self.icon_disease)
+        metadata = self.get_pathname_layers()
+        dialog = InputDialog(self, title="Disease Detection", icon=self.icon_disease, metadata=metadata)
         if dialog.exec_():
             tif, shp, out = dialog.get_values()
             self.run_analysis(self.disease_ctrl, tif, shp, out)
 
     def run_water_prediction(self):
         logger.info("action_water_predict ditekan")
-        dialog = InputDialog(self, title="Water Availability", icon=self.icon_water)
+        metadata = self.get_pathname_layers()
+        dialog = InputDialog(self, title="Water Availability", icon=self.icon_water, metadata=metadata)
         if dialog.exec_():
             tif, shp, out = dialog.get_values()
             self.run_analysis(self.water_ctrl, tif, shp, out)
 
     def run_nutrient_prediction(self):
         logger.info("action_disease_predict ditekan")
-        dialog = InputDialog(self, title="Nutrient Availability", icon=self.icon_mineral)
+        metadata = self.get_pathname_layers()
+        dialog = InputDialog(self, title="Nutrient Availability", icon=self.icon_mineral, metadata=metadata)
         if dialog.exec_():
             tif, shp, out = dialog.get_values()
             self.run_analysis(self.nutrient_ctrl, tif, shp, out)

@@ -54,7 +54,7 @@ class Viewer(QWidget):
         self.main_layout.addWidget(self.viewer)
         self._zoom = 0
 
-    def add_raster(self, path, isPrediction=False):
+    def add_raster(self, name, path, isPrediction=False):
         logger.info("Membuka raster")
         if path.lower().endswith((".png", ".jpg", ".jpeg")):
             pixmap = QPixmap(path)
@@ -147,6 +147,7 @@ class Viewer(QWidget):
 
             # Simpan info raster
             self.raster_info[layer_id] = {
+                "name": name,
                 "path": path,
                 "legend": legend_dict,
                 "stats": stats_dict,
@@ -159,6 +160,7 @@ class Viewer(QWidget):
                 "res": f"{pixel_width:.4f} m ({pixel_width*100:.1f} cm/px)"
             }
         self.layer_items[layer_id] = item
+        logger.info(f"{self.layer_items}")
         item.setTransformationMode(Qt.FastTransformation)
         item.setAcceptHoverEvents(False)
         self.fit_to_view()
@@ -227,7 +229,7 @@ class Viewer(QWidget):
                 self._draw_point_feature(geom.x, geom.y, group, color)
             self.fit_to_view()
 
-    def add_shapefile(self, path):
+    def add_shapefile(self, name, path):
         logger.info("Membuka shapefile")
         self._layer_id += 1
         layer_id = self._layer_id
@@ -235,7 +237,9 @@ class Viewer(QWidget):
         group = QGraphicsItemGroup()
         self.scene.addItem(group)
         self.layer_items[layer_id] = group
+        logger.info(f"{self.layer_items}")
         self.vector_info[layer_id] = {
+            "name": name,
             "type": "shp",
             "path": path,
             "crs": gdf.crs.to_string() if gdf.crs else "Unknown",
@@ -246,7 +250,7 @@ class Viewer(QWidget):
         self._add_vector(gdf, group)
         return layer_id
     
-    def add_gpkg_layer(self, path, layer_name):
+    def add_gpkg_layer(self, name, path, layer_name):
         logger.info(f"Membuka GPKG: {layer_name}")
         gdf = gpd.read_file(path, layer=layer_name)
         self._layer_id += 1
@@ -255,9 +259,11 @@ class Viewer(QWidget):
         group = QGraphicsItemGroup()
         self.scene.addItem(group)
         self.layer_items[layer_id] = group
+        logger.info(f"{self.layer_items}")
         self.vector_info[layer_id] = {
             "type": "gpkg",
             "path": path,
+            "name": name, 
             "layer_name": layer_name,
             "crs": gdf.crs.to_string() if gdf.crs else "Unknown",
             "geom_type": str(gdf.geom_type.iloc[0]),
@@ -403,16 +409,22 @@ class Viewer(QWidget):
         if isinstance(item, QGraphicsPixmapItem):
             info = self.raster_info.get(layer_id, {})
             metadata.update({
+                        "Filename": info.get("name", "-"),
+                        "Source": info.get("path", "-"),
                         "Type": "Raster",
                         "Data Type (DType)": info.get("dtype", "Unknown"),
                         "CRS": info.get("crs", "Unknown"),
                         "NoData Value": info.get("nodata", "None"),
-                        "Resolution": info.get("res", "Unknown")
+                        "Resolution": info.get("res", "Unknown"), 
+                        "Legend": info.get("legend", {}),
+                        "Stats": info.get("stats", {})
                     })
-        # Jika item adalah Shapefile
+        # Jika item adalah vektor
         elif isinstance(item, QGraphicsItemGroup):
             info = self.vector_info.get(layer_id, {})
             metadata.update({
+                        "Filename": info.get("name", "-"),
+                        "Source": info.get("path", "-"),
                         "Type": "GeoPackage Layer" if info.get("type") == "gpkg" else "Shapefile",
                         "Layer Name": info.get("layer_name", "-"),
                         "Geometry": info.get("geom_type", "Polygon"),
