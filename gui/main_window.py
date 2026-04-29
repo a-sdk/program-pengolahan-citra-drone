@@ -197,7 +197,8 @@ class MainWindow(QMainWindow):
                 self.viewer.isDrawing = True
                 self.viewer.setFocus(True)
                 self.viewer.setCursor(Qt.CrossCursor)
-                self.statusBar().showMessage("Draw polygon mode enabled. Left click to add points, right click to finish", 5000)
+                self.viewer.viewer.viewport().setCursor(Qt.CrossCursor)
+                self.statusBar().showMessage("Draw polygon mode enabled. Left click to add points, right click to finish. Press enter/return to save, esc to cancel", 20000)
     
     def draw_shp_finished(self, conds, path):
         if conds:

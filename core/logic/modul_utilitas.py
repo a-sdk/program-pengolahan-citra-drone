@@ -962,13 +962,8 @@ def hitung_sebaran_petak(gpkg_path, legend_dict):
         # Logika Rekomendasi
         val_1 = stats.get(labels[0], 0)
         val_2 = stats.get(labels[1], 0)
-        if len(labels) == 2: # Air (cukup, kurang)
-            if val_1 > val_2:
-                recom = "Irrigation should be applied only as needed to maintain soil moisture near field capacity and to avoid unnecessary water application."
-            elif val_2 > val_1:
-                recom = "More frequent irrigation with appropriate water volumes is recommended to restore soil moisture toward field capacity."
 
-        elif len(labels) == 3: # Nutrisi (kurang, cukup, berlebih)
+        if len(labels) == 3: # Nutrisi (kurang, cukup, berlebih)
             val_3 = stats.get(labels[2], 0)
             val_ = val_2 + val_3 # gabungan cukup + berlebih
             if val_1 > val_2 and val_1 > val_3:
@@ -993,7 +988,17 @@ def hitung_sebaran_petak(gpkg_path, legend_dict):
                 recom = "The majority of vegetation is healthy."
                 # recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
  
-
+        elif len(labels) == 5: # Air (rentang)
+            val_3 = stats.get(labels[2], 0)
+            val_4 = stats.get(labels[3], 0) 
+            val_5 = stats.get(labels[4], 0) 
+            val_ = val_4 + val_5 # gabungan sedang + parah
+            if val_1 > val_2 + val_3 and val_1 > val_:
+                recom = "Irrigation should be applied only as needed to maintain soil moisture near field capacity and to avoid unnecessary water application."
+            elif val_2 + val_3 > val_ and val_2 + val_3 > val_1:
+                recom = "More frequent irrigation with appropriate water volumes is recommended to restore soil moisture toward field capacity."
+            elif val_ > val_2 + val_3 and val_ > val_1:
+                recom = "Immediate irrigation is critically required to restore soil moisture above the permanent wilting threshold. Larger irrigation volumes should be applied promptly to re-establish soil moisture toward field capacity and to prevent irreversible crop stress and yield loss."
         # Simpan hasil per layer ke dictionary utama
         stats["rekomendasi"] = recom
         legend = legend_dict

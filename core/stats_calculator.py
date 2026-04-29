@@ -79,9 +79,12 @@ class WaterPlotCalculator(StatsCalculator):
         super().__init__()
 
         self.legend = {
-            # 1: {"label": "Excess",   "color": (0,128,0),    "range": (0.6, float('inf'))},
-            1: {"label": "Adequate", "color": (144,238,144), "range": (0.3, float('inf'))},
-            2: {"label": "Deficit",  "color": (255,255,116), "range": (-float('inf'), 0.3)}
+            1: {"label": "0.6 - 1",   "color": (0,128,0),    "range": (0.6, 1)},
+            2: {"label": "0.4 - 0.6", "color": (144,238,144), "range": (0.4, 0.6)},
+            3: {"label": "0.3 - 0.4",  "color": (255,255,116), "range": (0.3, 0.4)},
+            4: {"label": "0.1 - 0.3",  "color": (255,179,34), "range": (0.1, 0.3)},
+            5: {"label": "-0.2 - 0.1",  "color": (215,25,28), "range": (-0.2, 0.1)}
+
         }
 
     def _do_calculation(self, input_folder):

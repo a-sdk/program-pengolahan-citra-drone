@@ -35,7 +35,9 @@ class Viewer(QWidget):
         self.temp_shp_path = None
         self.temp_shp_crs = None
         self.active_poly_item = None
+        self.commit_poly_item = []
         self.geo_coords = []
+        self.list_poly = []
         self.isDrawing = False
         self._layer_id = 0
         self.raster_info = {}
@@ -344,7 +346,7 @@ class Viewer(QWidget):
 
     def mousePressEvent(self, event):
         if self.isDrawing and event.button() == Qt.LeftButton:
-            logger.info("Mode gambar: Kursor di klik")
+            logger.info("Mode gambar: klik kiri")
             # Tambah titik sudut
             pixel_pos = event.pos()
             scene_pos = self.viewer.mapToScene(pixel_pos)
@@ -357,7 +359,7 @@ class Viewer(QWidget):
                 self.update_draw_polygon()
             
         elif event.button() == Qt.RightButton:
-            logger.info("Mode gambar: selesai")
+            logger.info("Mode gambar: klik kanan")
             num_points = len(self.temp_shp_points)
             if self.temp_shp_type == "Polygon" and num_points < 3:
                 self.infoMsg.emit("Polygon require 3 or more points!")
@@ -369,22 +371,32 @@ class Viewer(QWidget):
                 self.finalize_polygon()
                     
     def keyPressEvent(self, event):
+        if event.key() in (Qt.Key_Return, Qt.Key_Enter):
+            logger.info("Mode gambar: selesai")
+            self.save_polygon()
+            if self.isDrawing:
+                self.del_drawing()
         if event.key() == Qt.Key_Escape:
             logger.info("Mode gambar: keluar")
             if self.isDrawing:
                 self.del_drawing()
 
     def del_drawing(self):
-        self.viewer.unsetCursor()
         self.viewer.setCursor(Qt.ArrowCursor)
+        self.viewer.viewport().setCursor(Qt.ArrowCursor)
         self.infoMsg.emit("Draw polygon mode disabled")
         self.viewer.setFocus(False)
         self.isDrawing = False
         if self.active_poly_item:
             self.scene.removeItem(self.active_poly_item)
             self.active_poly_item = None
-        self.temp_shp_points = []
-        self.geo_coords = []
+        if self.commit_poly_item:
+            for item in self.commit_poly_item:
+                self.scene.removeItem(item)
+        self.temp_shp_points.clear()
+        self.geo_coords.clear()
+        self.list_poly.clear()
+        self.commit_poly_item.clear()
         self.viewer.viewport().update()
 
     def set_z_order(self, ordered_ids):
@@ -469,16 +481,33 @@ class Viewer(QWidget):
                 geom = dtype(self.geo_coords[0])
             else:
                 geom = dtype(self.geo_coords)
+                self.list_poly.append(geom)
+                logger.info(f"Polygon yang dibuat: {self.list_poly}")
             if not geom.is_valid:
                 self.infoMsg.emit("Geometry is not valid")
                 logger.info("Geometri tidak valid")
                 return
-            
+            final_poly_item = QGraphicsPolygonItem(QPolygonF(self.temp_shp_points))
+            pen = QPen(QColor(153, 245, 39, 150))
+            pen.setWidth(1)
+            pen.setCosmetic(True)
+            final_poly_item.setPen(pen)
+            final_poly_item.setBrush(QColor(153, 245, 39, 50))
+            self.commit_poly_item.append(final_poly_item)
+            self.scene.addItem(final_poly_item)
+
             if self.active_poly_item:
                 self.scene.removeItem(self.active_poly_item)
                 self.active_poly_item = None
+                self.geo_coords.clear()
+                self.temp_shp_points.clear()
+                
+        except Exception as e:
+            logger.error(f"ERROR: {type(e).__name__}: {e}", exc_info=True)
 
-            gdf = gpd.GeoDataFrame({'id':[1]}, crs=self.temp_shp_crs, geometry=[geom])
+    def save_polygon(self):
+        try:
+            gdf = gpd.GeoDataFrame({'id':range(len(self.list_poly))}, crs=self.temp_shp_crs, geometry=self.list_poly)
             gdf.to_file(self.temp_shp_path, driver="ESRI Shapefile")
             self.drawFinished.emit(True, self.temp_shp_path)
 

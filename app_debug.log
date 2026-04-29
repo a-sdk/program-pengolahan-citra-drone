@@ -1,162 +1,1615 @@
-2026-04-28 21:28:22,572 [INFO] main: Aplikasi dibuka!
-2026-04-28 21:28:22,819 [INFO] gui.main_window: Sinyal Action terhubung
-2026-04-28 21:28:24,664 [INFO] gui.main_window: action_disease_predict ditekan
-2026-04-28 21:28:24,664 [INFO] gui.main_window: Update list layer combo box
-2026-04-28 21:28:24,667 [INFO] gui.input_dialog: User menggunakan drop-down combo box
-2026-04-28 21:28:28,855 [INFO] gui.main_window: action_disease_predict ditekan
-2026-04-28 21:28:28,856 [INFO] gui.main_window: Update list layer combo box
-2026-04-28 21:28:28,859 [INFO] gui.input_dialog: User menggunakan drop-down combo box
-2026-04-28 21:28:31,112 [INFO] gui.main_window: action_water_predict ditekan
-2026-04-28 21:28:31,112 [INFO] gui.main_window: Update list layer combo box
-2026-04-28 21:28:31,114 [INFO] gui.input_dialog: User menggunakan drop-down combo box
-2026-04-28 21:28:33,000 [INFO] gui.main_window: Action: open_img ditekan
-2026-04-28 21:28:37,598 [INFO] gui.viewer: Membuka raster
-2026-04-28 21:28:38,264 [INFO] gui.viewer: {1: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA7370>}
-2026-04-28 21:28:38,273 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-28 21:28:38,274 [INFO] gui.layer_panel: Layer IDs di panel: [1]
-2026-04-28 21:28:38,274 [INFO] gui.viewer: Mengatur z-order: [1]
-2026-04-28 21:28:38,274 [INFO] gui.layer_panel: Berhasil menambah 'hasil_potong.tif' dengan ID: 1
-2026-04-28 21:28:38,465 [INFO] gui.main_window: Action: open_img ditekan
-2026-04-28 21:28:39,754 [INFO] gui.viewer: Membuka raster
-2026-04-28 21:28:40,417 [INFO] gui.viewer: {1: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA7370>, 2: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA72E0>}
-2026-04-28 21:28:40,427 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-28 21:28:40,427 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2]
-2026-04-28 21:28:40,427 [INFO] gui.viewer: Mengatur z-order: [1, 2]
-2026-04-28 21:28:40,427 [INFO] gui.layer_panel: Berhasil menambah 'hasil_potong_masked.tif' dengan ID: 2
-2026-04-28 21:28:40,624 [INFO] gui.main_window: Action: open_img ditekan
-2026-04-28 21:28:42,221 [INFO] gui.viewer: Membuka raster
-2026-04-28 21:28:42,360 [INFO] gui.viewer: {1: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA7370>, 2: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA72E0>, 3: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA7130>}
-2026-04-28 21:28:42,364 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-28 21:28:42,364 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2, 3]
-2026-04-28 21:28:42,364 [INFO] gui.viewer: Mengatur z-order: [1, 2, 3]
-2026-04-28 21:28:42,365 [INFO] gui.layer_panel: Berhasil menambah 'NDVI.tif' dengan ID: 3
-2026-04-28 21:28:43,207 [INFO] gui.main_window: Action: open_img ditekan
-2026-04-28 21:28:44,326 [INFO] gui.viewer: Membuka raster
-2026-04-28 21:28:44,500 [INFO] gui.viewer: {1: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA7370>, 2: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA72E0>, 3: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA7130>, 4: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA6F80>}
-2026-04-28 21:28:44,504 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-28 21:28:44,505 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2, 3, 4]
-2026-04-28 21:28:44,505 [INFO] gui.viewer: Mengatur z-order: [1, 2, 3, 4]
-2026-04-28 21:28:44,505 [INFO] gui.layer_panel: Berhasil menambah 'hasil_threshold_model.tif' dengan ID: 4
-2026-04-28 21:28:46,008 [INFO] gui.main_window: action_disease_predict ditekan
-2026-04-28 21:28:46,008 [INFO] gui.main_window: Update list layer combo box
-2026-04-28 21:28:46,008 [INFO] gui.main_window: Daftar layer: {1: {'Filename': 'hasil_potong.tif', 'Source': 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/hasil_potong.tif'}, 2: {'Filename': 'hasil_potong_masked.tif', 'Source': 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/hasil_potong_masked.tif'}, 3: {'Filename': 'NDVI.tif', 'Source': 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/NDVI.tif'}, 4: {'Filename': 'hasil_threshold_model.tif', 'Source': 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/hasil_threshold_model.tif'}}
-2026-04-28 21:28:46,012 [INFO] gui.input_dialog: User menggunakan drop-down combo box
-2026-04-28 21:29:02,544 [INFO] gui.main_window: Action: open_shp ditekan
-2026-04-28 21:29:09,129 [INFO] gui.viewer: Membuka shapefile
-2026-04-28 21:29:09,146 [INFO] gui.viewer: {1: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA7370>, 2: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA72E0>, 3: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA7130>, 4: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA6F80>, 5: <PyQt5.QtWidgets.QGraphicsItemGroup object at 0x000001A2E7EA7EB0>}
-2026-04-28 21:29:09,147 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-28 21:29:09,147 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2, 3, 4, 5]
-2026-04-28 21:29:09,148 [INFO] gui.viewer: Mengatur z-order: [1, 2, 3, 4, 5]
-2026-04-28 21:29:09,148 [INFO] gui.layer_panel: Berhasil menambah 'tes0l.shp' dengan ID: 5
-2026-04-28 21:29:12,568 [INFO] gui.main_window: action_water_predict ditekan
-2026-04-28 21:29:12,568 [INFO] gui.main_window: Update list layer combo box
-2026-04-28 21:29:12,568 [INFO] gui.main_window: Daftar layer: {1: {'Filename': 'hasil_potong.tif', 'Source': 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/hasil_potong.tif'}, 2: {'Filename': 'hasil_potong_masked.tif', 'Source': 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/hasil_potong_masked.tif'}, 3: {'Filename': 'NDVI.tif', 'Source': 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/NDVI.tif'}, 4: {'Filename': 'hasil_threshold_model.tif', 'Source': 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/hasil_threshold_model.tif'}, 5: {'Filename': 'tes0l.shp', 'Source': 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/shapefile/tes0l.shp'}}
-2026-04-28 21:29:12,571 [INFO] gui.input_dialog: User menggunakan drop-down combo box
-2026-04-28 21:29:12,572 [INFO] gui.input_dialog: User memilih tif:1, shp: 5
-2026-04-28 21:29:21,456 [INFO] gui.input_dialog: btn_browse_out ditekan
-2026-04-28 21:29:34,553 [INFO] core.splitter: Memulai pembuatan multipoligon...
-2026-04-28 21:29:34,570 [INFO] gui.main_window: Progress 10% - Generating multi polygon...
-2026-04-28 21:29:34,572 [INFO] gui.main_window: Progress 11% - Loading polygon crs...
-2026-04-28 21:29:34,573 [INFO] gui.main_window: Progress 12% - Generating random points...
-2026-04-28 21:29:34,584 [INFO] gui.main_window: Progress 13% - Clustering points...
-2026-04-28 21:29:36,014 [INFO] gui.main_window: Progress 14% - Generating aggregates...
-2026-04-28 21:29:36,023 [INFO] gui.main_window: Progress 15% - Calculating centroids...
-2026-04-28 21:29:36,025 [INFO] gui.main_window: Progress 16% - Generating voronoi polygons...
-2026-04-28 21:29:36,048 [INFO] gui.main_window: Progress 19% - Performing intersection...
-2026-04-28 21:29:36,096 [INFO] core.clipper: Memulai clipping...
-2026-04-28 21:29:36,097 [INFO] gui.main_window: Progress 20% - Loading raster file...
-2026-04-28 21:29:36,168 [INFO] core.transformer: Memulai proses transformasi...
-2026-04-28 21:29:36,169 [INFO] gui.main_window: Progress 30% - Transforming with NDVI...
-2026-04-28 21:29:36,197 [INFO] core.segmenter: Memulai proses segmentasi...
-2026-04-28 21:29:36,197 [INFO] gui.main_window: Progress 40% - Separating vegetation...
-2026-04-28 21:29:36,400 [INFO] gui.main_window: Progress 40% - Separating vegetation (10/463)...
-2026-04-28 21:29:36,557 [INFO] gui.main_window: Progress 40% - Separating vegetation (20/463)...
-2026-04-28 21:29:36,711 [INFO] gui.main_window: Progress 40% - Separating vegetation (30/463)...
-2026-04-28 21:29:36,868 [INFO] gui.main_window: Progress 40% - Separating vegetation (40/463)...
-2026-04-28 21:29:37,077 [INFO] gui.main_window: Progress 41% - Separating vegetation (50/463)...
-2026-04-28 21:29:37,232 [INFO] gui.main_window: Progress 41% - Separating vegetation (60/463)...
-2026-04-28 21:29:37,387 [INFO] gui.main_window: Progress 41% - Separating vegetation (70/463)...
-2026-04-28 21:29:37,541 [INFO] gui.main_window: Progress 41% - Separating vegetation (80/463)...
-2026-04-28 21:29:37,698 [INFO] gui.main_window: Progress 41% - Separating vegetation (90/463)...
-2026-04-28 21:29:37,850 [INFO] gui.main_window: Progress 42% - Separating vegetation (100/463)...
-2026-04-28 21:29:38,006 [INFO] gui.main_window: Progress 42% - Separating vegetation (110/463)...
-2026-04-28 21:29:38,162 [INFO] gui.main_window: Progress 42% - Separating vegetation (120/463)...
-2026-04-28 21:29:38,316 [INFO] gui.main_window: Progress 42% - Separating vegetation (130/463)...
-2026-04-28 21:29:38,473 [INFO] gui.main_window: Progress 43% - Separating vegetation (140/463)...
-2026-04-28 21:29:38,628 [INFO] gui.main_window: Progress 43% - Separating vegetation (150/463)...
-2026-04-28 21:29:38,781 [INFO] gui.main_window: Progress 43% - Separating vegetation (160/463)...
-2026-04-28 21:29:38,935 [INFO] gui.main_window: Progress 43% - Separating vegetation (170/463)...
-2026-04-28 21:29:39,090 [INFO] gui.main_window: Progress 43% - Separating vegetation (180/463)...
-2026-04-28 21:29:39,244 [INFO] gui.main_window: Progress 44% - Separating vegetation (190/463)...
-2026-04-28 21:29:39,401 [INFO] gui.main_window: Progress 44% - Separating vegetation (200/463)...
-2026-04-28 21:29:39,555 [INFO] gui.main_window: Progress 44% - Separating vegetation (210/463)...
-2026-04-28 21:29:39,709 [INFO] gui.main_window: Progress 44% - Separating vegetation (220/463)...
-2026-04-28 21:29:39,865 [INFO] gui.main_window: Progress 44% - Separating vegetation (230/463)...
-2026-04-28 21:29:40,017 [INFO] gui.main_window: Progress 45% - Separating vegetation (240/463)...
-2026-04-28 21:29:40,171 [INFO] gui.main_window: Progress 45% - Separating vegetation (250/463)...
-2026-04-28 21:29:40,324 [INFO] gui.main_window: Progress 45% - Separating vegetation (260/463)...
-2026-04-28 21:29:40,477 [INFO] gui.main_window: Progress 45% - Separating vegetation (270/463)...
-2026-04-28 21:29:40,632 [INFO] gui.main_window: Progress 46% - Separating vegetation (280/463)...
-2026-04-28 21:29:40,787 [INFO] gui.main_window: Progress 46% - Separating vegetation (290/463)...
-2026-04-28 21:29:40,940 [INFO] gui.main_window: Progress 46% - Separating vegetation (300/463)...
-2026-04-28 21:29:41,097 [INFO] gui.main_window: Progress 46% - Separating vegetation (310/463)...
-2026-04-28 21:29:41,252 [INFO] gui.main_window: Progress 46% - Separating vegetation (320/463)...
-2026-04-28 21:29:41,411 [INFO] gui.main_window: Progress 47% - Separating vegetation (330/463)...
-2026-04-28 21:29:41,565 [INFO] gui.main_window: Progress 47% - Separating vegetation (340/463)...
-2026-04-28 21:29:41,721 [INFO] gui.main_window: Progress 47% - Separating vegetation (350/463)...
-2026-04-28 21:29:41,912 [INFO] gui.main_window: Progress 47% - Separating vegetation (360/463)...
-2026-04-28 21:29:42,066 [INFO] gui.main_window: Progress 47% - Separating vegetation (370/463)...
-2026-04-28 21:29:42,224 [INFO] gui.main_window: Progress 48% - Separating vegetation (380/463)...
-2026-04-28 21:29:42,377 [INFO] gui.main_window: Progress 48% - Separating vegetation (390/463)...
-2026-04-28 21:29:42,536 [INFO] gui.main_window: Progress 48% - Separating vegetation (400/463)...
-2026-04-28 21:29:42,689 [INFO] gui.main_window: Progress 48% - Separating vegetation (410/463)...
-2026-04-28 21:29:42,843 [INFO] gui.main_window: Progress 49% - Separating vegetation (420/463)...
-2026-04-28 21:29:42,995 [INFO] gui.main_window: Progress 49% - Separating vegetation (430/463)...
-2026-04-28 21:29:43,149 [INFO] gui.main_window: Progress 49% - Separating vegetation (440/463)...
-2026-04-28 21:29:43,302 [INFO] gui.main_window: Progress 49% - Separating vegetation (450/463)...
-2026-04-28 21:29:43,455 [INFO] gui.main_window: Progress 49% - Separating vegetation (460/463)...
-2026-04-28 21:29:43,539 [INFO] core.masker: Memulai proses masking...
-2026-04-28 21:29:43,541 [INFO] gui.main_window: Progress 50% - Masking raster...
-2026-04-28 21:29:43,576 [INFO] core.extractor: Memulai proses ekstraksi...
-2026-04-28 21:29:43,577 [INFO] gui.main_window: Progress 60% - Extracting pixel...
-2026-04-28 21:29:43,739 [INFO] core.transformer: Menghitung indeks vegetasi...
-2026-04-28 21:29:43,740 [INFO] gui.main_window: Progress 70% - Calculating vegetation indices...
-2026-04-28 21:29:43,755 [INFO] core.classifier: Memulai prediksi dengan WaterPlotClassifier...
-2026-04-28 21:29:43,755 [INFO] gui.main_window: Progress 80% - Identifying water availability...
-2026-04-28 21:29:46,169 [INFO] gui.main_window: Progress 82% - Generating prediction (1/5)...
-2026-04-28 21:29:46,205 [INFO] gui.main_window: Progress 84% - Generating prediction (2/5)...
-2026-04-28 21:29:46,238 [INFO] gui.main_window: Progress 86% - Generating prediction (3/5)...
-2026-04-28 21:29:46,272 [INFO] gui.main_window: Progress 88% - Generating prediction (4/5)...
-2026-04-28 21:29:46,306 [INFO] gui.main_window: Progress 90% - Generating prediction (5/5)...
-2026-04-28 21:29:46,555 [INFO] core.stats_calculator: Menghitung sebaran dan memunculkan hasil...
-2026-04-28 21:29:46,561 [INFO] gui.main_window: Progress 90% - Calculating stats...
-2026-04-28 21:29:46,580 [INFO] app.water_controller: Stats: {'water': {'Adequate': 82.35, 'Deficit': 17.65, 'rekomendasi': 'Irrigation should be applied only as needed to maintain soil moisture near field capacity and to avoid unnecessary water application.'}}
-2026-04-28 21:29:46,580 [INFO] gui.main_window: Progress 95% - Done
-2026-04-28 21:29:46,580 [INFO] app.water_controller: Semua proses selesai!
-2026-04-28 21:29:46,602 [INFO] gui.main_window: Progress 100% - Done
-2026-04-28 21:29:48,007 [INFO] gui.viewer: Membuka GPKG: water
-2026-04-28 21:29:48,017 [INFO] gui.viewer: {1: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA7370>, 2: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA72E0>, 3: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA7130>, 4: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001A2E7EA6F80>, 5: <PyQt5.QtWidgets.QGraphicsItemGroup object at 0x000001A2E7EA7EB0>, 6: <PyQt5.QtWidgets.QGraphicsItemGroup object at 0x000001A29B2DBF40>}
-2026-04-28 21:29:48,018 [INFO] gui.viewer: Value: 0.36070001125335693 | Label: Adequate | Color: [144, 238, 144]
-2026-04-28 21:29:48,018 [INFO] gui.viewer: Value: 0.510699987411499 | Label: Adequate | Color: [144, 238, 144]
-2026-04-28 21:29:48,019 [INFO] gui.viewer: Value: 0.4681999981403351 | Label: Adequate | Color: [144, 238, 144]
-2026-04-28 21:29:48,019 [INFO] gui.viewer: Value: 0.5098999738693237 | Label: Adequate | Color: [144, 238, 144]
-2026-04-28 21:29:48,020 [INFO] gui.viewer: Value: 0.5116999745368958 | Label: Adequate | Color: [144, 238, 144]
-2026-04-28 21:29:48,020 [INFO] gui.viewer: Value: 0.4390999972820282 | Label: Adequate | Color: [144, 238, 144]
-2026-04-28 21:29:48,020 [INFO] gui.viewer: Value: 0.5055999755859375 | Label: Adequate | Color: [144, 238, 144]
-2026-04-28 21:29:48,020 [INFO] gui.viewer: Value: 0.505299985408783 | Label: Adequate | Color: [144, 238, 144]
-2026-04-28 21:29:48,021 [INFO] gui.viewer: Value: 0.11670000106096268 | Label: Deficit | Color: [255, 255, 116]
-2026-04-28 21:29:48,021 [INFO] gui.viewer: Value: 0.5063999891281128 | Label: Adequate | Color: [144, 238, 144]
-2026-04-28 21:29:48,021 [INFO] gui.viewer: Value: 0.5023000240325928 | Label: Adequate | Color: [144, 238, 144]
-2026-04-28 21:29:48,022 [INFO] gui.viewer: Value: 0.5277000069618225 | Label: Adequate | Color: [144, 238, 144]
-2026-04-28 21:29:48,022 [INFO] gui.viewer: Value: 0.4805999994277954 | Label: Adequate | Color: [144, 238, 144]
-2026-04-28 21:29:48,022 [INFO] gui.viewer: Value: 0.17319999635219574 | Label: Deficit | Color: [255, 255, 116]
-2026-04-28 21:29:48,022 [INFO] gui.viewer: Value: 0.39480000734329224 | Label: Adequate | Color: [144, 238, 144]
-2026-04-28 21:29:48,023 [INFO] gui.viewer: Value: 0.3086000084877014 | Label: Adequate | Color: [144, 238, 144]
-2026-04-28 21:29:48,023 [INFO] gui.viewer: Value: 0.2797999978065491 | Label: Deficit | Color: [255, 255, 116]
-2026-04-28 21:29:48,023 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
-2026-04-28 21:29:48,023 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2, 3, 4, 5, 6]
-2026-04-28 21:29:48,023 [INFO] gui.viewer: Mengatur z-order: [1, 2, 3, 4, 5, 6]
-2026-04-28 21:29:52,583 [INFO] gui.main_window: Legenda diperbarui!
-2026-04-28 21:29:52,590 [INFO] gui.layer_panel: Layer 6 diklik
-2026-04-28 21:29:57,272 [INFO] gui.main_window: Mencoba menutup aplikasi...
-2026-04-28 21:29:59,138 [INFO] gui.main_window: Cleanup selesai. Aplikasi ditutup
+2026-04-29 17:37:29,848 [INFO] main: Aplikasi dibuka!
+2026-04-29 17:37:30,139 [INFO] gui.main_window: Sinyal Action terhubung
+2026-04-29 17:37:31,627 [INFO] gui.main_window: Action: open_img ditekan
+2026-04-29 17:37:36,711 [INFO] gui.viewer: Membuka raster
+2026-04-29 17:37:37,497 [INFO] gui.viewer: {1: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001F98683A9E0>}
+2026-04-29 17:37:37,523 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-29 17:37:37,523 [INFO] gui.layer_panel: Layer IDs di panel: [1]
+2026-04-29 17:37:37,523 [INFO] gui.viewer: Mengatur z-order: [1]
+2026-04-29 17:37:37,524 [INFO] gui.layer_panel: Berhasil menambah 'hasil_potong.tif' dengan ID: 1
+2026-04-29 17:37:41,450 [INFO] gui.main_window: Action: action_new_shp_layer ditekan
+2026-04-29 17:37:42,571 [INFO] gui.new_shp_dialog: btn_save_shp ditekan
+2026-04-29 17:37:59,869 [INFO] gui.main_window: Tipe geometri: Polygon, CRS: EPSG:32748
+2026-04-29 17:38:04,997 [INFO] gui.viewer: Mode gambar: klik kiri
+2026-04-29 17:38:06,596 [INFO] gui.viewer: Mode gambar: klik kiri
+2026-04-29 17:38:07,259 [INFO] gui.viewer: Mode gambar: klik kiri
+2026-04-29 17:38:07,987 [INFO] gui.viewer: Mode gambar: klik kiri
+2026-04-29 17:38:08,404 [INFO] gui.viewer: Mode gambar: klik kanan
+2026-04-29 17:38:08,404 [INFO] gui.viewer: Polygon yang dibuat: [<POLYGON ((702169.557 9229916.656, 702172.215 9229916.794, 702172.446 922991...>]
+2026-04-29 17:38:09,299 [INFO] gui.viewer: Mode gambar: klik kiri
+2026-04-29 17:38:09,788 [INFO] gui.viewer: Mode gambar: klik kiri
+2026-04-29 17:38:10,194 [INFO] gui.viewer: Mode gambar: klik kiri
+2026-04-29 17:38:10,691 [INFO] gui.viewer: Mode gambar: klik kiri
+2026-04-29 17:38:10,971 [INFO] gui.viewer: Mode gambar: klik kanan
+2026-04-29 17:38:10,972 [INFO] gui.viewer: Polygon yang dibuat: [<POLYGON ((702169.557 9229916.656, 702172.215 9229916.794, 702172.446 922991...>, <POLYGON ((702169.511 9229922.665, 702173.532 9229922.526, 702173.556 922992...>]
+2026-04-29 17:38:11,771 [INFO] gui.viewer: Mode gambar: klik kiri
+2026-04-29 17:38:12,364 [INFO] gui.viewer: Mode gambar: klik kiri
+2026-04-29 17:38:13,115 [INFO] gui.viewer: Mode gambar: klik kiri
+2026-04-29 17:38:13,739 [INFO] gui.viewer: Mode gambar: klik kiri
+2026-04-29 17:38:14,035 [INFO] gui.viewer: Mode gambar: klik kanan
+2026-04-29 17:38:14,035 [INFO] gui.viewer: Polygon yang dibuat: [<POLYGON ((702169.557 9229916.656, 702172.215 9229916.794, 702172.446 922991...>, <POLYGON ((702169.511 9229922.665, 702173.532 9229922.526, 702173.556 922992...>, <POLYGON ((702179.981 9229916.794, 702180.097 9229926.71, 702201.684 9229924...>]
+2026-04-29 17:38:20,405 [INFO] gui.viewer: Mode gambar: selesai
+2026-04-29 17:38:20,439 [INFO] gui.viewer: Membuka shapefile
+2026-04-29 17:38:20,459 [INFO] gui.viewer: {1: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001F98683A9E0>, 2: <PyQt5.QtWidgets.QGraphicsItemGroup object at 0x000001F98683B250>}
+2026-04-29 17:38:20,462 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-29 17:38:20,462 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2]
+2026-04-29 17:38:20,462 [INFO] gui.viewer: Mengatur z-order: [1, 2]
+2026-04-29 17:38:20,462 [INFO] gui.layer_panel: Berhasil menambah 'tes0p.shp' dengan ID: 2
+2026-04-29 17:38:23,659 [INFO] gui.main_window: action_water_predict ditekan
+2026-04-29 17:38:23,660 [INFO] gui.main_window: Update list layer combo box
+2026-04-29 17:38:23,660 [INFO] gui.main_window: Daftar layer: {1: {'Filename': 'hasil_potong.tif', 'Source': 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/Lahan percobaan/hasil_potong.tif'}, 2: {'Filename': 'tes0p.shp', 'Source': 'C:/Users/acer_/Documents/Orthomosaic/tes aplikasi/shapefile/tes0p.shp'}}
+2026-04-29 17:38:23,670 [INFO] gui.input_dialog: User menggunakan drop-down combo box
+2026-04-29 17:38:23,671 [INFO] gui.input_dialog: User memilih tif:1, shp: 2
+2026-04-29 17:38:28,787 [INFO] gui.input_dialog: btn_browse_out ditekan
+2026-04-29 17:38:44,479 [INFO] core.splitter: Memulai pembuatan multipoligon...
+2026-04-29 17:38:44,502 [INFO] gui.main_window: Progress 10% - Generating multi polygon...
+2026-04-29 17:38:44,505 [INFO] gui.main_window: Progress 11% - Loading polygon crs...
+2026-04-29 17:38:44,505 [INFO] gui.main_window: Progress 12% - Generating random points...
+2026-04-29 17:38:44,634 [INFO] gui.main_window: Progress 13% - Clustering points...
+2026-04-29 17:38:53,740 [INFO] gui.main_window: Progress 14% - Generating aggregates...
+2026-04-29 17:38:53,826 [INFO] gui.main_window: Progress 15% - Calculating centroids...
+2026-04-29 17:38:53,833 [INFO] gui.main_window: Progress 16% - Generating voronoi polygons...
+2026-04-29 17:38:54,000 [INFO] gui.main_window: Progress 19% - Performing intersection...
+2026-04-29 17:38:54,240 [INFO] core.clipper: Memulai clipping...
+2026-04-29 17:38:54,241 [INFO] gui.main_window: Progress 20% - Loading raster file...
+2026-04-29 17:38:54,735 [INFO] core.transformer: Memulai proses transformasi...
+2026-04-29 17:38:54,736 [INFO] gui.main_window: Progress 30% - Transforming with NDVI...
+2026-04-29 17:38:54,951 [INFO] core.segmenter: Memulai proses segmentasi...
+2026-04-29 17:38:54,951 [INFO] gui.main_window: Progress 40% - Separating vegetation...
+2026-04-29 17:38:55,316 [INFO] gui.main_window: Progress 40% - Separating vegetation (10/1496)...
+2026-04-29 17:38:55,472 [INFO] gui.main_window: Progress 40% - Separating vegetation (20/1496)...
+2026-04-29 17:38:55,674 [INFO] gui.main_window: Progress 40% - Separating vegetation (30/1496)...
+2026-04-29 17:38:55,834 [INFO] gui.main_window: Progress 40% - Separating vegetation (40/1496)...
+2026-04-29 17:38:55,994 [INFO] gui.main_window: Progress 40% - Separating vegetation (50/1496)...
+2026-04-29 17:38:56,154 [INFO] gui.main_window: Progress 40% - Separating vegetation (60/1496)...
+2026-04-29 17:38:56,314 [INFO] gui.main_window: Progress 40% - Separating vegetation (70/1496)...
+2026-04-29 17:38:56,474 [INFO] gui.main_window: Progress 40% - Separating vegetation (80/1496)...
+2026-04-29 17:38:56,633 [INFO] gui.main_window: Progress 40% - Separating vegetation (90/1496)...
+2026-04-29 17:38:56,791 [INFO] gui.main_window: Progress 40% - Separating vegetation (100/1496)...
+2026-04-29 17:38:56,950 [INFO] gui.main_window: Progress 40% - Separating vegetation (110/1496)...
+2026-04-29 17:38:57,108 [INFO] gui.main_window: Progress 40% - Separating vegetation (120/1496)...
+2026-04-29 17:38:57,268 [INFO] gui.main_window: Progress 40% - Separating vegetation (130/1496)...
+2026-04-29 17:38:57,428 [INFO] gui.main_window: Progress 40% - Separating vegetation (140/1496)...
+2026-04-29 17:38:57,588 [INFO] gui.main_window: Progress 41% - Separating vegetation (150/1496)...
+2026-04-29 17:38:57,749 [INFO] gui.main_window: Progress 41% - Separating vegetation (160/1496)...
+2026-04-29 17:38:57,909 [INFO] gui.main_window: Progress 41% - Separating vegetation (170/1496)...
+2026-04-29 17:38:58,068 [INFO] gui.main_window: Progress 41% - Separating vegetation (180/1496)...
+2026-04-29 17:38:58,228 [INFO] gui.main_window: Progress 41% - Separating vegetation (190/1496)...
+2026-04-29 17:38:58,388 [INFO] gui.main_window: Progress 41% - Separating vegetation (200/1496)...
+2026-04-29 17:38:58,549 [INFO] gui.main_window: Progress 41% - Separating vegetation (210/1496)...
+2026-04-29 17:38:58,719 [INFO] gui.main_window: Progress 41% - Separating vegetation (220/1496)...
+2026-04-29 17:38:58,889 [INFO] gui.main_window: Progress 41% - Separating vegetation (230/1496)...
+2026-04-29 17:38:59,059 [INFO] gui.main_window: Progress 41% - Separating vegetation (240/1496)...
+2026-04-29 17:38:59,227 [INFO] gui.main_window: Progress 41% - Separating vegetation (250/1496)...
+2026-04-29 17:38:59,406 [INFO] gui.main_window: Progress 41% - Separating vegetation (260/1496)...
+2026-04-29 17:38:59,589 [INFO] gui.main_window: Progress 41% - Separating vegetation (270/1496)...
+2026-04-29 17:38:59,750 [INFO] gui.main_window: Progress 41% - Separating vegetation (280/1496)...
+2026-04-29 17:38:59,999 [INFO] gui.main_window: Progress 41% - Separating vegetation (290/1496)...
+2026-04-29 17:39:00,181 [INFO] gui.main_window: Progress 42% - Separating vegetation (300/1496)...
+2026-04-29 17:39:00,372 [INFO] gui.main_window: Progress 42% - Separating vegetation (310/1496)...
+2026-04-29 17:39:00,554 [INFO] gui.main_window: Progress 42% - Separating vegetation (320/1496)...
+2026-04-29 17:39:00,734 [INFO] gui.main_window: Progress 42% - Separating vegetation (330/1496)...
+2026-04-29 17:39:00,945 [INFO] gui.main_window: Progress 42% - Separating vegetation (340/1496)...
+2026-04-29 17:39:01,123 [INFO] gui.main_window: Progress 42% - Separating vegetation (350/1496)...
+2026-04-29 17:39:01,283 [INFO] gui.main_window: Progress 42% - Separating vegetation (360/1496)...
+2026-04-29 17:39:01,462 [INFO] gui.main_window: Progress 42% - Separating vegetation (370/1496)...
+2026-04-29 17:39:01,632 [INFO] gui.main_window: Progress 42% - Separating vegetation (380/1496)...
+2026-04-29 17:39:01,815 [INFO] gui.main_window: Progress 42% - Separating vegetation (390/1496)...
+2026-04-29 17:39:01,976 [INFO] gui.main_window: Progress 42% - Separating vegetation (400/1496)...
+2026-04-29 17:39:02,145 [INFO] gui.main_window: Progress 42% - Separating vegetation (410/1496)...
+2026-04-29 17:39:02,336 [INFO] gui.main_window: Progress 42% - Separating vegetation (420/1496)...
+2026-04-29 17:39:02,505 [INFO] gui.main_window: Progress 42% - Separating vegetation (430/1496)...
+2026-04-29 17:39:02,707 [INFO] gui.main_window: Progress 42% - Separating vegetation (440/1496)...
+2026-04-29 17:39:02,895 [INFO] gui.main_window: Progress 43% - Separating vegetation (450/1496)...
+2026-04-29 17:39:03,078 [INFO] gui.main_window: Progress 43% - Separating vegetation (460/1496)...
+2026-04-29 17:39:03,268 [INFO] gui.main_window: Progress 43% - Separating vegetation (470/1496)...
+2026-04-29 17:39:03,468 [INFO] gui.main_window: Progress 43% - Separating vegetation (480/1496)...
+2026-04-29 17:39:03,659 [INFO] gui.main_window: Progress 43% - Separating vegetation (490/1496)...
+2026-04-29 17:39:03,850 [INFO] gui.main_window: Progress 43% - Separating vegetation (500/1496)...
+2026-04-29 17:39:04,032 [INFO] gui.main_window: Progress 43% - Separating vegetation (510/1496)...
+2026-04-29 17:39:04,250 [INFO] gui.main_window: Progress 43% - Separating vegetation (520/1496)...
+2026-04-29 17:39:04,422 [INFO] gui.main_window: Progress 43% - Separating vegetation (530/1496)...
+2026-04-29 17:39:04,592 [INFO] gui.main_window: Progress 43% - Separating vegetation (540/1496)...
+2026-04-29 17:39:04,752 [INFO] gui.main_window: Progress 43% - Separating vegetation (550/1496)...
+2026-04-29 17:39:04,912 [INFO] gui.main_window: Progress 43% - Separating vegetation (560/1496)...
+2026-04-29 17:39:05,070 [INFO] gui.main_window: Progress 43% - Separating vegetation (570/1496)...
+2026-04-29 17:39:05,240 [INFO] gui.main_window: Progress 43% - Separating vegetation (580/1496)...
+2026-04-29 17:39:05,409 [INFO] gui.main_window: Progress 43% - Separating vegetation (590/1496)...
+2026-04-29 17:39:05,580 [INFO] gui.main_window: Progress 44% - Separating vegetation (600/1496)...
+2026-04-29 17:39:05,741 [INFO] gui.main_window: Progress 44% - Separating vegetation (610/1496)...
+2026-04-29 17:39:05,901 [INFO] gui.main_window: Progress 44% - Separating vegetation (620/1496)...
+2026-04-29 17:39:06,070 [INFO] gui.main_window: Progress 44% - Separating vegetation (630/1496)...
+2026-04-29 17:39:06,239 [INFO] gui.main_window: Progress 44% - Separating vegetation (640/1496)...
+2026-04-29 17:39:06,409 [INFO] gui.main_window: Progress 44% - Separating vegetation (650/1496)...
+2026-04-29 17:39:06,568 [INFO] gui.main_window: Progress 44% - Separating vegetation (660/1496)...
+2026-04-29 17:39:06,740 [INFO] gui.main_window: Progress 44% - Separating vegetation (670/1496)...
+2026-04-29 17:39:06,910 [INFO] gui.main_window: Progress 44% - Separating vegetation (680/1496)...
+2026-04-29 17:39:07,068 [INFO] gui.main_window: Progress 44% - Separating vegetation (690/1496)...
+2026-04-29 17:39:07,227 [INFO] gui.main_window: Progress 44% - Separating vegetation (700/1496)...
+2026-04-29 17:39:07,388 [INFO] gui.main_window: Progress 44% - Separating vegetation (710/1496)...
+2026-04-29 17:39:07,559 [INFO] gui.main_window: Progress 44% - Separating vegetation (720/1496)...
+2026-04-29 17:39:07,728 [INFO] gui.main_window: Progress 44% - Separating vegetation (730/1496)...
+2026-04-29 17:39:07,897 [INFO] gui.main_window: Progress 44% - Separating vegetation (740/1496)...
+2026-04-29 17:39:08,057 [INFO] gui.main_window: Progress 45% - Separating vegetation (750/1496)...
+2026-04-29 17:39:08,216 [INFO] gui.main_window: Progress 45% - Separating vegetation (760/1496)...
+2026-04-29 17:39:08,387 [INFO] gui.main_window: Progress 45% - Separating vegetation (770/1496)...
+2026-04-29 17:39:08,545 [INFO] gui.main_window: Progress 45% - Separating vegetation (780/1496)...
+2026-04-29 17:39:08,716 [INFO] gui.main_window: Progress 45% - Separating vegetation (790/1496)...
+2026-04-29 17:39:08,888 [INFO] gui.main_window: Progress 45% - Separating vegetation (800/1496)...
+2026-04-29 17:39:09,048 [INFO] gui.main_window: Progress 45% - Separating vegetation (810/1496)...
+2026-04-29 17:39:09,216 [INFO] gui.main_window: Progress 45% - Separating vegetation (820/1496)...
+2026-04-29 17:39:09,427 [INFO] gui.main_window: Progress 45% - Separating vegetation (830/1496)...
+2026-04-29 17:39:09,606 [INFO] gui.main_window: Progress 45% - Separating vegetation (840/1496)...
+2026-04-29 17:39:09,767 [INFO] gui.main_window: Progress 45% - Separating vegetation (850/1496)...
+2026-04-29 17:39:09,936 [INFO] gui.main_window: Progress 45% - Separating vegetation (860/1496)...
+2026-04-29 17:39:10,097 [INFO] gui.main_window: Progress 45% - Separating vegetation (870/1496)...
+2026-04-29 17:39:10,275 [INFO] gui.main_window: Progress 45% - Separating vegetation (880/1496)...
+2026-04-29 17:39:10,445 [INFO] gui.main_window: Progress 45% - Separating vegetation (890/1496)...
+2026-04-29 17:39:10,616 [INFO] gui.main_window: Progress 46% - Separating vegetation (900/1496)...
+2026-04-29 17:39:10,785 [INFO] gui.main_window: Progress 46% - Separating vegetation (910/1496)...
+2026-04-29 17:39:10,966 [INFO] gui.main_window: Progress 46% - Separating vegetation (920/1496)...
+2026-04-29 17:39:11,135 [INFO] gui.main_window: Progress 46% - Separating vegetation (930/1496)...
+2026-04-29 17:39:11,305 [INFO] gui.main_window: Progress 46% - Separating vegetation (940/1496)...
+2026-04-29 17:39:11,477 [INFO] gui.main_window: Progress 46% - Separating vegetation (950/1496)...
+2026-04-29 17:39:11,665 [INFO] gui.main_window: Progress 46% - Separating vegetation (960/1496)...
+2026-04-29 17:39:11,833 [INFO] gui.main_window: Progress 46% - Separating vegetation (970/1496)...
+2026-04-29 17:39:12,014 [INFO] gui.main_window: Progress 46% - Separating vegetation (980/1496)...
+2026-04-29 17:39:12,194 [INFO] gui.main_window: Progress 46% - Separating vegetation (990/1496)...
+2026-04-29 17:39:12,356 [INFO] gui.main_window: Progress 46% - Separating vegetation (1000/1496)...
+2026-04-29 17:39:12,575 [INFO] gui.main_window: Progress 46% - Separating vegetation (1010/1496)...
+2026-04-29 17:39:12,745 [INFO] gui.main_window: Progress 46% - Separating vegetation (1020/1496)...
+2026-04-29 17:39:12,916 [INFO] gui.main_window: Progress 46% - Separating vegetation (1030/1496)...
+2026-04-29 17:39:13,075 [INFO] gui.main_window: Progress 46% - Separating vegetation (1040/1496)...
+2026-04-29 17:39:13,244 [INFO] gui.main_window: Progress 47% - Separating vegetation (1050/1496)...
+2026-04-29 17:39:13,405 [INFO] gui.main_window: Progress 47% - Separating vegetation (1060/1496)...
+2026-04-29 17:39:13,566 [INFO] gui.main_window: Progress 47% - Separating vegetation (1070/1496)...
+2026-04-29 17:39:13,727 [INFO] gui.main_window: Progress 47% - Separating vegetation (1080/1496)...
+2026-04-29 17:39:13,907 [INFO] gui.main_window: Progress 47% - Separating vegetation (1090/1496)...
+2026-04-29 17:39:14,089 [INFO] gui.main_window: Progress 47% - Separating vegetation (1100/1496)...
+2026-04-29 17:39:14,259 [INFO] gui.main_window: Progress 47% - Separating vegetation (1110/1496)...
+2026-04-29 17:39:14,440 [INFO] gui.main_window: Progress 47% - Separating vegetation (1120/1496)...
+2026-04-29 17:39:14,621 [INFO] gui.main_window: Progress 47% - Separating vegetation (1130/1496)...
+2026-04-29 17:39:14,791 [INFO] gui.main_window: Progress 47% - Separating vegetation (1140/1496)...
+2026-04-29 17:39:14,960 [INFO] gui.main_window: Progress 47% - Separating vegetation (1150/1496)...
+2026-04-29 17:39:15,121 [INFO] gui.main_window: Progress 47% - Separating vegetation (1160/1496)...
+2026-04-29 17:39:15,291 [INFO] gui.main_window: Progress 47% - Separating vegetation (1170/1496)...
+2026-04-29 17:39:15,473 [INFO] gui.main_window: Progress 47% - Separating vegetation (1180/1496)...
+2026-04-29 17:39:15,633 [INFO] gui.main_window: Progress 47% - Separating vegetation (1190/1496)...
+2026-04-29 17:39:15,803 [INFO] gui.main_window: Progress 48% - Separating vegetation (1200/1496)...
+2026-04-29 17:39:15,985 [INFO] gui.main_window: Progress 48% - Separating vegetation (1210/1496)...
+2026-04-29 17:39:16,145 [INFO] gui.main_window: Progress 48% - Separating vegetation (1220/1496)...
+2026-04-29 17:39:16,315 [INFO] gui.main_window: Progress 48% - Separating vegetation (1230/1496)...
+2026-04-29 17:39:16,485 [INFO] gui.main_window: Progress 48% - Separating vegetation (1240/1496)...
+2026-04-29 17:39:16,665 [INFO] gui.main_window: Progress 48% - Separating vegetation (1250/1496)...
+2026-04-29 17:39:16,825 [INFO] gui.main_window: Progress 48% - Separating vegetation (1260/1496)...
+2026-04-29 17:39:16,996 [INFO] gui.main_window: Progress 48% - Separating vegetation (1270/1496)...
+2026-04-29 17:39:17,156 [INFO] gui.main_window: Progress 48% - Separating vegetation (1280/1496)...
+2026-04-29 17:39:17,315 [INFO] gui.main_window: Progress 48% - Separating vegetation (1290/1496)...
+2026-04-29 17:39:17,484 [INFO] gui.main_window: Progress 48% - Separating vegetation (1300/1496)...
+2026-04-29 17:39:17,644 [INFO] gui.main_window: Progress 48% - Separating vegetation (1310/1496)...
+2026-04-29 17:39:17,844 [INFO] gui.main_window: Progress 48% - Separating vegetation (1320/1496)...
+2026-04-29 17:39:18,013 [INFO] gui.main_window: Progress 48% - Separating vegetation (1330/1496)...
+2026-04-29 17:39:18,172 [INFO] gui.main_window: Progress 48% - Separating vegetation (1340/1496)...
+2026-04-29 17:39:18,333 [INFO] gui.main_window: Progress 49% - Separating vegetation (1350/1496)...
+2026-04-29 17:39:18,490 [INFO] gui.main_window: Progress 49% - Separating vegetation (1360/1496)...
+2026-04-29 17:39:18,649 [INFO] gui.main_window: Progress 49% - Separating vegetation (1370/1496)...
+2026-04-29 17:39:18,808 [INFO] gui.main_window: Progress 49% - Separating vegetation (1380/1496)...
+2026-04-29 17:39:18,966 [INFO] gui.main_window: Progress 49% - Separating vegetation (1390/1496)...
+2026-04-29 17:39:19,123 [INFO] gui.main_window: Progress 49% - Separating vegetation (1400/1496)...
+2026-04-29 17:39:19,283 [INFO] gui.main_window: Progress 49% - Separating vegetation (1410/1496)...
+2026-04-29 17:39:19,440 [INFO] gui.main_window: Progress 49% - Separating vegetation (1420/1496)...
+2026-04-29 17:39:19,601 [INFO] gui.main_window: Progress 49% - Separating vegetation (1430/1496)...
+2026-04-29 17:39:19,759 [INFO] gui.main_window: Progress 49% - Separating vegetation (1440/1496)...
+2026-04-29 17:39:19,914 [INFO] gui.main_window: Progress 49% - Separating vegetation (1450/1496)...
+2026-04-29 17:39:20,071 [INFO] gui.main_window: Progress 49% - Separating vegetation (1460/1496)...
+2026-04-29 17:39:20,227 [INFO] gui.main_window: Progress 49% - Separating vegetation (1470/1496)...
+2026-04-29 17:39:20,383 [INFO] gui.main_window: Progress 49% - Separating vegetation (1480/1496)...
+2026-04-29 17:39:20,542 [INFO] gui.main_window: Progress 49% - Separating vegetation (1490/1496)...
+2026-04-29 17:39:20,846 [INFO] core.masker: Memulai proses masking...
+2026-04-29 17:39:20,847 [INFO] gui.main_window: Progress 50% - Masking raster...
+2026-04-29 17:39:21,108 [INFO] core.extractor: Memulai proses ekstraksi...
+2026-04-29 17:39:21,109 [INFO] gui.main_window: Progress 60% - Extracting pixel...
+2026-04-29 17:39:27,148 [INFO] core.transformer: Menghitung indeks vegetasi...
+2026-04-29 17:39:27,148 [INFO] gui.main_window: Progress 70% - Calculating vegetation indices...
+2026-04-29 17:39:27,195 [INFO] core.classifier: Memulai prediksi dengan WaterPlotClassifier...
+2026-04-29 17:39:27,195 [INFO] gui.main_window: Progress 80% - Identifying water availability...
+2026-04-29 17:39:33,629 [INFO] gui.main_window: Progress 82% - Generating prediction (1/5)...
+2026-04-29 17:39:33,807 [INFO] gui.main_window: Progress 84% - Generating prediction (2/5)...
+2026-04-29 17:39:33,989 [INFO] gui.main_window: Progress 86% - Generating prediction (3/5)...
+2026-04-29 17:39:34,166 [INFO] gui.main_window: Progress 88% - Generating prediction (4/5)...
+2026-04-29 17:39:34,342 [INFO] gui.main_window: Progress 90% - Generating prediction (5/5)...
+2026-04-29 17:39:35,257 [INFO] core.stats_calculator: Menghitung sebaran dan memunculkan hasil...
+2026-04-29 17:39:35,258 [INFO] gui.main_window: Progress 90% - Calculating stats...
+2026-04-29 17:39:35,326 [INFO] app.water_controller: Stats: {'water': {'0.6 - 1': 5.43, '0.4 - 0.6': 78.12, '0.3 - 0.4': 6.16, '0.1 - 0.3': 7.54, '-0.2 - 0.1': 2.75, 'rekomendasi': 'More frequent irrigation with appropriate water volumes is recommended to restore soil moisture toward field capacity.'}}
+2026-04-29 17:39:35,327 [INFO] gui.main_window: Progress 95% - Done
+2026-04-29 17:39:35,327 [INFO] app.water_controller: Semua proses selesai!
+2026-04-29 17:39:35,355 [INFO] gui.main_window: Progress 100% - Done
+2026-04-29 17:39:36,771 [INFO] gui.viewer: Membuka GPKG: water
+2026-04-29 17:39:36,828 [INFO] gui.viewer: {1: <PyQt5.QtWidgets.QGraphicsPixmapItem object at 0x000001F98683A9E0>, 2: <PyQt5.QtWidgets.QGraphicsItemGroup object at 0x000001F98683B250>, 3: <PyQt5.QtWidgets.QGraphicsItemGroup object at 0x000001F98B4D81F0>}
+2026-04-29 17:39:36,829 [INFO] gui.viewer: Value: 0.5906000137329102 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,830 [INFO] gui.viewer: Value: 0.5012000203132629 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,830 [INFO] gui.viewer: Value: 0.6000999808311462 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,831 [INFO] gui.viewer: Value: 0.6205000281333923 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,831 [INFO] gui.viewer: Value: 0.5892999768257141 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,832 [INFO] gui.viewer: Value: 0.61080002784729 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,832 [INFO] gui.viewer: Value: 0.6065999865531921 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,833 [INFO] gui.viewer: Value: 0.6136999726295471 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,833 [INFO] gui.viewer: Value: 0.6136000156402588 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,833 [INFO] gui.viewer: Value: 0.6017000079154968 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,834 [INFO] gui.viewer: Value: 0.6050000190734863 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,834 [INFO] gui.viewer: Value: 0.5356000065803528 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,834 [INFO] gui.viewer: Value: 0.6103000044822693 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,835 [INFO] gui.viewer: Value: 0.5922999978065491 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,835 [INFO] gui.viewer: Value: 0.6116999983787537 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,835 [INFO] gui.viewer: Value: 0.36809998750686646 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,835 [INFO] gui.viewer: Value: 0.5985000133514404 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,836 [INFO] gui.viewer: Value: 0.2092999964952469 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,836 [INFO] gui.viewer: Value: 0.5824999809265137 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,837 [INFO] gui.viewer: Value: 0.5831999778747559 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,837 [INFO] gui.viewer: Value: 0.5358999967575073 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,837 [INFO] gui.viewer: Value: 0.5963000059127808 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,838 [INFO] gui.viewer: Value: 0.5813999772071838 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,838 [INFO] gui.viewer: Value: 0.5715000033378601 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,838 [INFO] gui.viewer: Value: 0.5751000046730042 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,839 [INFO] gui.viewer: Value: 0.5723999738693237 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,839 [INFO] gui.viewer: Value: 0.5511999726295471 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,839 [INFO] gui.viewer: Value: 0.582099974155426 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,840 [INFO] gui.viewer: Value: 0.5206000208854675 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,840 [INFO] gui.viewer: Value: 0.5503000020980835 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,840 [INFO] gui.viewer: Value: 0.582099974155426 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,840 [INFO] gui.viewer: Value: 0.576200008392334 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,841 [INFO] gui.viewer: Value: 0.5218999981880188 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,841 [INFO] gui.viewer: Value: 0.5267000198364258 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,841 [INFO] gui.viewer: Value: 0.3564000129699707 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,841 [INFO] gui.viewer: Value: 0.5426999926567078 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,842 [INFO] gui.viewer: Value: 0.5565000176429749 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,842 [INFO] gui.viewer: Value: 0.5873000025749207 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,842 [INFO] gui.viewer: Value: 0.4975000023841858 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,842 [INFO] gui.viewer: Value: 0.5508999824523926 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,843 [INFO] gui.viewer: Value: 0.5184999704360962 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,843 [INFO] gui.viewer: Value: 0.3224000036716461 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,843 [INFO] gui.viewer: Value: 0.26980000734329224 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,844 [INFO] gui.viewer: Value: 0.5800999999046326 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,844 [INFO] gui.viewer: Value: 0.5307000279426575 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,844 [INFO] gui.viewer: Value: 0.5009999871253967 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,844 [INFO] gui.viewer: Value: 0.2955000102519989 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,845 [INFO] gui.viewer: Value: 0.513700008392334 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,845 [INFO] gui.viewer: Value: 0.5153999924659729 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,845 [INFO] gui.viewer: Value: 0.5479999780654907 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,845 [INFO] gui.viewer: Value: 0.17560000717639923 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,846 [INFO] gui.viewer: Value: 0.5198000073432922 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,846 [INFO] gui.viewer: Value: 0.3124000132083893 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,846 [INFO] gui.viewer: Value: 0.31189998984336853 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,846 [INFO] gui.viewer: Value: 0.25209999084472656 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,847 [INFO] gui.viewer: Value: 0.5091999769210815 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,847 [INFO] gui.viewer: Value: 0.47279998660087585 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,847 [INFO] gui.viewer: Value: 0.5127000212669373 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,847 [INFO] gui.viewer: Value: 0.2732999920845032 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,848 [INFO] gui.viewer: Value: 0.5192999839782715 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,848 [INFO] gui.viewer: Value: 0.5049999952316284 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,848 [INFO] gui.viewer: Value: 0.532800018787384 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,848 [INFO] gui.viewer: Value: 0.5159000158309937 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,849 [INFO] gui.viewer: Value: 0.5015000104904175 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,849 [INFO] gui.viewer: Value: 0.3140000104904175 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,849 [INFO] gui.viewer: Value: 0.5138000249862671 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,850 [INFO] gui.viewer: Value: 0.2515999972820282 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,850 [INFO] gui.viewer: Value: 0.22759999334812164 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,850 [INFO] gui.viewer: Value: 0.19979999959468842 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,851 [INFO] gui.viewer: Value: 0.1745000034570694 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,851 [INFO] gui.viewer: Value: 0.21719999611377716 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,852 [INFO] gui.viewer: Value: 0.5447999835014343 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,852 [INFO] gui.viewer: Value: 0.5037999749183655 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,852 [INFO] gui.viewer: Value: 0.2493000030517578 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,853 [INFO] gui.viewer: Value: 0.16740000247955322 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,853 [INFO] gui.viewer: Value: 0.17800000309944153 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,853 [INFO] gui.viewer: Value: 0.5239999890327454 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,853 [INFO] gui.viewer: Value: 0.4977000057697296 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,854 [INFO] gui.viewer: Value: 0.5360999703407288 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,854 [INFO] gui.viewer: Value: 0.5701000094413757 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,854 [INFO] gui.viewer: Value: 0.5378999710083008 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,854 [INFO] gui.viewer: Value: 0.4975000023841858 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,855 [INFO] gui.viewer: Value: 0.551800012588501 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,855 [INFO] gui.viewer: Value: 0.5565000176429749 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,855 [INFO] gui.viewer: Value: 0.19949999451637268 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,856 [INFO] gui.viewer: Value: 0.49799999594688416 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,856 [INFO] gui.viewer: Value: 0.48350000381469727 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,856 [INFO] gui.viewer: Value: 0.560699999332428 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,856 [INFO] gui.viewer: Value: 0.23010000586509705 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,857 [INFO] gui.viewer: Value: 0.4936000108718872 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,857 [INFO] gui.viewer: Value: 0.5561000108718872 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,857 [INFO] gui.viewer: Value: 0.19099999964237213 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,857 [INFO] gui.viewer: Value: 0.06310000270605087 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:36,858 [INFO] gui.viewer: Value: 0.5691999793052673 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,858 [INFO] gui.viewer: Value: 0.550599992275238 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,858 [INFO] gui.viewer: Value: 0.15039999783039093 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,858 [INFO] gui.viewer: Value: 0.21719999611377716 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,859 [INFO] gui.viewer: Value: 0.2175000011920929 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,859 [INFO] gui.viewer: Value: 0.20679999887943268 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,859 [INFO] gui.viewer: Value: 0.5307999849319458 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,859 [INFO] gui.viewer: Value: 0.5164999961853027 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,860 [INFO] gui.viewer: Value: 0.4830999970436096 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,860 [INFO] gui.viewer: Value: 0.5008999705314636 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,860 [INFO] gui.viewer: Value: 0.27239999175071716 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,860 [INFO] gui.viewer: Value: 0.5953999757766724 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,861 [INFO] gui.viewer: Value: 0.22010000050067902 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,861 [INFO] gui.viewer: Value: 0.2379000037908554 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,861 [INFO] gui.viewer: Value: 0.5666999816894531 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,861 [INFO] gui.viewer: Value: 0.5702000260353088 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,862 [INFO] gui.viewer: Value: 0.5648000240325928 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,862 [INFO] gui.viewer: Value: 0.5266000032424927 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,862 [INFO] gui.viewer: Value: 0.5630000233650208 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,863 [INFO] gui.viewer: Value: 0.10830000042915344 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,863 [INFO] gui.viewer: Value: 0.4810999929904938 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,863 [INFO] gui.viewer: Value: 0.4970000088214874 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,864 [INFO] gui.viewer: Value: 0.5066999793052673 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,864 [INFO] gui.viewer: Value: 0.5152999758720398 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,865 [INFO] gui.viewer: Value: 0.593999981880188 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,865 [INFO] gui.viewer: Value: 0.21060000360012054 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,865 [INFO] gui.viewer: Value: 0.4805999994277954 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,866 [INFO] gui.viewer: Value: 0.49399998784065247 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,866 [INFO] gui.viewer: Value: 0.22030000388622284 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,866 [INFO] gui.viewer: Value: 0.4934000074863434 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,866 [INFO] gui.viewer: Value: 0.47749999165534973 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,867 [INFO] gui.viewer: Value: 0.21220000088214874 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,867 [INFO] gui.viewer: Value: 0.4020000100135803 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,867 [INFO] gui.viewer: Value: 0.4596000015735626 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,867 [INFO] gui.viewer: Value: 0.511900007724762 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,868 [INFO] gui.viewer: Value: 0.5349000096321106 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,868 [INFO] gui.viewer: Value: 0.48010000586509705 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,869 [INFO] gui.viewer: Value: 0.49219998717308044 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,869 [INFO] gui.viewer: Value: 0.1356000006198883 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,869 [INFO] gui.viewer: Value: 0.09700000286102295 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:36,869 [INFO] gui.viewer: Value: 0.4763999879360199 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,870 [INFO] gui.viewer: Value: 0.4700999855995178 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,870 [INFO] gui.viewer: Value: 0.46970000863075256 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,870 [INFO] gui.viewer: Value: 0.48190000653266907 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,871 [INFO] gui.viewer: Value: 0.4950000047683716 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,871 [INFO] gui.viewer: Value: 0.46650001406669617 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,871 [INFO] gui.viewer: Value: 0.49380001425743103 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,871 [INFO] gui.viewer: Value: 0.4438999891281128 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,872 [INFO] gui.viewer: Value: 0.5120999813079834 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,872 [INFO] gui.viewer: Value: 0.6025999784469604 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,872 [INFO] gui.viewer: Value: 0.5315999984741211 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,872 [INFO] gui.viewer: Value: 0.5091000199317932 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,873 [INFO] gui.viewer: Value: 0.4169999957084656 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,873 [INFO] gui.viewer: Value: 0.47760000824928284 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,873 [INFO] gui.viewer: Value: 0.4918999969959259 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,874 [INFO] gui.viewer: Value: 0.38940000534057617 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,874 [INFO] gui.viewer: Value: 0.4309999942779541 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,874 [INFO] gui.viewer: Value: 0.4699000120162964 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,874 [INFO] gui.viewer: Value: 0.5694000124931335 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,875 [INFO] gui.viewer: Value: 0.598800003528595 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,875 [INFO] gui.viewer: Value: 0.05999999865889549 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:36,875 [INFO] gui.viewer: Value: 0.5453000068664551 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,876 [INFO] gui.viewer: Value: 0.47859999537467957 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,876 [INFO] gui.viewer: Value: 0.43140000104904175 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,876 [INFO] gui.viewer: Value: 0.3513000011444092 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,877 [INFO] gui.viewer: Value: 0.5476999878883362 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,877 [INFO] gui.viewer: Value: 0.5181999802589417 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,878 [INFO] gui.viewer: Value: 0.551800012588501 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,878 [INFO] gui.viewer: Value: 0.5878999829292297 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,878 [INFO] gui.viewer: Value: 0.6322000026702881 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,879 [INFO] gui.viewer: Value: 0.5493999719619751 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,879 [INFO] gui.viewer: Value: 0.6057999730110168 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,879 [INFO] gui.viewer: Value: 0.29820001125335693 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,880 [INFO] gui.viewer: Value: 0.5946999788284302 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,880 [INFO] gui.viewer: Value: 0.4941999912261963 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,880 [INFO] gui.viewer: Value: 0.5838000178337097 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,880 [INFO] gui.viewer: Value: 0.49059998989105225 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,881 [INFO] gui.viewer: Value: 0.5491999983787537 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,881 [INFO] gui.viewer: Value: 0.4779999852180481 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,881 [INFO] gui.viewer: Value: 0.4871000051498413 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,882 [INFO] gui.viewer: Value: 0.4320000112056732 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,882 [INFO] gui.viewer: Value: 0.4975999891757965 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,882 [INFO] gui.viewer: Value: 0.40779998898506165 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,883 [INFO] gui.viewer: Value: 0.4153999984264374 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,883 [INFO] gui.viewer: Value: 0.3564999997615814 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,883 [INFO] gui.viewer: Value: 0.4034999907016754 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,883 [INFO] gui.viewer: Value: 0.10159999877214432 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,884 [INFO] gui.viewer: Value: 0.42590001225471497 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,884 [INFO] gui.viewer: Value: 0.4837999939918518 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,884 [INFO] gui.viewer: Value: 0.4821000099182129 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,885 [INFO] gui.viewer: Value: 0.5831000208854675 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,885 [INFO] gui.viewer: Value: 0.5181999802589417 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,885 [INFO] gui.viewer: Value: 0.43950000405311584 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,886 [INFO] gui.viewer: Value: 0.4438000023365021 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,886 [INFO] gui.viewer: Value: 0.43369999527931213 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,886 [INFO] gui.viewer: Value: 0.4120999872684479 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,886 [INFO] gui.viewer: Value: 0.5523999929428101 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,887 [INFO] gui.viewer: Value: 0.382099986076355 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,887 [INFO] gui.viewer: Value: 0.33959999680519104 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,887 [INFO] gui.viewer: Value: 0.475600004196167 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,887 [INFO] gui.viewer: Value: 0.5146999955177307 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,888 [INFO] gui.viewer: Value: 0.48240000009536743 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,888 [INFO] gui.viewer: Value: 0.4767000079154968 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,888 [INFO] gui.viewer: Value: 0.4584999978542328 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,888 [INFO] gui.viewer: Value: 0.486299991607666 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,889 [INFO] gui.viewer: Value: 0.5324000120162964 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,889 [INFO] gui.viewer: Value: 0.504800021648407 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,889 [INFO] gui.viewer: Value: 0.5116999745368958 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,890 [INFO] gui.viewer: Value: 0.4977000057697296 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,890 [INFO] gui.viewer: Value: 0.5996999740600586 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,890 [INFO] gui.viewer: Value: 0.5712000131607056 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,891 [INFO] gui.viewer: Value: 0.5239999890327454 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,891 [INFO] gui.viewer: Value: 0.5027999877929688 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,891 [INFO] gui.viewer: Value: 0.4081999957561493 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,892 [INFO] gui.viewer: Value: 0.47510001063346863 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,892 [INFO] gui.viewer: Value: 0.48010000586509705 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,892 [INFO] gui.viewer: Value: 0.4781000018119812 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,893 [INFO] gui.viewer: Value: 0.6294000148773193 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,893 [INFO] gui.viewer: Value: 0.5002999901771545 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,893 [INFO] gui.viewer: Value: 0.6133000254631042 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,893 [INFO] gui.viewer: Value: 0.46230000257492065 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,894 [INFO] gui.viewer: Value: 0.4918999969959259 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,894 [INFO] gui.viewer: Value: 0.4823000133037567 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,894 [INFO] gui.viewer: Value: 0.4814999997615814 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,895 [INFO] gui.viewer: Value: 0.4916999936103821 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,895 [INFO] gui.viewer: Value: 0.4860999882221222 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,895 [INFO] gui.viewer: Value: 0.4846999943256378 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,896 [INFO] gui.viewer: Value: 0.39329999685287476 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,902 [INFO] gui.viewer: Value: 0.47119998931884766 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,903 [INFO] gui.viewer: Value: 0.048900000751018524 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:36,904 [INFO] gui.viewer: Value: 0.6097000241279602 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,904 [INFO] gui.viewer: Value: 0.5419999957084656 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,905 [INFO] gui.viewer: Value: 0.605400025844574 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,906 [INFO] gui.viewer: Value: 0.3495999872684479 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,907 [INFO] gui.viewer: Value: 0.6310999989509583 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,908 [INFO] gui.viewer: Value: 0.43970000743865967 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,908 [INFO] gui.viewer: Value: 0.532800018787384 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,909 [INFO] gui.viewer: Value: 0.4982999861240387 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,909 [INFO] gui.viewer: Value: 0.5587000250816345 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,910 [INFO] gui.viewer: Value: 0.4787999987602234 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,910 [INFO] gui.viewer: Value: 0.4918999969959259 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,910 [INFO] gui.viewer: Value: 0.5171999931335449 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,911 [INFO] gui.viewer: Value: 0.5530999898910522 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,911 [INFO] gui.viewer: Value: 0.4537000060081482 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,912 [INFO] gui.viewer: Value: 0.6177999973297119 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,912 [INFO] gui.viewer: Value: 0.6111999750137329 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:36,913 [INFO] gui.viewer: Value: 0.4262000024318695 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,913 [INFO] gui.viewer: Value: 0.4909999966621399 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,914 [INFO] gui.viewer: Value: 0.4092000126838684 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,914 [INFO] gui.viewer: Value: 0.4259999990463257 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,915 [INFO] gui.viewer: Value: 0.48240000009536743 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,916 [INFO] gui.viewer: Value: 0.4756999909877777 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,918 [INFO] gui.viewer: Value: 0.4747999906539917 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,919 [INFO] gui.viewer: Value: 0.4887999892234802 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,920 [INFO] gui.viewer: Value: 0.4805999994277954 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,920 [INFO] gui.viewer: Value: 0.5681999921798706 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,921 [INFO] gui.viewer: Value: 0.4124000072479248 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,922 [INFO] gui.viewer: Value: 0.5828999876976013 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,922 [INFO] gui.viewer: Value: 0.44279998540878296 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,923 [INFO] gui.viewer: Value: 0.5785999894142151 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,924 [INFO] gui.viewer: Value: 0.47929999232292175 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,924 [INFO] gui.viewer: Value: 0.4740999937057495 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,925 [INFO] gui.viewer: Value: 0.24140000343322754 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,925 [INFO] gui.viewer: Value: 0.48969998955726624 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,926 [INFO] gui.viewer: Value: 0.4884999990463257 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,926 [INFO] gui.viewer: Value: 0.4226999878883362 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,927 [INFO] gui.viewer: Value: 0.47380000352859497 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,927 [INFO] gui.viewer: Value: 0.46399998664855957 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,928 [INFO] gui.viewer: Value: 0.4790000021457672 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,928 [INFO] gui.viewer: Value: 0.4390999972820282 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,929 [INFO] gui.viewer: Value: 0.5192999839782715 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,930 [INFO] gui.viewer: Value: 0.5579000115394592 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,930 [INFO] gui.viewer: Value: 0.5092999935150146 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,931 [INFO] gui.viewer: Value: 0.5896999835968018 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,932 [INFO] gui.viewer: Value: 0.459199994802475 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,933 [INFO] gui.viewer: Value: 0.47519999742507935 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,935 [INFO] gui.viewer: Value: 0.48510000109672546 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,936 [INFO] gui.viewer: Value: 0.5333999991416931 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,937 [INFO] gui.viewer: Value: 0.4397999942302704 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,937 [INFO] gui.viewer: Value: 0.4586000144481659 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,938 [INFO] gui.viewer: Value: 0.5529000163078308 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,938 [INFO] gui.viewer: Value: 0.2222999930381775 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,939 [INFO] gui.viewer: Value: 0.5705000162124634 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,939 [INFO] gui.viewer: Value: 0.4894999861717224 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,940 [INFO] gui.viewer: Value: 0.335999995470047 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,940 [INFO] gui.viewer: Value: 0.4431000053882599 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,941 [INFO] gui.viewer: Value: 0.36660000681877136 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,941 [INFO] gui.viewer: Value: 0.4293999969959259 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,942 [INFO] gui.viewer: Value: 0.4934999942779541 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,943 [INFO] gui.viewer: Value: 0.486299991607666 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,943 [INFO] gui.viewer: Value: 0.4779999852180481 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,944 [INFO] gui.viewer: Value: 0.4787999987602234 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,944 [INFO] gui.viewer: Value: 0.5580000281333923 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,944 [INFO] gui.viewer: Value: 0.5514000058174133 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,945 [INFO] gui.viewer: Value: 0.5551999807357788 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,945 [INFO] gui.viewer: Value: 0.46160000562667847 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,946 [INFO] gui.viewer: Value: 0.486299991607666 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,946 [INFO] gui.viewer: Value: 0.4797999858856201 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,946 [INFO] gui.viewer: Value: 0.5051000118255615 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,947 [INFO] gui.viewer: Value: 0.5741000175476074 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,947 [INFO] gui.viewer: Value: 0.4887999892234802 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,948 [INFO] gui.viewer: Value: 0.48170000314712524 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,948 [INFO] gui.viewer: Value: 0.39329999685287476 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,948 [INFO] gui.viewer: Value: 0.5116999745368958 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,949 [INFO] gui.viewer: Value: 0.5008000135421753 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,949 [INFO] gui.viewer: Value: 0.5109000205993652 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,949 [INFO] gui.viewer: Value: 0.4724999964237213 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,950 [INFO] gui.viewer: Value: 0.38999998569488525 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,950 [INFO] gui.viewer: Value: 0.20100000500679016 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:36,951 [INFO] gui.viewer: Value: 0.4138999879360199 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,951 [INFO] gui.viewer: Value: 0.4950000047683716 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,952 [INFO] gui.viewer: Value: 0.4652999937534332 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,952 [INFO] gui.viewer: Value: 0.47600001096725464 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,953 [INFO] gui.viewer: Value: 0.516700029373169 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,953 [INFO] gui.viewer: Value: 0.46540001034736633 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,954 [INFO] gui.viewer: Value: 0.4713999927043915 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,954 [INFO] gui.viewer: Value: 0.45590001344680786 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,955 [INFO] gui.viewer: Value: 0.4724000096321106 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,955 [INFO] gui.viewer: Value: 0.4900999963283539 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,956 [INFO] gui.viewer: Value: 0.5600000023841858 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,957 [INFO] gui.viewer: Value: 0.4763000011444092 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,958 [INFO] gui.viewer: Value: 0.49880000948905945 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,959 [INFO] gui.viewer: Value: 0.48750001192092896 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,960 [INFO] gui.viewer: Value: 0.43220001459121704 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,960 [INFO] gui.viewer: Value: 0.4932999908924103 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,961 [INFO] gui.viewer: Value: 0.5212000012397766 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,962 [INFO] gui.viewer: Value: 0.4334000051021576 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,962 [INFO] gui.viewer: Value: 0.4740999937057495 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,963 [INFO] gui.viewer: Value: 0.46399998664855957 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,963 [INFO] gui.viewer: Value: 0.45089998841285706 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,963 [INFO] gui.viewer: Value: 0.498199999332428 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,964 [INFO] gui.viewer: Value: 0.4133000075817108 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,964 [INFO] gui.viewer: Value: 0.47510001063346863 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,964 [INFO] gui.viewer: Value: 0.4819999933242798 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,965 [INFO] gui.viewer: Value: 0.4900999963283539 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,965 [INFO] gui.viewer: Value: 0.4848000109195709 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,965 [INFO] gui.viewer: Value: 0.4634000062942505 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,966 [INFO] gui.viewer: Value: 0.5084999799728394 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,966 [INFO] gui.viewer: Value: 0.47510001063346863 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,966 [INFO] gui.viewer: Value: 0.578000009059906 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,967 [INFO] gui.viewer: Value: 0.4934000074863434 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,967 [INFO] gui.viewer: Value: 0.4943999946117401 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,967 [INFO] gui.viewer: Value: 0.4722999930381775 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,968 [INFO] gui.viewer: Value: 0.46399998664855957 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,968 [INFO] gui.viewer: Value: 0.4702000021934509 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,968 [INFO] gui.viewer: Value: 0.48750001192092896 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,969 [INFO] gui.viewer: Value: 0.47760000824928284 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,969 [INFO] gui.viewer: Value: 0.4771000146865845 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,970 [INFO] gui.viewer: Value: 0.5145999789237976 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,970 [INFO] gui.viewer: Value: 0.48240000009536743 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,970 [INFO] gui.viewer: Value: 0.5065000057220459 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,970 [INFO] gui.viewer: Value: 0.3549000024795532 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,971 [INFO] gui.viewer: Value: 0.38510000705718994 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,971 [INFO] gui.viewer: Value: 0.49070000648498535 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,971 [INFO] gui.viewer: Value: 0.4733999967575073 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,972 [INFO] gui.viewer: Value: 0.4733999967575073 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,972 [INFO] gui.viewer: Value: 0.3709999918937683 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,972 [INFO] gui.viewer: Value: 0.46810001134872437 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,973 [INFO] gui.viewer: Value: 0.46779999136924744 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,973 [INFO] gui.viewer: Value: 0.4821999967098236 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,973 [INFO] gui.viewer: Value: 0.48489999771118164 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,973 [INFO] gui.viewer: Value: 0.4733000099658966 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,974 [INFO] gui.viewer: Value: 0.44350001215934753 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,974 [INFO] gui.viewer: Value: 0.4927000105381012 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,974 [INFO] gui.viewer: Value: 0.4805999994277954 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,975 [INFO] gui.viewer: Value: 0.48739999532699585 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,975 [INFO] gui.viewer: Value: 0.5138999819755554 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,975 [INFO] gui.viewer: Value: 0.48240000009536743 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,975 [INFO] gui.viewer: Value: 0.5048999786376953 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,976 [INFO] gui.viewer: Value: 0.46299999952316284 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,976 [INFO] gui.viewer: Value: 0.486299991607666 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,976 [INFO] gui.viewer: Value: 0.43779999017715454 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,977 [INFO] gui.viewer: Value: 0.3977999985218048 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,977 [INFO] gui.viewer: Value: 0.4745999872684479 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,977 [INFO] gui.viewer: Value: 0.45239999890327454 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,978 [INFO] gui.viewer: Value: 0.5113000273704529 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,978 [INFO] gui.viewer: Value: 0.47519999742507935 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,978 [INFO] gui.viewer: Value: 0.482699990272522 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,979 [INFO] gui.viewer: Value: 0.4916999936103821 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,979 [INFO] gui.viewer: Value: 0.4603999853134155 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,979 [INFO] gui.viewer: Value: 0.42750000953674316 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,980 [INFO] gui.viewer: Value: 0.4878000020980835 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,980 [INFO] gui.viewer: Value: 0.414000004529953 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,980 [INFO] gui.viewer: Value: 0.4706999957561493 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,981 [INFO] gui.viewer: Value: 0.4537000060081482 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,981 [INFO] gui.viewer: Value: 0.5001999735832214 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,981 [INFO] gui.viewer: Value: 0.396699994802475 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,982 [INFO] gui.viewer: Value: 0.49639999866485596 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,982 [INFO] gui.viewer: Value: 0.5238000154495239 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,983 [INFO] gui.viewer: Value: 0.5019000172615051 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,983 [INFO] gui.viewer: Value: 0.48590001463890076 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,983 [INFO] gui.viewer: Value: 0.478300005197525 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,983 [INFO] gui.viewer: Value: 0.4932999908924103 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,984 [INFO] gui.viewer: Value: 0.4162999987602234 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,984 [INFO] gui.viewer: Value: 0.46959999203681946 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,984 [INFO] gui.viewer: Value: 0.4424000084400177 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,985 [INFO] gui.viewer: Value: 0.39010000228881836 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,985 [INFO] gui.viewer: Value: 0.4212999939918518 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,985 [INFO] gui.viewer: Value: 0.44850000739097595 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,986 [INFO] gui.viewer: Value: 0.4214000105857849 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,986 [INFO] gui.viewer: Value: 0.4677000045776367 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,986 [INFO] gui.viewer: Value: 0.5590999722480774 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,987 [INFO] gui.viewer: Value: 0.3750999867916107 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,987 [INFO] gui.viewer: Value: 0.58160001039505 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,987 [INFO] gui.viewer: Value: 0.4722000062465668 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,988 [INFO] gui.viewer: Value: 0.4830000102519989 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,988 [INFO] gui.viewer: Value: 0.40880000591278076 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,988 [INFO] gui.viewer: Value: 0.43290001153945923 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,989 [INFO] gui.viewer: Value: 0.45329999923706055 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,989 [INFO] gui.viewer: Value: 0.4625999927520752 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,989 [INFO] gui.viewer: Value: 0.4415000081062317 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,989 [INFO] gui.viewer: Value: 0.3792000114917755 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,990 [INFO] gui.viewer: Value: 0.48980000615119934 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,990 [INFO] gui.viewer: Value: 0.4943000078201294 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,990 [INFO] gui.viewer: Value: 0.4966999888420105 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,991 [INFO] gui.viewer: Value: 0.4104999899864197 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,991 [INFO] gui.viewer: Value: 0.48730000853538513 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,991 [INFO] gui.viewer: Value: 0.4796999990940094 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,992 [INFO] gui.viewer: Value: 0.4674000144004822 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,992 [INFO] gui.viewer: Value: 0.3926999866962433 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,992 [INFO] gui.viewer: Value: 0.5990999937057495 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,992 [INFO] gui.viewer: Value: 0.4936000108718872 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,993 [INFO] gui.viewer: Value: 0.47530001401901245 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,993 [INFO] gui.viewer: Value: 0.49380001425743103 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,993 [INFO] gui.viewer: Value: 0.45170000195503235 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,994 [INFO] gui.viewer: Value: 0.48260000348091125 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,994 [INFO] gui.viewer: Value: 0.45809999108314514 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,994 [INFO] gui.viewer: Value: 0.4668000042438507 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,995 [INFO] gui.viewer: Value: 0.38040000200271606 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,995 [INFO] gui.viewer: Value: 0.5498999953269958 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,995 [INFO] gui.viewer: Value: 0.5181999802589417 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,996 [INFO] gui.viewer: Value: 0.39089998602867126 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,996 [INFO] gui.viewer: Value: 0.4514000117778778 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,996 [INFO] gui.viewer: Value: 0.41659998893737793 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,997 [INFO] gui.viewer: Value: 0.42100000381469727 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,997 [INFO] gui.viewer: Value: 0.4699999988079071 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,997 [INFO] gui.viewer: Value: 0.5853000283241272 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,998 [INFO] gui.viewer: Value: 0.49380001425743103 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,998 [INFO] gui.viewer: Value: 0.396699994802475 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:36,998 [INFO] gui.viewer: Value: 0.4239000082015991 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,999 [INFO] gui.viewer: Value: 0.478300005197525 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,999 [INFO] gui.viewer: Value: 0.5953999757766724 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:36,999 [INFO] gui.viewer: Value: 0.48739999532699585 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,000 [INFO] gui.viewer: Value: 0.39500001072883606 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,000 [INFO] gui.viewer: Value: 0.47690001130104065 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,000 [INFO] gui.viewer: Value: 0.4740000069141388 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,001 [INFO] gui.viewer: Value: 0.44440001249313354 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,001 [INFO] gui.viewer: Value: 0.4408999979496002 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,001 [INFO] gui.viewer: Value: 0.4415000081062317 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,001 [INFO] gui.viewer: Value: 0.4844000041484833 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,002 [INFO] gui.viewer: Value: 0.5479000210762024 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,002 [INFO] gui.viewer: Value: 0.4738999903202057 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,003 [INFO] gui.viewer: Value: 0.414000004529953 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,003 [INFO] gui.viewer: Value: 0.5307999849319458 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,003 [INFO] gui.viewer: Value: 0.3815000057220459 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,004 [INFO] gui.viewer: Value: 0.424699991941452 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,004 [INFO] gui.viewer: Value: 0.4221999943256378 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,004 [INFO] gui.viewer: Value: 0.4066999852657318 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,004 [INFO] gui.viewer: Value: 0.6055999994277954 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,005 [INFO] gui.viewer: Value: 0.4293000102043152 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,005 [INFO] gui.viewer: Value: 0.42730000615119934 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,005 [INFO] gui.viewer: Value: 0.426800012588501 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,006 [INFO] gui.viewer: Value: 0.6050000190734863 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,006 [INFO] gui.viewer: Value: 0.4848000109195709 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,006 [INFO] gui.viewer: Value: 0.46059998869895935 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,007 [INFO] gui.viewer: Value: 0.4823000133037567 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,007 [INFO] gui.viewer: Value: 0.018699999898672104 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,007 [INFO] gui.viewer: Value: 0.483599990606308 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,008 [INFO] gui.viewer: Value: 0.48559999465942383 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,008 [INFO] gui.viewer: Value: 0.4702000021934509 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,008 [INFO] gui.viewer: Value: 0.5705999732017517 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,009 [INFO] gui.viewer: Value: 0.5906000137329102 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,009 [INFO] gui.viewer: Value: 0.6395000219345093 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,009 [INFO] gui.viewer: Value: 0.48579999804496765 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,010 [INFO] gui.viewer: Value: 0.41760000586509705 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,010 [INFO] gui.viewer: Value: 0.39410001039505005 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,010 [INFO] gui.viewer: Value: 0.4465000033378601 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,011 [INFO] gui.viewer: Value: 0.48190000653266907 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,011 [INFO] gui.viewer: Value: 0.4846999943256378 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,011 [INFO] gui.viewer: Value: 0.47999998927116394 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,012 [INFO] gui.viewer: Value: 0.4934999942779541 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,012 [INFO] gui.viewer: Value: 0.5230000019073486 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,012 [INFO] gui.viewer: Value: 0.508400022983551 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,013 [INFO] gui.viewer: Value: 0.6251999735832214 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,013 [INFO] gui.viewer: Value: 0.44440001249313354 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,013 [INFO] gui.viewer: Value: 0.5339000225067139 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,014 [INFO] gui.viewer: Value: 0.6226999759674072 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,014 [INFO] gui.viewer: Value: 0.45559999346733093 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,014 [INFO] gui.viewer: Value: 0.40869998931884766 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,014 [INFO] gui.viewer: Value: 0.4726000130176544 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,015 [INFO] gui.viewer: Value: 0.45890000462532043 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,015 [INFO] gui.viewer: Value: 0.4325000047683716 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,015 [INFO] gui.viewer: Value: 0.44909998774528503 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,016 [INFO] gui.viewer: Value: 0.4683000147342682 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,016 [INFO] gui.viewer: Value: 0.40689998865127563 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,016 [INFO] gui.viewer: Value: 0.4620000123977661 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,017 [INFO] gui.viewer: Value: 0.4530999958515167 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,017 [INFO] gui.viewer: Value: 0.47769999504089355 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,017 [INFO] gui.viewer: Value: 0.5212000012397766 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,018 [INFO] gui.viewer: Value: 0.49869999289512634 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,018 [INFO] gui.viewer: Value: 0.5687999725341797 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,018 [INFO] gui.viewer: Value: 0.582099974155426 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,018 [INFO] gui.viewer: Value: 0.5903000235557556 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,019 [INFO] gui.viewer: Value: 0.4706000089645386 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,019 [INFO] gui.viewer: Value: 0.6227999925613403 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,019 [INFO] gui.viewer: Value: 0.4997999966144562 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,020 [INFO] gui.viewer: Value: 0.4512999951839447 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,020 [INFO] gui.viewer: Value: 0.4896000027656555 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,020 [INFO] gui.viewer: Value: 0.47679999470710754 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,021 [INFO] gui.viewer: Value: 0.45399999618530273 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,021 [INFO] gui.viewer: Value: 0.5932999849319458 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,021 [INFO] gui.viewer: Value: 0.4781000018119812 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,021 [INFO] gui.viewer: Value: 0.46050000190734863 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,022 [INFO] gui.viewer: Value: 0.5947999954223633 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,023 [INFO] gui.viewer: Value: 0.4156000018119812 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,023 [INFO] gui.viewer: Value: 0.6280999779701233 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,023 [INFO] gui.viewer: Value: 0.44830000400543213 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,024 [INFO] gui.viewer: Value: 0.41519999504089355 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,024 [INFO] gui.viewer: Value: 0.41670000553131104 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,025 [INFO] gui.viewer: Value: 0.550000011920929 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,025 [INFO] gui.viewer: Value: 0.6248999834060669 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,025 [INFO] gui.viewer: Value: 0.41999998688697815 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,025 [INFO] gui.viewer: Value: 0.47510001063346863 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,026 [INFO] gui.viewer: Value: 0.4602000117301941 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,026 [INFO] gui.viewer: Value: 0.5891000032424927 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,026 [INFO] gui.viewer: Value: 0.48649999499320984 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,027 [INFO] gui.viewer: Value: 0.48170000314712524 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,027 [INFO] gui.viewer: Value: 0.46810001134872437 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,027 [INFO] gui.viewer: Value: 0.6290000081062317 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,028 [INFO] gui.viewer: Value: 0.636900007724762 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,028 [INFO] gui.viewer: Value: 0.48069998621940613 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,028 [INFO] gui.viewer: Value: 0.44999998807907104 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,029 [INFO] gui.viewer: Value: 0.4413999915122986 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,029 [INFO] gui.viewer: Value: 0.5192999839782715 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,029 [INFO] gui.viewer: Value: 0.4652000069618225 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,030 [INFO] gui.viewer: Value: 0.0778999999165535 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,030 [INFO] gui.viewer: Value: 0.5109999775886536 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,030 [INFO] gui.viewer: Value: 0.12620000541210175 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,031 [INFO] gui.viewer: Value: 0.4885999858379364 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,031 [INFO] gui.viewer: Value: 0.6424000263214111 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,031 [INFO] gui.viewer: Value: 0.6177999973297119 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,031 [INFO] gui.viewer: Value: 0.6383000016212463 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,032 [INFO] gui.viewer: Value: 0.583299994468689 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,032 [INFO] gui.viewer: Value: 0.4860000014305115 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,032 [INFO] gui.viewer: Value: 0.21969999372959137 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,033 [INFO] gui.viewer: Value: 0.45739999413490295 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,033 [INFO] gui.viewer: Value: 0.47429999709129333 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,033 [INFO] gui.viewer: Value: 0.4627000093460083 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,034 [INFO] gui.viewer: Value: 0.4699999988079071 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,034 [INFO] gui.viewer: Value: 0.453000009059906 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,034 [INFO] gui.viewer: Value: 0.4016000032424927 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,035 [INFO] gui.viewer: Value: 0.490200012922287 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,035 [INFO] gui.viewer: Value: 0.4745999872684479 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,035 [INFO] gui.viewer: Value: 0.5918999910354614 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,036 [INFO] gui.viewer: Value: 0.5536999702453613 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,036 [INFO] gui.viewer: Value: 0.5787000060081482 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,037 [INFO] gui.viewer: Value: 0.6312999725341797 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,037 [INFO] gui.viewer: Value: 0.5591999888420105 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,037 [INFO] gui.viewer: Value: 0.4690000116825104 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,038 [INFO] gui.viewer: Value: 0.5860000252723694 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,038 [INFO] gui.viewer: Value: 0.5892000198364258 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,038 [INFO] gui.viewer: Value: 0.5651000142097473 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,039 [INFO] gui.viewer: Value: 0.5418000221252441 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,039 [INFO] gui.viewer: Value: 0.4652000069618225 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,039 [INFO] gui.viewer: Value: 0.49399998784065247 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,040 [INFO] gui.viewer: Value: 0.6029999852180481 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,040 [INFO] gui.viewer: Value: 0.5023000240325928 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,040 [INFO] gui.viewer: Value: 0.5285000205039978 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,041 [INFO] gui.viewer: Value: 0.6008999943733215 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,041 [INFO] gui.viewer: Value: 0.5067999958992004 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,041 [INFO] gui.viewer: Value: 0.5307999849319458 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,041 [INFO] gui.viewer: Value: 0.48980000615119934 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,042 [INFO] gui.viewer: Value: 0.6335999965667725 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,042 [INFO] gui.viewer: Value: 0.608299970626831 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,043 [INFO] gui.viewer: Value: 0.57669997215271 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,043 [INFO] gui.viewer: Value: 0.5356000065803528 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,043 [INFO] gui.viewer: Value: 0.478300005197525 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,044 [INFO] gui.viewer: Value: 0.5270000100135803 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,044 [INFO] gui.viewer: Value: 0.4747999906539917 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,044 [INFO] gui.viewer: Value: 0.49079999327659607 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,045 [INFO] gui.viewer: Value: 0.5551999807357788 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,045 [INFO] gui.viewer: Value: 0.4797999858856201 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,045 [INFO] gui.viewer: Value: 0.5863000154495239 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,046 [INFO] gui.viewer: Value: 0.5167999863624573 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,046 [INFO] gui.viewer: Value: 0.5619999766349792 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,046 [INFO] gui.viewer: Value: 0.5040000081062317 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,047 [INFO] gui.viewer: Value: 0.25780001282691956 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,047 [INFO] gui.viewer: Value: 0.2206999957561493 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,047 [INFO] gui.viewer: Value: 0.5996000170707703 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,048 [INFO] gui.viewer: Value: 0.47040000557899475 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,048 [INFO] gui.viewer: Value: 0.5526000261306763 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,048 [INFO] gui.viewer: Value: 0.508400022983551 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,049 [INFO] gui.viewer: Value: 0.3391999900341034 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,049 [INFO] gui.viewer: Value: 0.41179999709129333 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,049 [INFO] gui.viewer: Value: 0.6155999898910522 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,050 [INFO] gui.viewer: Value: 0.46639999747276306 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,050 [INFO] gui.viewer: Value: 0.47269999980926514 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,050 [INFO] gui.viewer: Value: 0.44449999928474426 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,051 [INFO] gui.viewer: Value: 0.6144999861717224 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,051 [INFO] gui.viewer: Value: 0.6225000023841858 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,051 [INFO] gui.viewer: Value: 0.5166000127792358 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,052 [INFO] gui.viewer: Value: 0.5403000116348267 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,052 [INFO] gui.viewer: Value: 0.4788999855518341 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,052 [INFO] gui.viewer: Value: 0.49639999866485596 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,053 [INFO] gui.viewer: Value: 0.6164000034332275 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,053 [INFO] gui.viewer: Value: 0.6104999780654907 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,054 [INFO] gui.viewer: Value: 0.4733999967575073 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,054 [INFO] gui.viewer: Value: 0.5861999988555908 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,054 [INFO] gui.viewer: Value: 0.23000000417232513 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,055 [INFO] gui.viewer: Value: 0.49900001287460327 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,055 [INFO] gui.viewer: Value: 0.07699999958276749 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,055 [INFO] gui.viewer: Value: 0.2143000066280365 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,056 [INFO] gui.viewer: Value: 0.5066999793052673 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,056 [INFO] gui.viewer: Value: 0.5719000101089478 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,056 [INFO] gui.viewer: Value: 0.6177999973297119 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,056 [INFO] gui.viewer: Value: 0.503000020980835 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,057 [INFO] gui.viewer: Value: 0.5049999952316284 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,057 [INFO] gui.viewer: Value: 0.5268999934196472 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,057 [INFO] gui.viewer: Value: 0.6114000082015991 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,058 [INFO] gui.viewer: Value: 0.08250000327825546 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,058 [INFO] gui.viewer: Value: 0.4943000078201294 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,058 [INFO] gui.viewer: Value: 0.4722999930381775 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,059 [INFO] gui.viewer: Value: 0.6104999780654907 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,059 [INFO] gui.viewer: Value: 0.26019999384880066 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,059 [INFO] gui.viewer: Value: 0.09769999980926514 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,060 [INFO] gui.viewer: Value: 0.4681999981403351 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,060 [INFO] gui.viewer: Value: 0.616100013256073 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,060 [INFO] gui.viewer: Value: 0.4828000068664551 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,061 [INFO] gui.viewer: Value: 0.3109999895095825 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,061 [INFO] gui.viewer: Value: 0.24539999663829803 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,062 [INFO] gui.viewer: Value: 0.19329999387264252 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,062 [INFO] gui.viewer: Value: 0.5773000121116638 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,062 [INFO] gui.viewer: Value: 0.16200000047683716 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,063 [INFO] gui.viewer: Value: 0.4921000003814697 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,063 [INFO] gui.viewer: Value: 0.19290000200271606 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,064 [INFO] gui.viewer: Value: 0.49779999256134033 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,064 [INFO] gui.viewer: Value: 0.06759999692440033 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,064 [INFO] gui.viewer: Value: 0.47189998626708984 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,065 [INFO] gui.viewer: Value: 0.5138000249862671 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,065 [INFO] gui.viewer: Value: 0.16840000450611115 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,066 [INFO] gui.viewer: Value: 0.1817999929189682 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,066 [INFO] gui.viewer: Value: 0.07039999961853027 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,066 [INFO] gui.viewer: Value: 0.460999995470047 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,067 [INFO] gui.viewer: Value: 0.44940000772476196 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,067 [INFO] gui.viewer: Value: 0.24580000340938568 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,067 [INFO] gui.viewer: Value: 0.18629999458789825 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,068 [INFO] gui.viewer: Value: 0.5151000022888184 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,068 [INFO] gui.viewer: Value: 0.5102999806404114 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,068 [INFO] gui.viewer: Value: 0.1981000006198883 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,069 [INFO] gui.viewer: Value: 0.46459999680519104 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,069 [INFO] gui.viewer: Value: 0.24570000171661377 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,070 [INFO] gui.viewer: Value: 0.1808999925851822 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,070 [INFO] gui.viewer: Value: 0.5367000102996826 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,070 [INFO] gui.viewer: Value: 0.5633999705314636 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,071 [INFO] gui.viewer: Value: 0.2264000028371811 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,071 [INFO] gui.viewer: Value: 0.22010000050067902 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,071 [INFO] gui.viewer: Value: 0.4805000126361847 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,072 [INFO] gui.viewer: Value: 0.20970000326633453 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,072 [INFO] gui.viewer: Value: 0.21299999952316284 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,072 [INFO] gui.viewer: Value: 0.22360000014305115 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,072 [INFO] gui.viewer: Value: 0.21719999611377716 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,073 [INFO] gui.viewer: Value: 0.5029000043869019 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,073 [INFO] gui.viewer: Value: 0.4756999909877777 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,074 [INFO] gui.viewer: Value: 0.2062000036239624 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,074 [INFO] gui.viewer: Value: 0.5209000110626221 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,074 [INFO] gui.viewer: Value: 0.2572999894618988 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,075 [INFO] gui.viewer: Value: 0.1923000067472458 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,075 [INFO] gui.viewer: Value: 0.5278000235557556 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,075 [INFO] gui.viewer: Value: 0.5030999779701233 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,076 [INFO] gui.viewer: Value: 0.5013999938964844 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,076 [INFO] gui.viewer: Value: 0.24459999799728394 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,077 [INFO] gui.viewer: Value: 0.4909000098705292 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,077 [INFO] gui.viewer: Value: 0.49959999322891235 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,077 [INFO] gui.viewer: Value: 0.4586000144481659 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,078 [INFO] gui.viewer: Value: 0.28369998931884766 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,078 [INFO] gui.viewer: Value: 0.2524999976158142 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,078 [INFO] gui.viewer: Value: 0.043299999088048935 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,079 [INFO] gui.viewer: Value: 0.4927000105381012 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,079 [INFO] gui.viewer: Value: 0.5335999727249146 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,079 [INFO] gui.viewer: Value: 0.5284000039100647 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,080 [INFO] gui.viewer: Value: 0.4821000099182129 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,080 [INFO] gui.viewer: Value: 0.5041999816894531 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,080 [INFO] gui.viewer: Value: 0.5192999839782715 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,081 [INFO] gui.viewer: Value: 0.5343999862670898 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,081 [INFO] gui.viewer: Value: 0.47540000081062317 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,081 [INFO] gui.viewer: Value: 0.5139999985694885 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,082 [INFO] gui.viewer: Value: 0.4747999906539917 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,082 [INFO] gui.viewer: Value: 0.47119998931884766 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,083 [INFO] gui.viewer: Value: 0.49970000982284546 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,083 [INFO] gui.viewer: Value: 0.275299996137619 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,083 [INFO] gui.viewer: Value: 0.541700005531311 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,084 [INFO] gui.viewer: Value: 0.48330000042915344 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,084 [INFO] gui.viewer: Value: 0.5130000114440918 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,084 [INFO] gui.viewer: Value: 0.567300021648407 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,085 [INFO] gui.viewer: Value: 0.4514999985694885 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,085 [INFO] gui.viewer: Value: 0.5333999991416931 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,085 [INFO] gui.viewer: Value: 0.5300999879837036 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,086 [INFO] gui.viewer: Value: 0.5827999711036682 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,086 [INFO] gui.viewer: Value: 0.29019999504089355 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,086 [INFO] gui.viewer: Value: 0.512499988079071 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,087 [INFO] gui.viewer: Value: 0.5123999714851379 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,087 [INFO] gui.viewer: Value: 0.251800000667572 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,087 [INFO] gui.viewer: Value: 0.5151000022888184 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,088 [INFO] gui.viewer: Value: 0.45500001311302185 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,088 [INFO] gui.viewer: Value: 0.5727999806404114 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,088 [INFO] gui.viewer: Value: 0.5767999887466431 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,089 [INFO] gui.viewer: Value: 0.4742000102996826 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,089 [INFO] gui.viewer: Value: 0.6026999950408936 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,090 [INFO] gui.viewer: Value: 0.6019999980926514 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,090 [INFO] gui.viewer: Value: 0.5152000188827515 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,091 [INFO] gui.viewer: Value: 0.6019999980926514 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,091 [INFO] gui.viewer: Value: 0.506600022315979 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,091 [INFO] gui.viewer: Value: 0.4781000018119812 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,092 [INFO] gui.viewer: Value: 0.24220000207424164 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,092 [INFO] gui.viewer: Value: 0.5892000198364258 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,092 [INFO] gui.viewer: Value: 0.4659000039100647 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,093 [INFO] gui.viewer: Value: 0.4950000047683716 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,093 [INFO] gui.viewer: Value: 0.46779999136924744 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,093 [INFO] gui.viewer: Value: 0.6190000176429749 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,094 [INFO] gui.viewer: Value: 0.5576000213623047 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,094 [INFO] gui.viewer: Value: 0.5386000275611877 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,094 [INFO] gui.viewer: Value: 0.51910001039505 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,095 [INFO] gui.viewer: Value: 0.6234999895095825 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,095 [INFO] gui.viewer: Value: 0.2921999990940094 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,095 [INFO] gui.viewer: Value: 0.49410000443458557 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,096 [INFO] gui.viewer: Value: 0.5861999988555908 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,096 [INFO] gui.viewer: Value: 0.24619999527931213 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,097 [INFO] gui.viewer: Value: 0.5460000038146973 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,097 [INFO] gui.viewer: Value: 0.3709999918937683 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,097 [INFO] gui.viewer: Value: 0.5392000079154968 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,098 [INFO] gui.viewer: Value: 0.30709999799728394 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,098 [INFO] gui.viewer: Value: 0.46810001134872437 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,098 [INFO] gui.viewer: Value: 0.4950999915599823 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,099 [INFO] gui.viewer: Value: 0.4893999993801117 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,099 [INFO] gui.viewer: Value: 0.10490000247955322 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,099 [INFO] gui.viewer: Value: 0.47620001435279846 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,100 [INFO] gui.viewer: Value: 0.5223000049591064 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,100 [INFO] gui.viewer: Value: 0.5120000243186951 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,100 [INFO] gui.viewer: Value: 0.47749999165534973 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,101 [INFO] gui.viewer: Value: 0.5756999850273132 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,101 [INFO] gui.viewer: Value: 0.4903999865055084 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,102 [INFO] gui.viewer: Value: 0.6116999983787537 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,102 [INFO] gui.viewer: Value: 0.3197000026702881 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,102 [INFO] gui.viewer: Value: 0.4778999984264374 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,103 [INFO] gui.viewer: Value: 0.5523999929428101 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,103 [INFO] gui.viewer: Value: 0.5590999722480774 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,104 [INFO] gui.viewer: Value: 0.4616999924182892 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,104 [INFO] gui.viewer: Value: 0.5130000114440918 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,104 [INFO] gui.viewer: Value: 0.2973000109195709 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,105 [INFO] gui.viewer: Value: 0.5358999967575073 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,105 [INFO] gui.viewer: Value: 0.49070000648498535 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,105 [INFO] gui.viewer: Value: 0.47040000557899475 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,106 [INFO] gui.viewer: Value: 0.48809999227523804 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,106 [INFO] gui.viewer: Value: 0.48910000920295715 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,106 [INFO] gui.viewer: Value: 0.4912000000476837 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,107 [INFO] gui.viewer: Value: 0.48170000314712524 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,107 [INFO] gui.viewer: Value: 0.4862000048160553 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,107 [INFO] gui.viewer: Value: 0.5364000201225281 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,108 [INFO] gui.viewer: Value: 0.5515999794006348 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,108 [INFO] gui.viewer: Value: 0.3025999963283539 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,109 [INFO] gui.viewer: Value: 0.5699999928474426 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,109 [INFO] gui.viewer: Value: 0.18469999730587006 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,109 [INFO] gui.viewer: Value: 0.5274999737739563 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,110 [INFO] gui.viewer: Value: 0.5189999938011169 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,110 [INFO] gui.viewer: Value: 0.5806999802589417 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,110 [INFO] gui.viewer: Value: 0.5551000237464905 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,111 [INFO] gui.viewer: Value: 0.47360000014305115 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,111 [INFO] gui.viewer: Value: 0.4629000127315521 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,111 [INFO] gui.viewer: Value: 0.46309998631477356 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,112 [INFO] gui.viewer: Value: 0.5254999995231628 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,112 [INFO] gui.viewer: Value: 0.17270000278949738 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,112 [INFO] gui.viewer: Value: 0.5281000137329102 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,113 [INFO] gui.viewer: Value: 0.5004000067710876 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,113 [INFO] gui.viewer: Value: 0.5440000295639038 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,114 [INFO] gui.viewer: Value: 0.5393000245094299 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,114 [INFO] gui.viewer: Value: 0.5468999743461609 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,114 [INFO] gui.viewer: Value: 0.5824999809265137 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,115 [INFO] gui.viewer: Value: 0.2386000007390976 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,115 [INFO] gui.viewer: Value: 0.5019999742507935 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,115 [INFO] gui.viewer: Value: 0.20149999856948853 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,116 [INFO] gui.viewer: Value: 0.4287000000476837 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,116 [INFO] gui.viewer: Value: 0.4666999876499176 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,117 [INFO] gui.viewer: Value: 0.48829999566078186 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,117 [INFO] gui.viewer: Value: 0.5077999830245972 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,118 [INFO] gui.viewer: Value: 0.5092999935150146 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,118 [INFO] gui.viewer: Value: 0.5508999824523926 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,118 [INFO] gui.viewer: Value: 0.5720000267028809 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,119 [INFO] gui.viewer: Value: 0.4921000003814697 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,119 [INFO] gui.viewer: Value: 0.5586000084877014 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,120 [INFO] gui.viewer: Value: 0.49709999561309814 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,120 [INFO] gui.viewer: Value: 0.4894999861717224 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,120 [INFO] gui.viewer: Value: 0.5715000033378601 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,121 [INFO] gui.viewer: Value: 0.5315999984741211 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,121 [INFO] gui.viewer: Value: 0.4032999873161316 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,121 [INFO] gui.viewer: Value: 0.48820000886917114 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,122 [INFO] gui.viewer: Value: 0.4778999984264374 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,122 [INFO] gui.viewer: Value: 0.5048999786376953 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,122 [INFO] gui.viewer: Value: 0.5081999897956848 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,123 [INFO] gui.viewer: Value: 0.487199991941452 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,123 [INFO] gui.viewer: Value: 0.43560001254081726 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,124 [INFO] gui.viewer: Value: 0.5618000030517578 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,124 [INFO] gui.viewer: Value: 0.5712000131607056 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,124 [INFO] gui.viewer: Value: 0.5569999814033508 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,125 [INFO] gui.viewer: Value: 0.5440999865531921 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,125 [INFO] gui.viewer: Value: 0.5063999891281128 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,125 [INFO] gui.viewer: Value: 0.2685999870300293 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,126 [INFO] gui.viewer: Value: 0.5016999840736389 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,126 [INFO] gui.viewer: Value: 0.5185999870300293 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,127 [INFO] gui.viewer: Value: 0.506600022315979 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,127 [INFO] gui.viewer: Value: 0.47269999980926514 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,127 [INFO] gui.viewer: Value: 0.4749000072479248 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,128 [INFO] gui.viewer: Value: 0.5049999952316284 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,128 [INFO] gui.viewer: Value: 0.5564000010490417 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,128 [INFO] gui.viewer: Value: 0.5152999758720398 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,129 [INFO] gui.viewer: Value: 0.506600022315979 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,130 [INFO] gui.viewer: Value: 0.4799000024795532 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,130 [INFO] gui.viewer: Value: 0.5906999707221985 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,131 [INFO] gui.viewer: Value: 0.4049000144004822 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,131 [INFO] gui.viewer: Value: 0.5284000039100647 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,131 [INFO] gui.viewer: Value: 0.5282999873161316 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,132 [INFO] gui.viewer: Value: 0.45399999618530273 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,132 [INFO] gui.viewer: Value: 0.5094000101089478 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,132 [INFO] gui.viewer: Value: 0.47690001130104065 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,133 [INFO] gui.viewer: Value: 0.43880000710487366 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,133 [INFO] gui.viewer: Value: 0.4410000145435333 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,134 [INFO] gui.viewer: Value: 0.5236999988555908 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,134 [INFO] gui.viewer: Value: 0.48330000042915344 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,134 [INFO] gui.viewer: Value: 0.48190000653266907 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,135 [INFO] gui.viewer: Value: 0.49390000104904175 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,135 [INFO] gui.viewer: Value: 0.47110000252723694 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,135 [INFO] gui.viewer: Value: 0.5078999996185303 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,136 [INFO] gui.viewer: Value: 0.4848000109195709 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,136 [INFO] gui.viewer: Value: 0.4781999886035919 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,136 [INFO] gui.viewer: Value: 0.4593999981880188 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,137 [INFO] gui.viewer: Value: 0.47510001063346863 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,137 [INFO] gui.viewer: Value: 0.4837999939918518 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,137 [INFO] gui.viewer: Value: 0.49480000138282776 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,138 [INFO] gui.viewer: Value: 0.5526000261306763 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,138 [INFO] gui.viewer: Value: 0.552299976348877 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,139 [INFO] gui.viewer: Value: 0.5015000104904175 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,139 [INFO] gui.viewer: Value: 0.5090000033378601 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,139 [INFO] gui.viewer: Value: 0.5221999883651733 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,140 [INFO] gui.viewer: Value: 0.49410000443458557 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,140 [INFO] gui.viewer: Value: 0.5020999908447266 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,141 [INFO] gui.viewer: Value: 0.5575000047683716 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,141 [INFO] gui.viewer: Value: 0.5393999814987183 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,141 [INFO] gui.viewer: Value: 0.5318999886512756 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,142 [INFO] gui.viewer: Value: 0.5026000142097473 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,142 [INFO] gui.viewer: Value: 0.47909998893737793 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,142 [INFO] gui.viewer: Value: 0.4968999922275543 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,143 [INFO] gui.viewer: Value: 0.45080000162124634 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,143 [INFO] gui.viewer: Value: 0.5406000018119812 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,144 [INFO] gui.viewer: Value: 0.5896999835968018 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,144 [INFO] gui.viewer: Value: 0.5109000205993652 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,144 [INFO] gui.viewer: Value: 0.5465999841690063 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,145 [INFO] gui.viewer: Value: 0.43709999322891235 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,145 [INFO] gui.viewer: Value: 0.4918000102043152 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,146 [INFO] gui.viewer: Value: 0.49230000376701355 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,146 [INFO] gui.viewer: Value: 0.4867999851703644 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,146 [INFO] gui.viewer: Value: 0.5216000080108643 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,147 [INFO] gui.viewer: Value: 0.4767000079154968 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,147 [INFO] gui.viewer: Value: 0.4959999918937683 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,147 [INFO] gui.viewer: Value: 0.47350001335144043 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,148 [INFO] gui.viewer: Value: 0.5109000205993652 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,148 [INFO] gui.viewer: Value: 0.48410001397132874 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,148 [INFO] gui.viewer: Value: 0.5372999906539917 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,149 [INFO] gui.viewer: Value: 0.4803999960422516 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,149 [INFO] gui.viewer: Value: 0.4952999949455261 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,149 [INFO] gui.viewer: Value: 0.49480000138282776 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,150 [INFO] gui.viewer: Value: 0.4950000047683716 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,150 [INFO] gui.viewer: Value: 0.5085999965667725 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,150 [INFO] gui.viewer: Value: 0.5260000228881836 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,151 [INFO] gui.viewer: Value: 0.5016000270843506 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,151 [INFO] gui.viewer: Value: 0.5254999995231628 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,152 [INFO] gui.viewer: Value: 0.5178999900817871 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,152 [INFO] gui.viewer: Value: 0.47609999775886536 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,152 [INFO] gui.viewer: Value: 0.47909998893737793 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,153 [INFO] gui.viewer: Value: 0.4878000020980835 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,153 [INFO] gui.viewer: Value: 0.4984000027179718 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,153 [INFO] gui.viewer: Value: 0.4828999936580658 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,154 [INFO] gui.viewer: Value: 0.48809999227523804 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,154 [INFO] gui.viewer: Value: 0.4684999883174896 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,154 [INFO] gui.viewer: Value: 0.4860000014305115 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,155 [INFO] gui.viewer: Value: 0.49540001153945923 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,155 [INFO] gui.viewer: Value: 0.48840001225471497 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,156 [INFO] gui.viewer: Value: 0.5095999836921692 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,156 [INFO] gui.viewer: Value: 0.5153999924659729 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,157 [INFO] gui.viewer: Value: 0.5080999732017517 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,157 [INFO] gui.viewer: Value: 0.5253000259399414 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,157 [INFO] gui.viewer: Value: 0.48399999737739563 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,158 [INFO] gui.viewer: Value: 0.5 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,158 [INFO] gui.viewer: Value: 0.4894999861717224 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,158 [INFO] gui.viewer: Value: 0.48570001125335693 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,159 [INFO] gui.viewer: Value: 0.4803999960422516 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,159 [INFO] gui.viewer: Value: 0.4918000102043152 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,159 [INFO] gui.viewer: Value: 0.5073999762535095 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,160 [INFO] gui.viewer: Value: 0.5090000033378601 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,160 [INFO] gui.viewer: Value: 0.5232999920845032 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,161 [INFO] gui.viewer: Value: 0.5013999938964844 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,161 [INFO] gui.viewer: Value: 0.555899977684021 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,161 [INFO] gui.viewer: Value: 0.517300009727478 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,162 [INFO] gui.viewer: Value: 0.5163999795913696 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,162 [INFO] gui.viewer: Value: 0.48570001125335693 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,163 [INFO] gui.viewer: Value: 0.49399998784065247 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,163 [INFO] gui.viewer: Value: 0.492000013589859 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,163 [INFO] gui.viewer: Value: 0.49889999628067017 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,164 [INFO] gui.viewer: Value: 0.501800000667572 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,164 [INFO] gui.viewer: Value: 0.5149000287055969 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,164 [INFO] gui.viewer: Value: 0.4875999987125397 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,165 [INFO] gui.viewer: Value: 0.5135999917984009 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,165 [INFO] gui.viewer: Value: 0.4722000062465668 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,165 [INFO] gui.viewer: Value: 0.4799000024795532 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,166 [INFO] gui.viewer: Value: 0.4952999949455261 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,166 [INFO] gui.viewer: Value: 0.4973999857902527 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,166 [INFO] gui.viewer: Value: 0.5584999918937683 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,167 [INFO] gui.viewer: Value: 0.5133000016212463 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,167 [INFO] gui.viewer: Value: 0.49309998750686646 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,167 [INFO] gui.viewer: Value: 0.5889000296592712 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,168 [INFO] gui.viewer: Value: 0.4537000060081482 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,168 [INFO] gui.viewer: Value: 0.48899999260902405 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,169 [INFO] gui.viewer: Value: 0.504800021648407 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,169 [INFO] gui.viewer: Value: 0.5198000073432922 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,170 [INFO] gui.viewer: Value: 0.4805999994277954 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,170 [INFO] gui.viewer: Value: 0.5 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,170 [INFO] gui.viewer: Value: 0.4970000088214874 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,171 [INFO] gui.viewer: Value: 0.4921000003814697 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,171 [INFO] gui.viewer: Value: 0.5536999702453613 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,172 [INFO] gui.viewer: Value: 0.49639999866485596 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,172 [INFO] gui.viewer: Value: 0.5360999703407288 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,172 [INFO] gui.viewer: Value: 0.4896000027656555 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,173 [INFO] gui.viewer: Value: 0.49570000171661377 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,173 [INFO] gui.viewer: Value: 0.48739999532699585 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,173 [INFO] gui.viewer: Value: 0.4885999858379364 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,174 [INFO] gui.viewer: Value: 0.4936999976634979 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,174 [INFO] gui.viewer: Value: 0.5013999938964844 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,175 [INFO] gui.viewer: Value: 0.5537999868392944 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,175 [INFO] gui.viewer: Value: 0.501800000667572 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,175 [INFO] gui.viewer: Value: 0.48429998755455017 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,176 [INFO] gui.viewer: Value: 0.47999998927116394 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,176 [INFO] gui.viewer: Value: 0.49559998512268066 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,176 [INFO] gui.viewer: Value: 0.4959000051021576 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,177 [INFO] gui.viewer: Value: 0.5817999839782715 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,177 [INFO] gui.viewer: Value: 0.5199999809265137 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,177 [INFO] gui.viewer: Value: 0.5412999987602234 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,178 [INFO] gui.viewer: Value: 0.448199987411499 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,178 [INFO] gui.viewer: Value: 0.5162000060081482 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,178 [INFO] gui.viewer: Value: 0.48840001225471497 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,178 [INFO] gui.viewer: Value: 0.48669999837875366 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,178 [INFO] gui.viewer: Value: 0.4771000146865845 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,179 [INFO] gui.viewer: Value: 0.49239999055862427 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,179 [INFO] gui.viewer: Value: 0.4422999918460846 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,180 [INFO] gui.viewer: Value: 0.4763999879360199 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,180 [INFO] gui.viewer: Value: 0.4537000060081482 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,180 [INFO] gui.viewer: Value: 0.5126000046730042 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,181 [INFO] gui.viewer: Value: 0.5217000246047974 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,181 [INFO] gui.viewer: Value: 0.5600000023841858 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,181 [INFO] gui.viewer: Value: 0.4921000003814697 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,182 [INFO] gui.viewer: Value: 0.49570000171661377 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,182 [INFO] gui.viewer: Value: 0.5101000070571899 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,183 [INFO] gui.viewer: Value: 0.5138000249862671 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,183 [INFO] gui.viewer: Value: 0.44020000100135803 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,184 [INFO] gui.viewer: Value: 0.519599974155426 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,184 [INFO] gui.viewer: Value: 0.572700023651123 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,185 [INFO] gui.viewer: Value: 0.5248000025749207 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,185 [INFO] gui.viewer: Value: 0.5016999840736389 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,185 [INFO] gui.viewer: Value: 0.48350000381469727 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,186 [INFO] gui.viewer: Value: 0.4799000024795532 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,186 [INFO] gui.viewer: Value: 0.4133000075817108 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,186 [INFO] gui.viewer: Value: 0.501800000667572 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,187 [INFO] gui.viewer: Value: 0.4887000024318695 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,187 [INFO] gui.viewer: Value: 0.5849999785423279 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,188 [INFO] gui.viewer: Value: 0.5065000057220459 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,188 [INFO] gui.viewer: Value: 0.4887999892234802 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,188 [INFO] gui.viewer: Value: 0.46810001134872437 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,189 [INFO] gui.viewer: Value: 0.4794999957084656 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,189 [INFO] gui.viewer: Value: 0.4828000068664551 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,189 [INFO] gui.viewer: Value: 0.4650999903678894 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,190 [INFO] gui.viewer: Value: 0.5882999897003174 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,190 [INFO] gui.viewer: Value: 0.5121999979019165 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,191 [INFO] gui.viewer: Value: 0.5587999820709229 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,191 [INFO] gui.viewer: Value: 0.4864000082015991 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,191 [INFO] gui.viewer: Value: 0.45190000534057617 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,192 [INFO] gui.viewer: Value: 0.5051000118255615 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,192 [INFO] gui.viewer: Value: 0.49000000953674316 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,192 [INFO] gui.viewer: Value: 0.5346999764442444 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,193 [INFO] gui.viewer: Value: 0.4896000027656555 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,193 [INFO] gui.viewer: Value: 0.4691999852657318 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,194 [INFO] gui.viewer: Value: 0.4537999927997589 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,194 [INFO] gui.viewer: Value: 0.48069998621940613 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,194 [INFO] gui.viewer: Value: 0.5199000239372253 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,195 [INFO] gui.viewer: Value: 0.4708000123500824 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,196 [INFO] gui.viewer: Value: 0.5091999769210815 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,196 [INFO] gui.viewer: Value: 0.5051000118255615 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,196 [INFO] gui.viewer: Value: 0.513700008392334 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,197 [INFO] gui.viewer: Value: 0.5070000290870667 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,197 [INFO] gui.viewer: Value: 0.4837000072002411 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,198 [INFO] gui.viewer: Value: 0.5508999824523926 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,198 [INFO] gui.viewer: Value: 0.4828000068664551 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,198 [INFO] gui.viewer: Value: 0.45730000734329224 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,199 [INFO] gui.viewer: Value: 0.47360000014305115 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,199 [INFO] gui.viewer: Value: 0.4828999936580658 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,200 [INFO] gui.viewer: Value: 0.5388000011444092 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,200 [INFO] gui.viewer: Value: 0.5037999749183655 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,200 [INFO] gui.viewer: Value: 0.5206999778747559 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,201 [INFO] gui.viewer: Value: 0.5411999821662903 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,202 [INFO] gui.viewer: Value: 0.475600004196167 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,202 [INFO] gui.viewer: Value: 0.48910000920295715 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,203 [INFO] gui.viewer: Value: 0.48260000348091125 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,203 [INFO] gui.viewer: Value: 0.48809999227523804 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,203 [INFO] gui.viewer: Value: 0.5080000162124634 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,204 [INFO] gui.viewer: Value: 0.47099998593330383 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,204 [INFO] gui.viewer: Value: 0.499099999666214 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,204 [INFO] gui.viewer: Value: 0.5115000009536743 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,205 [INFO] gui.viewer: Value: 0.524399995803833 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,205 [INFO] gui.viewer: Value: 0.4788999855518341 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,205 [INFO] gui.viewer: Value: 0.4374000132083893 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,206 [INFO] gui.viewer: Value: 0.45190000534057617 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,206 [INFO] gui.viewer: Value: 0.5126000046730042 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,207 [INFO] gui.viewer: Value: 0.5012000203132629 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,207 [INFO] gui.viewer: Value: 0.43560001254081726 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,208 [INFO] gui.viewer: Value: 0.47350001335144043 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,208 [INFO] gui.viewer: Value: 0.5489000082015991 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,209 [INFO] gui.viewer: Value: 0.5095999836921692 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,209 [INFO] gui.viewer: Value: 0.4309000074863434 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,210 [INFO] gui.viewer: Value: 0.49000000953674316 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,210 [INFO] gui.viewer: Value: 0.49869999289512634 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,211 [INFO] gui.viewer: Value: 0.47429999709129333 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,211 [INFO] gui.viewer: Value: 0.5142999887466431 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,212 [INFO] gui.viewer: Value: 0.47450000047683716 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,212 [INFO] gui.viewer: Value: 0.5254999995231628 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,212 [INFO] gui.viewer: Value: 0.46869999170303345 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,213 [INFO] gui.viewer: Value: 0.39959999918937683 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,213 [INFO] gui.viewer: Value: 0.4431999921798706 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,214 [INFO] gui.viewer: Value: 0.49630001187324524 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,214 [INFO] gui.viewer: Value: 0.46000000834465027 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,214 [INFO] gui.viewer: Value: 0.5424000024795532 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,215 [INFO] gui.viewer: Value: 0.4860000014305115 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,215 [INFO] gui.viewer: Value: 0.4666999876499176 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,216 [INFO] gui.viewer: Value: 0.4767000079154968 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,216 [INFO] gui.viewer: Value: 0.4896000027656555 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,216 [INFO] gui.viewer: Value: 0.47909998893737793 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,217 [INFO] gui.viewer: Value: 0.4431999921798706 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,217 [INFO] gui.viewer: Value: 0.4878999888896942 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,217 [INFO] gui.viewer: Value: 0.5591999888420105 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,218 [INFO] gui.viewer: Value: 0.4894999861717224 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,218 [INFO] gui.viewer: Value: 0.49880000948905945 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,219 [INFO] gui.viewer: Value: 0.5063999891281128 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,219 [INFO] gui.viewer: Value: 0.48339998722076416 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,219 [INFO] gui.viewer: Value: 0.4745999872684479 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,220 [INFO] gui.viewer: Value: 0.5403000116348267 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,220 [INFO] gui.viewer: Value: 0.4921000003814697 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,220 [INFO] gui.viewer: Value: 0.5134000182151794 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,221 [INFO] gui.viewer: Value: 0.46779999136924744 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,221 [INFO] gui.viewer: Value: 0.4223000109195709 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,222 [INFO] gui.viewer: Value: 0.5576000213623047 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,222 [INFO] gui.viewer: Value: 0.4417000114917755 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,222 [INFO] gui.viewer: Value: 0.3840000033378601 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,223 [INFO] gui.viewer: Value: 0.4740000069141388 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,223 [INFO] gui.viewer: Value: 0.47290000319480896 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,224 [INFO] gui.viewer: Value: 0.4007999897003174 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,224 [INFO] gui.viewer: Value: 0.4438000023365021 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,224 [INFO] gui.viewer: Value: 0.40700000524520874 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,225 [INFO] gui.viewer: Value: 0.49070000648498535 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,225 [INFO] gui.viewer: Value: 0.48179998993873596 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,226 [INFO] gui.viewer: Value: 0.5210000276565552 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,226 [INFO] gui.viewer: Value: 0.5097000002861023 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,226 [INFO] gui.viewer: Value: 0.4702000021934509 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,227 [INFO] gui.viewer: Value: 0.37869998812675476 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,227 [INFO] gui.viewer: Value: 0.399399995803833 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,228 [INFO] gui.viewer: Value: 0.5759000182151794 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,228 [INFO] gui.viewer: Value: 0.5339999794960022 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,228 [INFO] gui.viewer: Value: 0.448199987411499 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,229 [INFO] gui.viewer: Value: 0.5706999897956848 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,229 [INFO] gui.viewer: Value: 0.5521000027656555 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,229 [INFO] gui.viewer: Value: 0.4893999993801117 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,230 [INFO] gui.viewer: Value: 0.550599992275238 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,230 [INFO] gui.viewer: Value: 0.4772999882698059 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,231 [INFO] gui.viewer: Value: 0.39959999918937683 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,231 [INFO] gui.viewer: Value: 0.4643000066280365 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,231 [INFO] gui.viewer: Value: 0.40149998664855957 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,232 [INFO] gui.viewer: Value: 0.4187000095844269 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,232 [INFO] gui.viewer: Value: 0.45419999957084656 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,232 [INFO] gui.viewer: Value: 0.4553000032901764 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,233 [INFO] gui.viewer: Value: 0.45739999413490295 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,233 [INFO] gui.viewer: Value: 0.39259999990463257 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,234 [INFO] gui.viewer: Value: 0.4546999931335449 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,234 [INFO] gui.viewer: Value: 0.5077000260353088 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,234 [INFO] gui.viewer: Value: 0.33500000834465027 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,235 [INFO] gui.viewer: Value: 0.4165000021457672 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,235 [INFO] gui.viewer: Value: 0.36149999499320984 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,236 [INFO] gui.viewer: Value: 0.40799999237060547 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,236 [INFO] gui.viewer: Value: 0.5098999738693237 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,237 [INFO] gui.viewer: Value: 0.392300009727478 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,237 [INFO] gui.viewer: Value: 0.4632999897003174 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,237 [INFO] gui.viewer: Value: 0.2777000069618225 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,238 [INFO] gui.viewer: Value: 0.4510999917984009 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,238 [INFO] gui.viewer: Value: 0.5126000046730042 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,239 [INFO] gui.viewer: Value: 0.5569999814033508 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,239 [INFO] gui.viewer: Value: 0.5227000117301941 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,239 [INFO] gui.viewer: Value: 0.38350000977516174 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,240 [INFO] gui.viewer: Value: 0.35190001130104065 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,240 [INFO] gui.viewer: Value: 0.48899999260902405 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,240 [INFO] gui.viewer: Value: 0.38040000200271606 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,241 [INFO] gui.viewer: Value: 0.33629998564720154 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,241 [INFO] gui.viewer: Value: 0.3294999897480011 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,242 [INFO] gui.viewer: Value: 0.37560001015663147 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,242 [INFO] gui.viewer: Value: 0.39559999108314514 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,242 [INFO] gui.viewer: Value: 0.4803999960422516 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,243 [INFO] gui.viewer: Value: 0.3118000030517578 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,243 [INFO] gui.viewer: Value: 0.5139999985694885 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,243 [INFO] gui.viewer: Value: 0.4300999939441681 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,244 [INFO] gui.viewer: Value: 0.3495999872684479 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,244 [INFO] gui.viewer: Value: 0.43700000643730164 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,245 [INFO] gui.viewer: Value: 0.28790000081062317 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,245 [INFO] gui.viewer: Value: 0.3409999907016754 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,245 [INFO] gui.viewer: Value: 0.4433000087738037 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,246 [INFO] gui.viewer: Value: 0.04360000044107437 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,246 [INFO] gui.viewer: Value: 0.3880000114440918 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,247 [INFO] gui.viewer: Value: 0.43529999256134033 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,247 [INFO] gui.viewer: Value: 0.5070000290870667 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,247 [INFO] gui.viewer: Value: 0.3953999876976013 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,248 [INFO] gui.viewer: Value: 0.42149999737739563 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,248 [INFO] gui.viewer: Value: 0.37540000677108765 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,248 [INFO] gui.viewer: Value: 0.4950999915599823 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,249 [INFO] gui.viewer: Value: 0.4706000089645386 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,250 [INFO] gui.viewer: Value: 0.5455999970436096 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,250 [INFO] gui.viewer: Value: 0.4778999984264374 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,250 [INFO] gui.viewer: Value: 0.3815999925136566 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,251 [INFO] gui.viewer: Value: 0.5266000032424927 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,252 [INFO] gui.viewer: Value: 0.5468000173568726 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,252 [INFO] gui.viewer: Value: 0.4934999942779541 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,252 [INFO] gui.viewer: Value: 0.3467999994754791 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,253 [INFO] gui.viewer: Value: 0.5091000199317932 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,253 [INFO] gui.viewer: Value: 0.5037000179290771 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,253 [INFO] gui.viewer: Value: 0.3765999972820282 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,253 [INFO] gui.viewer: Value: 0.38589999079704285 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,253 [INFO] gui.viewer: Value: 0.3698999881744385 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,254 [INFO] gui.viewer: Value: 0.5708000063896179 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,254 [INFO] gui.viewer: Value: 0.5097000002861023 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,255 [INFO] gui.viewer: Value: 0.5238999724388123 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,255 [INFO] gui.viewer: Value: 0.39100000262260437 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,256 [INFO] gui.viewer: Value: 0.4952999949455261 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,256 [INFO] gui.viewer: Value: 0.3303000032901764 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,256 [INFO] gui.viewer: Value: 0.46630001068115234 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,257 [INFO] gui.viewer: Value: 0.4941999912261963 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,257 [INFO] gui.viewer: Value: 0.4880000054836273 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,258 [INFO] gui.viewer: Value: 0.26820001006126404 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,258 [INFO] gui.viewer: Value: 0.3792000114917755 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,258 [INFO] gui.viewer: Value: 0.2791000008583069 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,259 [INFO] gui.viewer: Value: 0.46239998936653137 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,259 [INFO] gui.viewer: Value: 0.4876999855041504 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,260 [INFO] gui.viewer: Value: 0.4075999855995178 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,260 [INFO] gui.viewer: Value: 0.5803999900817871 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,261 [INFO] gui.viewer: Value: 0.32899999618530273 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,261 [INFO] gui.viewer: Value: 0.5587000250816345 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,262 [INFO] gui.viewer: Value: 0.5264000296592712 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,262 [INFO] gui.viewer: Value: -0.0027000000700354576 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,263 [INFO] gui.viewer: Value: 0.36320000886917114 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,263 [INFO] gui.viewer: Value: 0.3732999861240387 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,264 [INFO] gui.viewer: Value: 0.4629000127315521 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,264 [INFO] gui.viewer: Value: 0.5058000087738037 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,264 [INFO] gui.viewer: Value: 0.51910001039505 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,265 [INFO] gui.viewer: Value: 0.5964999794960022 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,265 [INFO] gui.viewer: Value: 0.5354999899864197 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,266 [INFO] gui.viewer: Value: 0.4984000027179718 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,266 [INFO] gui.viewer: Value: 0.34540000557899475 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,267 [INFO] gui.viewer: Value: 0.45820000767707825 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,267 [INFO] gui.viewer: Value: -0.016599999740719795 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,267 [INFO] gui.viewer: Value: 0.33149999380111694 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,268 [INFO] gui.viewer: Value: 0.02759999968111515 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,268 [INFO] gui.viewer: Value: 0.4797999858856201 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,269 [INFO] gui.viewer: Value: 0.5354999899864197 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,269 [INFO] gui.viewer: Value: 0.2535000145435333 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,270 [INFO] gui.viewer: Value: 0.026100000366568565 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,270 [INFO] gui.viewer: Value: 0.04820000007748604 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,270 [INFO] gui.viewer: Value: 0.4851999878883362 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,271 [INFO] gui.viewer: Value: 0.5789999961853027 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,271 [INFO] gui.viewer: Value: 0.46720001101493835 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,272 [INFO] gui.viewer: Value: 0.07490000128746033 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,272 [INFO] gui.viewer: Value: 0.4318000078201294 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,272 [INFO] gui.viewer: Value: 0.3804999887943268 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,273 [INFO] gui.viewer: Value: 0.002300000051036477 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,273 [INFO] gui.viewer: Value: 0.5443000197410583 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,274 [INFO] gui.viewer: Value: 0.4104999899864197 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,274 [INFO] gui.viewer: Value: 0.04910000041127205 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,275 [INFO] gui.viewer: Value: 0.03689999878406525 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,275 [INFO] gui.viewer: Value: 0.1873999983072281 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,276 [INFO] gui.viewer: Value: 0.2937000095844269 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,277 [INFO] gui.viewer: Value: 0.47929999232292175 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,277 [INFO] gui.viewer: Value: 0.46869999170303345 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,277 [INFO] gui.viewer: Value: 0.29760000109672546 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,278 [INFO] gui.viewer: Value: 0.5361999869346619 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,278 [INFO] gui.viewer: Value: 0.03830000013113022 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,279 [INFO] gui.viewer: Value: 0.41780000925064087 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,279 [INFO] gui.viewer: Value: 0.5074999928474426 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,279 [INFO] gui.viewer: Value: 0.47530001401901245 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,280 [INFO] gui.viewer: Value: 0.5776000022888184 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,280 [INFO] gui.viewer: Value: 0.06769999861717224 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,281 [INFO] gui.viewer: Value: -0.0032999999821186066 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,281 [INFO] gui.viewer: Value: 0.03500000014901161 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,281 [INFO] gui.viewer: Value: 0.47099998593330383 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,282 [INFO] gui.viewer: Value: 0.5006999969482422 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,282 [INFO] gui.viewer: Value: 0.4884999990463257 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,283 [INFO] gui.viewer: Value: 0.47269999980926514 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,283 [INFO] gui.viewer: Value: 0.5224999785423279 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,283 [INFO] gui.viewer: Value: 0.014499999582767487 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,284 [INFO] gui.viewer: Value: -0.010099999606609344 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,284 [INFO] gui.viewer: Value: 0.10750000178813934 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,285 [INFO] gui.viewer: Value: 0.11699999868869781 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,285 [INFO] gui.viewer: Value: 0.21610000729560852 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,286 [INFO] gui.viewer: Value: 0.4593999981880188 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,286 [INFO] gui.viewer: Value: 0.5460000038146973 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,286 [INFO] gui.viewer: Value: 0.4715000092983246 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,287 [INFO] gui.viewer: Value: 0.45890000462532043 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,287 [INFO] gui.viewer: Value: 0.5738999843597412 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,288 [INFO] gui.viewer: Value: 0.33980000019073486 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,288 [INFO] gui.viewer: Value: 0.44029998779296875 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,289 [INFO] gui.viewer: Value: 0.438400000333786 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,289 [INFO] gui.viewer: Value: 0.1858000010251999 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,290 [INFO] gui.viewer: Value: 0.05480000004172325 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,290 [INFO] gui.viewer: Value: 0.45509999990463257 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,291 [INFO] gui.viewer: Value: 0.48080000281333923 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,291 [INFO] gui.viewer: Value: 0.48399999737739563 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,291 [INFO] gui.viewer: Value: 0.46869999170303345 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,292 [INFO] gui.viewer: Value: 0.49630001187324524 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,292 [INFO] gui.viewer: Value: 0.014499999582767487 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,293 [INFO] gui.viewer: Value: 0.41350001096725464 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,293 [INFO] gui.viewer: Value: 0.023000000044703484 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,294 [INFO] gui.viewer: Value: 0.49050000309944153 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,294 [INFO] gui.viewer: Value: 0.5415999889373779 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,294 [INFO] gui.viewer: Value: 0.5127000212669373 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,295 [INFO] gui.viewer: Value: 0.21570000052452087 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,295 [INFO] gui.viewer: Value: 0.5077000260353088 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,295 [INFO] gui.viewer: Value: 0.5539000034332275 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,296 [INFO] gui.viewer: Value: 0.22939999401569366 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,296 [INFO] gui.viewer: Value: 0.24379999935626984 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,297 [INFO] gui.viewer: Value: 0.010599999688565731 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,297 [INFO] gui.viewer: Value: 0.4805000126361847 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,297 [INFO] gui.viewer: Value: 0.4490000009536743 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,298 [INFO] gui.viewer: Value: 0.2045000046491623 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,298 [INFO] gui.viewer: Value: 0.45750001072883606 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,299 [INFO] gui.viewer: Value: 0.4747999906539917 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,299 [INFO] gui.viewer: Value: 0.483599990606308 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,300 [INFO] gui.viewer: Value: 0.249099999666214 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,300 [INFO] gui.viewer: Value: 0.03150000050663948 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,301 [INFO] gui.viewer: Value: 0.559499979019165 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,301 [INFO] gui.viewer: Value: -0.012400000356137753 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,302 [INFO] gui.viewer: Value: 0.029899999499320984 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,302 [INFO] gui.viewer: Value: 0.4180000126361847 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,302 [INFO] gui.viewer: Value: 0.46709999442100525 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,303 [INFO] gui.viewer: Value: 0.5127000212669373 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,303 [INFO] gui.viewer: Value: 0.4821999967098236 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,304 [INFO] gui.viewer: Value: 0.013899999670684338 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,304 [INFO] gui.viewer: Value: 0.6097000241279602 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,305 [INFO] gui.viewer: Value: 0.5774000287055969 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,305 [INFO] gui.viewer: Value: 0.2451000064611435 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,305 [INFO] gui.viewer: Value: 0.5748999714851379 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,306 [INFO] gui.viewer: Value: 0.5792999863624573 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,306 [INFO] gui.viewer: Value: 0.36320000886917114 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,307 [INFO] gui.viewer: Value: 0.28610000014305115 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,307 [INFO] gui.viewer: Value: 0.04520000144839287 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,308 [INFO] gui.viewer: Value: 0.03060000017285347 | Label: -0.2 - 0.1 | Color: [255, 179, 34]
+2026-04-29 17:39:37,308 [INFO] gui.viewer: Value: 0.2425999939441681 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,309 [INFO] gui.viewer: Value: 0.5573999881744385 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,309 [INFO] gui.viewer: Value: 0.5260000228881836 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,309 [INFO] gui.viewer: Value: 0.2759000062942505 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,310 [INFO] gui.viewer: Value: 0.4702000021934509 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,310 [INFO] gui.viewer: Value: 0.5486000180244446 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,311 [INFO] gui.viewer: Value: 0.5838000178337097 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,311 [INFO] gui.viewer: Value: 0.23340000212192535 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,311 [INFO] gui.viewer: Value: 0.4413999915122986 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,312 [INFO] gui.viewer: Value: 0.15039999783039093 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,312 [INFO] gui.viewer: Value: 0.47360000014305115 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,313 [INFO] gui.viewer: Value: 0.5828999876976013 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,313 [INFO] gui.viewer: Value: 0.5490000247955322 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,313 [INFO] gui.viewer: Value: 0.5615000128746033 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,314 [INFO] gui.viewer: Value: 0.2240000069141388 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,314 [INFO] gui.viewer: Value: 0.32440000772476196 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,315 [INFO] gui.viewer: Value: 0.2572999894618988 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,315 [INFO] gui.viewer: Value: 0.28139999508857727 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,316 [INFO] gui.viewer: Value: 0.552299976348877 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,316 [INFO] gui.viewer: Value: 0.47589999437332153 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,317 [INFO] gui.viewer: Value: 0.5820000171661377 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,317 [INFO] gui.viewer: Value: 0.5177000164985657 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,318 [INFO] gui.viewer: Value: 0.5666999816894531 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,318 [INFO] gui.viewer: Value: 0.6198999881744385 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,319 [INFO] gui.viewer: Value: 0.5073000192642212 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,319 [INFO] gui.viewer: Value: 0.5005999803543091 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,320 [INFO] gui.viewer: Value: 0.30230000615119934 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,320 [INFO] gui.viewer: Value: 0.42649999260902405 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,320 [INFO] gui.viewer: Value: 0.46970000863075256 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,321 [INFO] gui.viewer: Value: 0.5278000235557556 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,321 [INFO] gui.viewer: Value: 0.5794000029563904 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,322 [INFO] gui.viewer: Value: 0.3610999882221222 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,322 [INFO] gui.viewer: Value: 0.5641999840736389 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,322 [INFO] gui.viewer: Value: 0.47530001401901245 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,323 [INFO] gui.viewer: Value: 0.5759000182151794 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,323 [INFO] gui.viewer: Value: 0.314300000667572 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,324 [INFO] gui.viewer: Value: 0.6065000295639038 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,324 [INFO] gui.viewer: Value: 0.5227000117301941 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,325 [INFO] gui.viewer: Value: 0.22360000014305115 | Label: 0.1 - 0.3 | Color: [255, 179, 34]
+2026-04-29 17:39:37,325 [INFO] gui.viewer: Value: 0.5414999723434448 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,325 [INFO] gui.viewer: Value: 0.5333999991416931 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,326 [INFO] gui.viewer: Value: 0.5722000002861023 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,326 [INFO] gui.viewer: Value: 0.3328999876976013 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,327 [INFO] gui.viewer: Value: 0.5932000279426575 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,327 [INFO] gui.viewer: Value: 0.5317999720573425 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,328 [INFO] gui.viewer: Value: 0.5044000148773193 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,328 [INFO] gui.viewer: Value: 0.3059000074863434 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,329 [INFO] gui.viewer: Value: 0.5623000264167786 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,330 [INFO] gui.viewer: Value: 0.3276999890804291 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,330 [INFO] gui.viewer: Value: 0.5777999758720398 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,331 [INFO] gui.viewer: Value: 0.5680999755859375 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,331 [INFO] gui.viewer: Value: 0.531000018119812 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,332 [INFO] gui.viewer: Value: 0.33180001378059387 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,332 [INFO] gui.viewer: Value: 0.612500011920929 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,333 [INFO] gui.viewer: Value: 0.5916000008583069 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,333 [INFO] gui.viewer: Value: 0.5637999773025513 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,334 [INFO] gui.viewer: Value: 0.57669997215271 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,334 [INFO] gui.viewer: Value: 0.567799985408783 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,334 [INFO] gui.viewer: Value: 0.5931000113487244 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,335 [INFO] gui.viewer: Value: 0.5604000091552734 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,335 [INFO] gui.viewer: Value: 0.6212000250816345 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,336 [INFO] gui.viewer: Value: 0.5569999814033508 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,336 [INFO] gui.viewer: Value: 0.5831999778747559 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,337 [INFO] gui.viewer: Value: 0.32899999618530273 | Label: 0.3 - 0.4 | Color: [255, 255, 116]
+2026-04-29 17:39:37,337 [INFO] gui.viewer: Value: 0.6123999953269958 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,337 [INFO] gui.viewer: Value: 0.6039000153541565 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,338 [INFO] gui.viewer: Value: 0.6055999994277954 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,338 [INFO] gui.viewer: Value: 0.5476999878883362 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,339 [INFO] gui.viewer: Value: 0.6283000111579895 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,339 [INFO] gui.viewer: Value: 0.5625 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,340 [INFO] gui.viewer: Value: 0.5917999744415283 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,340 [INFO] gui.viewer: Value: 0.5590000152587891 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,340 [INFO] gui.viewer: Value: 0.6111000180244446 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,341 [INFO] gui.viewer: Value: 0.5989000201225281 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,341 [INFO] gui.viewer: Value: 0.5996999740600586 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,342 [INFO] gui.viewer: Value: 0.5774000287055969 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,342 [INFO] gui.viewer: Value: 0.5679000020027161 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,343 [INFO] gui.viewer: Value: 0.6226999759674072 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,343 [INFO] gui.viewer: Value: 0.551800012588501 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,344 [INFO] gui.viewer: Value: 0.5627999901771545 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,344 [INFO] gui.viewer: Value: 0.61080002784729 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,345 [INFO] gui.viewer: Value: 0.5760999917984009 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,345 [INFO] gui.viewer: Value: 0.61080002784729 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,345 [INFO] gui.viewer: Value: 0.5950000286102295 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,346 [INFO] gui.viewer: Value: 0.5103999972343445 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,346 [INFO] gui.viewer: Value: 0.5745000243186951 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,347 [INFO] gui.viewer: Value: 0.6057000160217285 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,347 [INFO] gui.viewer: Value: 0.5845000147819519 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,348 [INFO] gui.viewer: Value: 0.5152000188827515 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,348 [INFO] gui.viewer: Value: 0.5989999771118164 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,349 [INFO] gui.viewer: Value: 0.5835000276565552 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,349 [INFO] gui.viewer: Value: 0.5856999754905701 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,349 [INFO] gui.viewer: Value: 0.5489000082015991 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,350 [INFO] gui.viewer: Value: 0.546999990940094 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,350 [INFO] gui.viewer: Value: 0.5270000100135803 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,351 [INFO] gui.viewer: Value: 0.5662000179290771 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,351 [INFO] gui.viewer: Value: 0.5929999947547913 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,352 [INFO] gui.viewer: Value: 0.593500018119812 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,352 [INFO] gui.viewer: Value: 0.5282999873161316 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,353 [INFO] gui.viewer: Value: 0.5895000100135803 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,353 [INFO] gui.viewer: Value: 0.6111999750137329 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,353 [INFO] gui.viewer: Value: 0.5602999925613403 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,354 [INFO] gui.viewer: Value: 0.5946999788284302 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,354 [INFO] gui.viewer: Value: 0.5138000249862671 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,355 [INFO] gui.viewer: Value: 0.5120000243186951 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,355 [INFO] gui.viewer: Value: 0.6083999872207642 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,356 [INFO] gui.viewer: Value: 0.5960999727249146 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,356 [INFO] gui.viewer: Value: 0.6032999753952026 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,357 [INFO] gui.viewer: Value: 0.5888000130653381 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,357 [INFO] gui.viewer: Value: 0.5489000082015991 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,358 [INFO] gui.viewer: Value: 0.5893999934196472 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,358 [INFO] gui.viewer: Value: 0.6007999777793884 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,359 [INFO] gui.viewer: Value: 0.548799991607666 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,359 [INFO] gui.viewer: Value: 0.5817000269889832 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,359 [INFO] gui.viewer: Value: 0.614300012588501 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,360 [INFO] gui.viewer: Value: 0.6240000128746033 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,360 [INFO] gui.viewer: Value: 0.6049000024795532 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,361 [INFO] gui.viewer: Value: 0.5846999883651733 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,361 [INFO] gui.viewer: Value: 0.5946000218391418 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,362 [INFO] gui.viewer: Value: 0.61080002784729 | Label: 0.6 - 1 | Color: [0, 128, 0]
+2026-04-29 17:39:37,362 [INFO] gui.viewer: Value: 0.4932999908924103 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,363 [INFO] gui.viewer: Value: 0.4860000014305115 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,363 [INFO] gui.viewer: Value: 0.501800000667572 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,364 [INFO] gui.viewer: Value: 0.5353999733924866 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,364 [INFO] gui.viewer: Value: 0.516700029373169 | Label: 0.4 - 0.6 | Color: [144, 238, 144]
+2026-04-29 17:39:37,365 [INFO] gui.layer_panel: Sinyal terdeteksi, perbarui z-order
+2026-04-29 17:39:37,365 [INFO] gui.layer_panel: Layer IDs di panel: [1, 2, 3]
+2026-04-29 17:39:37,365 [INFO] gui.viewer: Mengatur z-order: [1, 2, 3]
+2026-04-29 17:40:02,818 [INFO] gui.main_window: Legenda diperbarui!
+2026-04-29 17:40:02,826 [INFO] gui.layer_panel: Layer 3 diklik
+2026-04-29 17:40:23,437 [INFO] gui.main_window: Mencoba menutup aplikasi...
+2026-04-29 17:40:24,325 [INFO] gui.main_window: Cleanup selesai. Aplikasi ditutup
