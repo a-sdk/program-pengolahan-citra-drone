@@ -28,7 +28,7 @@ class LegendPanel(QWidget):
 
     def add_legend_item(self, label, color):
         item = QListWidgetItem(label)
-        pix = QPixmap(16, 16)
+        pix = QPixmap(20, 20)
         pix.fill(QColor(*color))
         item.setIcon(QIcon(pix))
         self.legend_list.addItem(item)
@@ -37,13 +37,13 @@ class LegendPanel(QWidget):
             # Logika formatting
             if is_header:
                 top_margin = "15px" if text.lower() == "recommendation:" else "0px"
-                html = (f"<div style='font-weight: bold; font-size: 14px; "
+                html = (f"<div style='font-weight: bold; font-size: 18px; "
                                 f"margin-top: {top_margin}; margin-bottom: 5px; "
                                 f"border-bottom: 1px solid #ddd;'>{text}</div>")
             elif is_highlight:
                 html = f"<div style='color: #000; margin: 0px; padding: 0px;'>{text}</div>"
             else:
-                html = f"<div style='margin: 0px; padding: 0px;'>{text}</div>"
+                html = f"<div style='font-size: 16px; margin: 0px; padding: 0px;'>{text}</div>"
             
             self.info_list.append(html)
 

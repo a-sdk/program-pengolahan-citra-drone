@@ -4,6 +4,7 @@ from core.logic.modul_klasifikasi import (
     deteksi_air_petak,
     deteksi_nutrisi_petak
 )
+from path_config import AppPaths
 import logging
 logger = logging.getLogger(__name__)
 
@@ -57,8 +58,8 @@ class PlantDiseaseClassifier(BaseClassifier):
     """
     Kelas untuk deteksi penyakit per rumpun.
     """ 
-    MODEL1_PATH = "core/models/disease_detection/disease_classification_model.h5"
-    SCALER1_PATH = "core/scaler/disease_classification_scaler.joblib"
+    MODEL1_PATH = AppPaths.MODELS / "disease_detection/disease_classification_model.h5"
+    SCALER1_PATH = AppPaths.SCALERS / "disease_classification_scaler.joblib"
     def __init__(self):
         super().__init__()
 
@@ -78,8 +79,8 @@ class DiseasePlotClassifier(BaseClassifier):
     """
     Kelas untuk deteksi penyakit per plot/petak.
     """ 
-    MODEL1_PATH = "core/models/disease_detection/disease_classification_model.h5"
-    SCALER1_PATH = "core/scaler/disease_classification_scaler.joblib"
+    MODEL1_PATH = AppPaths.MODELS / "disease_detection/disease_classification_model.h5"
+    SCALER1_PATH = AppPaths.SCALERS / "disease_classification_scaler.joblib"
     def __init__(self):
         super().__init__()
 
@@ -100,10 +101,9 @@ class WaterPlotClassifier(BaseClassifier):
     """
     Kelas untuk deteksi ketersedian air per plot/petak.
     """ 
-    MODEL1_PATH = "core/models/water_availability/water_regression_model.h5"
-    MODEL2_PATH = "core/models/water_availability/water_regression_model.h5"
-    SCALER1_PATH = "core/scaler/water_regression_polynom.joblib"
-    SCALER2_PATH = "core/scaler/water_regression_scaler.joblib"
+    MODEL1_PATH = AppPaths.MODELS / "water_availability/water_regression_model.h5"
+    SCALER1_PATH = AppPaths.SCALERS / "water_regression_polynom.joblib"
+    SCALER2_PATH = AppPaths.SCALERS / "water_regression_scaler.joblib"
     def __init__(self):
         super().__init__()
 
@@ -125,8 +125,8 @@ class NutrientPlotClassifier(BaseClassifier):
     """
     Kelas untuk deteksi ketersediaan nitrogen per plot/petak.
     """ 
-    MODEL1_PATH = "core/models/nutrient_availability/nitrogen_classification_model.h5"
-    SCALER1_PATH = "core/scaler/disease_classification_scaler.joblib"
+    MODEL1_PATH = AppPaths.MODELS / "nutrient_availability/nitrogen_classification_model.h5"
+    SCALER1_PATH = AppPaths.SCALERS / "disease_classification_scaler.joblib"
 
     def __init__(self):
         super().__init__()

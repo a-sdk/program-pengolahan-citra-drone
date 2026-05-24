@@ -7,6 +7,7 @@ import pandas as pd
 import rasterio as rio
 from core.logic.modul_utilitas import otsu_threshold, simpan_raster, tampilkan_histogram
 from core.logic.modul_klasifikasi import pisahkan_gulma
+from path_config import AppPaths
 import logging
 import os
 
@@ -232,7 +233,7 @@ def proses_segmentasi(input_folder, ndvi_path, output_folder, check_cancel, on_p
     """
 
     # Membuat peta segmentasi gulma dan padi
-    model_gulma = r"core\models\model_deteksi_gulma_v1.joblib"
+    model_gulma = AppPaths.models("model_deteksi_gulma_v1.joblib")
     peta_segmentasi_gulma = pisahkan_gulma(model_gulma, input_folder, output_folder, "segmentasi_gulma.tif", check_cancel, on_progress)
     print("Memuat file hasil transformasi...")
     with (

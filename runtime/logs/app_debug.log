@@ -1,0 +1,4 @@
+2026-05-24 17:55:33,812 [INFO] __main__: Aplikasi dibuka!
+2026-05-24 17:55:34,065 [INFO] gui.main_window: Sinyal Action terhubung
+2026-05-24 17:55:43,877 [INFO] gui.main_window: Mencoba menutup aplikasi...
+2026-05-24 17:55:46,103 [INFO] gui.main_window: Cleanup selesai. Aplikasi ditutup

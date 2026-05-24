@@ -16,6 +16,7 @@ from app.disease_controller import DiseaseAnalysis
 from app.water_controller import WaterAnalysis
 from app.nutrient_controller import NutrientAnalysis
 from app.result_model import AnalysisResult
+from path_config import AppPaths
 import os
 import logging
 
@@ -24,9 +25,9 @@ logger = logging.getLogger(__name__)
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        uic.loadUi("ui/main_window.ui", self)
+        uic.loadUi(str(AppPaths.ui("main_window.ui")), self)
         self.setWindowTitle("Multispectral Image Processing Program")
-        self.setWindowIcon(QIcon("assets/icon/edit-image.png"))
+        self.setWindowIcon(QIcon(str(AppPaths.assets("icon/edit-image.png"))))
         self.elapsed_sec = 0
         self.time_str = str(0)
         self.current_msg = "Processing..."
@@ -81,19 +82,19 @@ class MainWindow(QMainWindow):
         
 
     def _setup_icons(self):
-        icon_tif = QIcon("assets/icon/add_img.png")
-        icon_shp = QIcon("assets/icon/poly.png")
-        icon_open = QIcon("assets/icon/folder.png")
-        icon_exit = QIcon("assets/icon/exit.png")
-        icon_model = QIcon("assets/icon/deep-learning.png")
-        self.icon_disease = QIcon("assets/icon/virus.png")
-        self.icon_mineral = QIcon("assets/icon/nutrients.png")
-        self.icon_water = QIcon("assets/icon/drop.png")
-        icon_hand = QIcon("assets/icon/hand.png")
-        icon_zoom_in = QIcon("assets/icon/zoom-in.png")
-        icon_zoom_out = QIcon("assets/icon/zoom-out.png")
-        icon_fit_to_view = QIcon("assets/icon/width.png")
-        icon_new_shp = QIcon("assets/icon/edit_poly.png")
+        icon_tif = QIcon(str(AppPaths.assets("icon/add_img.png")))
+        icon_shp = QIcon(str(AppPaths.assets("icon/poly.png")))
+        icon_open = QIcon(str(AppPaths.assets("icon/folder.png")))
+        icon_exit = QIcon(str(AppPaths.assets("icon/exit.png")))
+        icon_model = QIcon(str(AppPaths.assets("icon/deep-learning.png")))
+        self.icon_disease = QIcon(str(AppPaths.assets("icon/virus.png")))
+        self.icon_mineral = QIcon(str(AppPaths.assets("icon/nutrients.png")))
+        self.icon_water = QIcon(str(AppPaths.assets("icon/drop.png")))
+        icon_hand = QIcon(str(AppPaths.assets("icon/hand.png")))
+        icon_zoom_in = QIcon(str(AppPaths.assets("icon/zoom-in.png")))
+        icon_zoom_out = QIcon(str(AppPaths.assets("icon/zoom-out.png")))
+        icon_fit_to_view = QIcon(str(AppPaths.assets("icon/width.png")))
+        icon_new_shp = QIcon(str(AppPaths.assets("icon/edit_poly.png")))
         self.menuOpen.setIcon(icon_open)
         self.action_open_img.setIcon(icon_tif)
         self.action_open_shp.setIcon(icon_shp)
@@ -246,6 +247,7 @@ class MainWindow(QMainWindow):
 
         if not legend and not stats:
             self.legend_panel.clear()
+            self.dockLegend.hide()
             return
 
         if legend:
@@ -265,10 +267,6 @@ class MainWindow(QMainWindow):
         logger.info(f"Progress {value}% - {msg}")
 
     def run_analysis(self, controller, tif, shp, out):
-        # # Menambah tif ke layer panel
-        # self.layer_panel.add_layer(tif)
-        # # Menambah shp ke layer panel
-        # self.layer_panel.add_layer(shp)
         # Inisiasi worker thread
         self.worker_thread = Worker(controller, tif, shp, out)
         # Inisiasi progress dialog
