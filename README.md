@@ -2,21 +2,16 @@
 
 ## Deskripsi Proyek
 
-Proyek ini adalah program untuk mengolah citra udara yang ditangkap oleh drone sehingga menghasilkan data dalam bentuk CSV.
+Proyek ini adalah program untuk mengolah citra udara dari drone sehingga menghasilkan peta sebaran.
 
 ## Fitur Utama
 
-1. Memotong citra berdasarkan poligon.
-2. Membuat multipoligon dari sebuah shapefile poligon.
-3. Mengekstrak koordinat vertek dari multipoligon.
-4. Menghitung indeks vegetasi seperti SAVI, NDVI, NDRE, dan lainnya.
-5. Melakukan segmentasi untuk memisahkan tanaman dan yang bukan tanaman.
-6. Melakukan masking untuk menghapus data raster yang bukan berupa tanaman.
-7. Mengekstrak nilai piksel citra dan atribut lainnya ke dalam file CSV.
-8. Memeriksa ukuran raster.
-9. Mendeteksi penyakit tanaman padi berdasarkan rumpun dan petak.
-10. Membuat peta sebaran penyakit tanaman pati berdasarkan rumpun dan petak.
-
+1. Memuat citra raster GeoTiff dan gambar biasa (.png/.jpg/.jpeg).
+2. Memuat vektor seperti shapefile dan geopackage.
+3. Membuat dan menggambar poligon.
+4. Memproses raster GeoTiff menggunakan model machine learning.
+5. Menampilkan peta sebaran hasil prediksi model machine learning.
+6. Memberikan informasi sebaran dan rekomendasi tindakan.
 
 
 ## Panduan Instalasi dan Penggunaan
@@ -65,19 +60,16 @@ App/
 ├── path_config.py
 │
 ├── app/
+├── assets/
+│   ├── defaults/
+│       ├── config/
+│       ├── models/
+│       ├── scalers/
+│       └── textures/
+├── changelogs/
 ├── core/
 ├── gui/
-├── ui/
-├── assets/
-│
-├── runtime/
-│   ├── models/
-│   ├── scalers/
-│   ├── config/
-│   ├── cache/
-│   └── logs/
-│
-└── temp/
+└── ui/
 
 
 ---
