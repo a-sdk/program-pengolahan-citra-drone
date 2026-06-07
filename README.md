@@ -54,6 +54,7 @@ Program akan berjalan dan menunjukkan status proses yang dilakukan.
 
 ## Struktur Proyek
 
+```text
 App/
 │
 ├── main.py
