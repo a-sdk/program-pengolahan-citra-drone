@@ -14,7 +14,6 @@ import os
 import glob
 import gc
 from mahotas.polygon import fill_polygon
-from tqdm import tqdm
 import logging
 
 logger = logging.getLogger(__name__)
@@ -113,7 +112,7 @@ def ekstrak_piksel_dari_vertek(input_vertek, input_folder, output_folder, output
         hasil_ekstraksi = []
 
         # Memproses setiap poligon berdasarkan ID
-        for id_poligon, data in tqdm(grup, desc=f"Mengkestrak {nama_band}", unit=" poligon", total=len(grup)):
+        for id_poligon, data in grup:
             xs, ys = data["X"].to_numpy(), data["Y"].to_numpy()
             # Konversi koordinat UTM ke baris dan kolom raster
             rows, cols = rio.transform.rowcol(transform, xs, ys)
@@ -138,7 +137,6 @@ def ekstrak_piksel_dari_vertek(input_vertek, input_folder, output_folder, output
                     nama_band: nilai_piksel
                 })
             
-            tqdm.write(f"Poligon {id_poligon} selesai ({len(x1)} piksel)")
 
         df_band = pd.DataFrame(hasil_ekstraksi)
 
@@ -227,7 +225,7 @@ def ekstrak_tumpukan_fitur(shp_path, input_folder, output_folder, output_filenam
     with rio.open(input_folder) as src:
         nodata_val = src.nodata if src.nodata is not None else np.nan
         
-        for index, row in tqdm(gdf.iterrows(), desc="Mengekstrak piksel", total=len(gdf)):
+        for index, row in gdf.iterrows():
             geom = row.geometry
             id_poligon = row["id"]
             nama_titik = row["Nama"]
@@ -318,7 +316,7 @@ def ekstrak_tumpukan_fitur_optimized(shp_path, input_folder, output_folder, outp
         # Menulis header CSV sekali
         pd.DataFrame(columns=nama_kolom).to_csv(output_path, index=False)
         
-        for index, row in tqdm(gdf.iterrows(), desc="Mengekstrak piksel", total=len(gdf)):
+        for index, row in gdf.iterrows():
             geom = row.geometry
 
             # Windowed Reading (Hanya bagian kecil citra)
@@ -380,7 +378,6 @@ def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename
     Returns:
         str: Output path.
     """
-
     gdf = gpd.read_file(shp_path)
 
     # Menyiapkan kolom identitas
@@ -411,7 +408,7 @@ def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename
     nf = os.path.splitext(os.path.basename(input_folder))[0]
     print(f"\nMemuat hasil masking: {nf}")
     with rio.open(input_folder) as src:
-        for i, nama_band in tqdm(enumerate(nama_bands), desc="Mengekstrak rerata piksel", unit=" band", total=len(nama_bands)):
+        for i, name in enumerate(nama_bands):
             band_data = src.read(i + 1)
             
             stats = zonal_stats(
@@ -424,7 +421,7 @@ def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename
             )
             
             mean_values = [s.get("mean", src.nodata) for s in stats]
-            hasil_ekstraksi[nama_band] = mean_values
+            hasil_ekstraksi[name] = mean_values
 
     # Cek baris yang mengandung NaN sebelum dihapus
     df_lengkap = pd.DataFrame(hasil_ekstraksi)

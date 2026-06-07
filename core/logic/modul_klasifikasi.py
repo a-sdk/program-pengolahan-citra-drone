@@ -26,7 +26,8 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, check
     os.makedirs(output_folder, exist_ok=True)
     print(f"Memuat model...")
     try:
-        model = joblib.load(model_path)
+        with joblib.parallel_backend('threading'):
+            model = joblib.load(model_path)
     except FileNotFoundError:
         print(f"ERROR: File model tidak ditemukan. Silahkan dicek dulu.")
         return
@@ -201,7 +202,7 @@ def deteksi_penyakit_petak(scaler, model, input_folder, shp_path, output_folder,
     X_inf = df[fitur]
     X_inf_array = X_inf.values
     X_inf_scaled = scaler.transform(X_inf_array)
-    raw_preds = model.predict(X_inf_scaled)
+    raw_preds = model.predict(X_inf_scaled, verbose=0)
     
     disease_names = ["blas", "blb", "bs", "nbs"]
     map_label = {1: "Sehat", 2: "Ringan", 3: "Sedang", 4: "Parah"}
@@ -262,7 +263,7 @@ def deteksi_air_petak(polynom, scaler, model_reg, input_folder, shp_path, output
     X_inf = df[fitur]
     X_poly = polynom.transform(X_inf)
     X_poly_scaled = scaler.transform(X_poly)
-    reg_raw_preds = np.round(model_reg.predict(X_poly_scaled).flatten(), 4)
+    reg_raw_preds = np.round(model_reg.predict(X_poly_scaled, verbose=0).flatten(), 4)
     # model = ["klasifikasi", "regresi"]
     map_label = {1: "Cukup", 2: "Kurang"}
     output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Petak/Air Tersedia"
@@ -320,9 +321,9 @@ def deteksi_nutrisi_petak(scaler_n, scaler_p, scaler_k, model_n, model_p, model_
     X_n_scaled = scaler_n.transform(X_inf_array)
     X_p_scaled = scaler_p.transform(X_inf_array)
     X_k_scaled = scaler_k.transform(X_inf_array)
-    n_preds = model_n.predict(X_n_scaled)
-    p_preds = model_p.predict(X_p_scaled)
-    k_preds = model_k.predict(X_k_scaled)
+    n_preds = model_n.predict(X_n_scaled, verbose=0)
+    p_preds = model_p.predict(X_p_scaled, verbose=0)
+    k_preds = model_k.predict(X_k_scaled, verbose=0)
     # Ambil index kelas tertinggi
     n_class_idx = np.argmax(n_preds, axis=1) + 1
     p_class_idx = np.argmax(p_preds, axis=1) + 1

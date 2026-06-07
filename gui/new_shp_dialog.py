@@ -12,7 +12,7 @@ class CreateShapefileDialog(QDialog):
         uic.loadUi(str(AppPaths.ui("new_shp_dialog.ui")), self)
 
         self.setWindowTitle("New Shapefile Layer")
-        self.setWindowIcon(QIcon(str(AppPaths.assets("/icon/poly.png"))))
+        self.setWindowIcon(QIcon(str(AppPaths.assets("defaults/textures/icon/poly.png"))))
         self.btn_save_shp.clicked.connect(self._handle_save_shp)
 
     def _handle_save_shp(self):

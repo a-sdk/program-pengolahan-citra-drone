@@ -1,6 +1,17 @@
 # Folder
-__pycache__/
+# Venv
 .venv_stable/
+# IDE
+.vscode
+# Python
+__pycache__/
+# PyInstaller
+dist/
+build/
+# Others
+runtime/
+runtime/
+temp/
 *.tif
 *.jpg
 *.png

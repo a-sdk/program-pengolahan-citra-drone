@@ -1,0 +1,41 @@
+{
+  "models": {
+    "water_availability": {
+      "path": "water_regression_model.h5"
+    },
+
+    "nitrogen_availability": {
+      "path": "nitrogen_classification_model.h5"
+    },
+
+    "phospor_availability": {
+      "path": "nitrogen_classification_model.h5"
+    },
+
+    "kalium_availability": {
+      "path": "nitrogen_classification_model.h5"
+    },
+
+    "disease_detection": {
+      "path": "disease_classification_model.h5"
+    }
+  },
+
+  "scalers": {
+    "water_polynom": {
+      "path": "water_regression_polynom.joblib"
+    },
+
+    "water_scaler": {
+        "path": "water_regression_scaler.joblib"
+    },
+
+    "nitrogen_scaler": {
+        "path": "disease_classification_scaler.joblib"
+    },
+
+    "disease_scaler": {
+        "path": "disease_classification_scaler.joblib"
+    }
+  }
+}

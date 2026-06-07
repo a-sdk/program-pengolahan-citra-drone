@@ -26,8 +26,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi(str(AppPaths.ui("main_window.ui")), self)
-        self.setWindowTitle("Multispectral Image Processing Program")
-        self.setWindowIcon(QIcon(str(AppPaths.assets("icon/edit-image.png"))))
+        self.setWindowTitle("mY App")
+        self.setWindowIcon(QIcon(str(AppPaths.assets("defaults/textures/icon/edit-image.png"))))
         self.elapsed_sec = 0
         self.time_str = str(0)
         self.current_msg = "Processing..."
@@ -82,19 +82,19 @@ class MainWindow(QMainWindow):
         
 
     def _setup_icons(self):
-        icon_tif = QIcon(str(AppPaths.assets("icon/add_img.png")))
-        icon_shp = QIcon(str(AppPaths.assets("icon/poly.png")))
-        icon_open = QIcon(str(AppPaths.assets("icon/folder.png")))
-        icon_exit = QIcon(str(AppPaths.assets("icon/exit.png")))
-        icon_model = QIcon(str(AppPaths.assets("icon/deep-learning.png")))
-        self.icon_disease = QIcon(str(AppPaths.assets("icon/virus.png")))
-        self.icon_mineral = QIcon(str(AppPaths.assets("icon/nutrients.png")))
-        self.icon_water = QIcon(str(AppPaths.assets("icon/drop.png")))
-        icon_hand = QIcon(str(AppPaths.assets("icon/hand.png")))
-        icon_zoom_in = QIcon(str(AppPaths.assets("icon/zoom-in.png")))
-        icon_zoom_out = QIcon(str(AppPaths.assets("icon/zoom-out.png")))
-        icon_fit_to_view = QIcon(str(AppPaths.assets("icon/width.png")))
-        icon_new_shp = QIcon(str(AppPaths.assets("icon/edit_poly.png")))
+        icon_tif = QIcon(str(AppPaths.assets("defaults/textures/icon/add_img.png")))
+        icon_shp = QIcon(str(AppPaths.assets("defaults/textures/icon/poly.png")))
+        icon_open = QIcon(str(AppPaths.assets("defaults/textures/icon/folder.png")))
+        icon_exit = QIcon(str(AppPaths.assets("defaults/textures/icon/exit.png")))
+        icon_model = QIcon(str(AppPaths.assets("defaults/textures/icon/deep-learning.png")))
+        self.icon_disease = QIcon(str(AppPaths.assets("defaults/textures/icon/virus.png")))
+        self.icon_mineral = QIcon(str(AppPaths.assets("defaults/textures/icon/nutrients.png")))
+        self.icon_water = QIcon(str(AppPaths.assets("defaults/textures/icon/drop.png")))
+        icon_hand = QIcon(str(AppPaths.assets("defaults/textures/icon/hand.png")))
+        icon_zoom_in = QIcon(str(AppPaths.assets("defaults/textures/icon/zoom-in.png")))
+        icon_zoom_out = QIcon(str(AppPaths.assets("defaults/textures/icon/zoom-out.png")))
+        icon_fit_to_view = QIcon(str(AppPaths.assets("defaults/textures/icon/width.png")))
+        icon_new_shp = QIcon(str(AppPaths.assets("defaults/textures/icon/edit_poly.png")))
         self.menuOpen.setIcon(icon_open)
         self.action_open_img.setIcon(icon_tif)
         self.action_open_shp.setIcon(icon_shp)

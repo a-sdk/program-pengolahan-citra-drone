@@ -1,64 +1,60 @@
 import sys
-import os
-import ctypes
-import logging
-from path_config import AppPaths
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtGui import QFont
-from gui.main_window import MainWindow
+from PyQt5.QtWidgets import QApplication, QSplashScreen
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtCore import Qt
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-logger = logging.getLogger(__name__)
-AppPaths.ensure_runtime_dirs()
-print("CWD:", os.getcwd())
-print("BASE_DIR:", AppPaths.BASE_DIR)
-print("RESOURCE_DIR:", AppPaths.RESOURCE_DIR)
-print("UI:", AppPaths.UI)
-logger.info("ASSETS:", AppPaths.ASSETS)
-logger.info("CWD:", os.getcwd())
-logger.info("BASE_DIR:", AppPaths.BASE_DIR)
-logger.info("RESOURCE_DIR:", AppPaths.RESOURCE_DIR)
-logger.info("UI:", AppPaths.UI)
-logger.info("ASSETS:", AppPaths.ASSETS)
-if not getattr(sys, 'frozen', False):
-    venv_path = (
-        AppPaths.BASE_DIR /
-        ".venv" /
-        "Lib" /
-        "site-packages" /
-        "tensorflow"
+
+if __name__ == "__main__":
+    import os
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+    os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+    import ctypes
+    # Windows App ID
+    myappid = 'unpad.img_processing.ms_img.beta-0.0.1'
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    import multiprocessing
+    multiprocessing.freeze_support()
+    # Start app 
+    from path_config import AppPaths
+    app = QApplication(sys.argv)
+    pixmap = QPixmap(str(AppPaths.assets("defaults/textures/splash_loading.png")))
+    splash = QSplashScreen(pixmap, Qt.WindowStaysOnTopHint)
+    splash.show()
+    splash.showMessage("Starting app...", Qt.AlignBottom | Qt.AlignCenter, Qt.black)
+    app.processEvents()
+    # Init runtime folder
+    splash.showMessage("Initializing runtime folder...", Qt.AlignBottom | Qt.AlignCenter, Qt.black)
+    app.processEvents()
+    from core.runtime_initializer import initialize_runtime
+    initialize_runtime()
+    # Init main window
+    splash.showMessage("Loading python modules...", Qt.AlignBottom | Qt.AlignCenter, Qt.black)
+    app.processEvents()
+    from gui.main_window import MainWindow
+    splash.showMessage("Loading main window...", Qt.AlignBottom | Qt.AlignCenter, Qt.black)
+    app.processEvents()
+    window = MainWindow()
+    window.show()
+    splash.finish(window)
+    # Logging
+    import logging
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+        handlers=[
+            logging.FileHandler(str(AppPaths.LOGS / "app_debug.log"), mode='w'), 
+            logging.StreamHandler(sys.stdout) 
+        ]
     )
-    if venv_path.exists():
-        os.add_dll_directory(str(venv_path))
-    
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
-    handlers=[
-        logging.FileHandler(str(AppPaths.LOGS / "app_debug.log"), mode='w'), 
-        logging.StreamHandler(sys.stdout) 
-    ]
-)
+    logger = logging.getLogger(__name__)
+    logger.info("Aplikasi dibuka!")
+    def handle_exception(exc_type, exc_value, exc_traceback):
+        if issubclass(exc_type, KeyboardInterrupt):
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+            return
+        logging.error("Uncaught exception.", exc_info=(exc_type, exc_value, exc_traceback))
+    sys.excepthook = handle_exception
 
-def handle_exception(exc_type, exc_value, exc_traceback):
-    if issubclass(exc_type, KeyboardInterrupt):
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
-    logging.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
-sys.excepthook = handle_exception
-
-# Windows App ID
-myappid = 'unpad.img_processing.ms_img.beta-0.0.1'
-ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
-
-# Mulai aplikasi 
-logger = logging.getLogger(__name__)
-logger.info("Aplikasi dibuka!")
-
-app = QApplication(sys.argv)
-window = MainWindow()
-window.show()
-
-sys.exit(app.exec_())
+    sys.exit(app.exec_())
 

@@ -22,7 +22,6 @@ class Viewer(QWidget):
     mouseMoved = pyqtSignal(float, float)
     infoMsg = pyqtSignal(str)
     drawFinished = pyqtSignal(bool, str)
-
     def __init__(self, parent=None):
         super().__init__(parent)
         self.main_layout = QVBoxLayout(self)
@@ -78,8 +77,11 @@ class Viewer(QWidget):
                 img_max = bands.max()
                 img_min = bands.min()
                 ch = 4
-                qt_transform = QTransform(t.a, t.b, t.d, t.e, t.c, t.f)
-
+                qt_transform = QTransform(
+                    t.a, t.b, 
+                    t.d, t.e, 
+                    t.c, t.f
+                    )
                 if img_max <= 4 and dtype == 'uint8':
                     isPrediction = True
 
@@ -162,7 +164,7 @@ class Viewer(QWidget):
                 "res": f"{pixel_width:.4f} m ({pixel_width*100:.1f} cm/px)"
             }
         self.layer_items[layer_id] = item
-        logger.info(f"{self.layer_items}")
+        # logger.info(f"{self.layer_items}")
         item.setTransformationMode(Qt.FastTransformation)
         item.setAcceptHoverEvents(False)
         self.fit_to_view()
@@ -239,7 +241,7 @@ class Viewer(QWidget):
         group = QGraphicsItemGroup()
         self.scene.addItem(group)
         self.layer_items[layer_id] = group
-        logger.info(f"{self.layer_items}")
+        # logger.info(f"{self.layer_items}")
         self.vector_info[layer_id] = {
             "name": name,
             "type": "shp",
@@ -261,7 +263,7 @@ class Viewer(QWidget):
         group = QGraphicsItemGroup()
         self.scene.addItem(group)
         self.layer_items[layer_id] = group
-        logger.info(f"{self.layer_items}")
+        # logger.info(f"{self.layer_items}")
         self.vector_info[layer_id] = {
             "type": "gpkg",
             "path": path,
@@ -289,10 +291,15 @@ class Viewer(QWidget):
         item = self.layer_items.pop(layer_id)
         self.scene.removeItem(item)
 
+    def apply_view_transform(self):
+        t = self.viewer.transform()
+        if t.m22() > 0:
+            self.viewer.scale(1, -1)
+
     def fit_to_view(self):
         rect = self.scene.itemsBoundingRect()
         self.viewer.fitInView(rect, Qt.KeepAspectRatio)
-        self._zoom = 0
+        self.apply_view_transform()
 
     def set_pan_mode(self, enabled: bool):
         if enabled:
@@ -345,7 +352,7 @@ class Viewer(QWidget):
         self.scene.addItem(self.active_poly_item)
 
     def mousePressEvent(self, event):
-        if self.isDrawing and event.button() == Qt.LeftButton:
+        if self.isDrawing and event.button() == Qt.MouseButton.LeftButton:
             logger.info("Mode gambar: klik kiri")
             # Tambah titik sudut
             pixel_pos = event.pos()
@@ -358,7 +365,7 @@ class Viewer(QWidget):
             else:
                 self.update_draw_polygon()
             
-        elif event.button() == Qt.RightButton:
+        elif self.isDrawing and event.button() == Qt.MouseButton.RightButton:
             logger.info("Mode gambar: klik kanan")
             num_points = len(self.temp_shp_points)
             if self.temp_shp_type == "Polygon" and num_points < 3:
@@ -369,7 +376,7 @@ class Viewer(QWidget):
                 self.infoMsg.emit("Point not defined!")
             else:
                 self.finalize_polygon()
-                    
+
     def keyPressEvent(self, event):
         if event.key() in (Qt.Key_Return, Qt.Key_Enter):
             logger.info("Mode gambar: selesai")

@@ -7,12 +7,13 @@ class PropertyDialog(QDialog):
         self.resize(400, 300)
         
         layout = QVBoxLayout(self)
-        table = QTableWidget(len(metadata), 2)
+        filtered_metadata = {k: v for k, v in metadata.items() if k not in ["Legend", "Stats"]}
+        table = QTableWidget(len(filtered_metadata), 2)
         table.setHorizontalHeaderLabels(["Property", "Value"])
         table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         
-        for i, (key, value) in enumerate(metadata.items()):
-            table.setItem(i, 0, QTableWidgetItem(key))
-            table.setItem(i, 1, QTableWidgetItem(str(value)))
+        for i, (key, value) in enumerate(filtered_metadata.items()):
+                table.setItem(i, 0, QTableWidgetItem(key))
+                table.setItem(i, 1, QTableWidgetItem(str(value)))
             
         layout.addWidget(table)

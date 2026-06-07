@@ -1,5 +1,6 @@
 from pathlib import Path
 import sys
+import json
 
 class AppPaths:
 
@@ -24,6 +25,7 @@ class AppPaths:
     LOGS = RUNTIME / "logs"
     MODELS = RUNTIME / "models"
     SCALERS = RUNTIME / "scalers"
+    TEMP = BASE_DIR / "temp"
 
     @staticmethod
     def ensure_runtime_dirs():
@@ -35,6 +37,7 @@ class AppPaths:
             AppPaths.CONFIG,
             AppPaths.CACHE,
             AppPaths.LOGS,
+            AppPaths.TEMP
         ]
         for d in dirs:
             d.mkdir(parents=True, exist_ok=True)
@@ -61,5 +64,59 @@ class AppPaths:
         return AppPaths.RUNTIME / filename
     
     @staticmethod
+    def models(filename=""):
+        return AppPaths.MODELS / filename
+    
+    @staticmethod
+    def scalers(filename=""):
+        return AppPaths.SCALERS / filename
+    
+    @staticmethod
     def ui(filename=""):
         return AppPaths.UI / filename
+    
+
+class ModelRegistry:
+
+    @staticmethod
+    def load_config():
+
+        with open(
+            AppPaths.CONFIG / "models.json",
+            "r",
+            encoding="utf-8"
+        ) as f:
+
+            return json.load(f)
+        
+    @staticmethod
+    def model_path(name):
+
+        config = ModelRegistry.load_config()
+
+        relative = (
+            config["models"]
+            [name]
+            ["path"]
+        )
+
+        return (
+            AppPaths.MODELS
+            / relative
+        )
+    
+    @staticmethod
+    def scaler_path(name):
+
+        config = ModelRegistry.load_config()
+
+        relative = (
+            config["scalers"]
+            [name]
+            ["path"]
+        )
+
+        return (
+            AppPaths.SCALERS
+            / relative
+        )

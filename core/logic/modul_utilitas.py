@@ -121,8 +121,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
         raise ValueError(f"File {filename} tidak memiliki CRS. Harap periksa file.")
 
     if polygons.crs.is_geographic:
-        overall_geometry = polygons.unary_union
-        centroid = overall_geometry.centroid
+        centroid = polygons.unary_union.centroid
         epsg_code = lonlat_to_utm_epsg(centroid.x, centroid.y)
         polygons = polygons.to_crs(epsg=epsg_code)
         print(f"CRS diubah dari {crs_asal} ke UTM (EPSG:{epsg_code})")
@@ -197,11 +196,11 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
     if on_progress:
         on_progress(16, f"Generating voronoi polygons...")
     points = MultiPoint(list(centroids.geometry))
-    buffer_union = centroids.buffer(100).unary_union
-    boundary = buffer_union.convex_hull
+    # buffer_union = centroids.buffer(100).unary_union
+    boundary = polygons.unary_union.envelope.buffer(500) # buffer_union.convex_hull
 
     vor = ops.voronoi_diagram(points, envelope=boundary, tolerance=0)
-    polys = [poly for poly in vor.geoms if poly.is_valid]
+    polys = [poly.buffer(0) for poly in vor.geoms if poly.is_valid and not poly.is_empty]
 
     gdf_voronoi = gpd.GeoDataFrame(geometry=polys, crs=centroids.crs)
     gdf_voronoi = gpd.sjoin_nearest(

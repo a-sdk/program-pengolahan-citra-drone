@@ -4,17 +4,17 @@ from core.logic.modul_klasifikasi import (
     deteksi_air_petak,
     deteksi_nutrisi_petak
 )
-from path_config import AppPaths
+from path_config import ModelRegistry
 import logging
 logger = logging.getLogger(__name__)
 
 class BaseClassifier:
-    MODEL1_PATH = None
-    MODEL2_PATH = None
-    MODEL3_PATH = None
-    SCALER1_PATH = None
-    SCALER2_PATH = None
-    SCALER3_PATH = None
+    MODEL_KEY_1 = None
+    MODEL_KEY_2 = None
+    MODEL_KEY_3 = None
+    SCALER_KEY_1 = None
+    SCALER_KEY_2 = None
+    SCALER_KEY_3 = None
 
     def __init__(self):
         self.scaler_1 = None
@@ -26,21 +26,42 @@ class BaseClassifier:
         self.result = None
 
     def _load_model(self):
-        if self.MODEL1_PATH is None or self.SCALER1_PATH is None:
+        if self.MODEL_KEY_1 is None or self.SCALER_KEY_1 is None:
             raise ValueError("Path model belum ditentukan di child class!")
         if self.model_1 is not None:
             return
         
         import tensorflow as tf
         import joblib
-        self.scaler_1 = joblib.load(self.SCALER1_PATH)
-        self.model_1 = tf.keras.models.load_model(self.MODEL1_PATH, compile=False)
-        if self.MODEL2_PATH is not None and self.SCALER2_PATH is not None:
-            self.scaler_2 = joblib.load(self.SCALER2_PATH)
-            self.model_2 = tf.keras.models.load_model(self.MODEL2_PATH, compile=False)
-        if self.MODEL3_PATH is not None and self.SCALER3_PATH is not None:
-            self.scaler_3 = joblib.load(self.SCALER3_PATH)
-            self.model_3 = tf.keras.models.load_model(self.MODEL3_PATH, compile=False)
+
+        with joblib.parallel_backend('threading'):
+            if self.SCALER_KEY_1 is not None:
+                self.scaler_1 = joblib.load(str(ModelRegistry.scaler_path(self.SCALER_KEY_1)))
+                
+            if self.SCALER_KEY_2 is not None:
+                self.scaler_2 = joblib.load(str(ModelRegistry.scaler_path(self.SCALER_KEY_2)))
+                
+            if self.SCALER_KEY_3 is not None:
+                self.scaler_3 = joblib.load(str(ModelRegistry.scaler_path(self.SCALER_KEY_3)))
+
+
+        if self.MODEL_KEY_1 is not None:
+            self.model_1 = tf.keras.models.load_model(
+                str(ModelRegistry.model_path(self.MODEL_KEY_1)), 
+                compile=False
+            )
+            
+        if self.MODEL_KEY_2 is not None:
+            self.model_2 = tf.keras.models.load_model(
+                str(ModelRegistry.model_path(self.MODEL_KEY_2)), 
+                compile=False
+            )
+            
+        if self.MODEL_KEY_3 is not None:
+            self.model_3 = tf.keras.models.load_model(
+                str(ModelRegistry.model_path(self.MODEL_KEY_3)), 
+                compile=False
+            )
 
     def run(self, input_folder, output_folder, shp_path=None, check_cancel=None, on_progress=None):
         logger.info(f"Memulai prediksi dengan {self.__class__.__name__}...")
@@ -58,8 +79,8 @@ class PlantDiseaseClassifier(BaseClassifier):
     """
     Kelas untuk deteksi penyakit per rumpun.
     """ 
-    MODEL1_PATH = AppPaths.MODELS / "disease_detection/disease_classification_model.h5"
-    SCALER1_PATH = AppPaths.SCALERS / "disease_classification_scaler.joblib"
+    MODEL_KEY_1 = "disease_detection"
+    SCALER_KEY_1 = "disease_scaler"
     def __init__(self):
         super().__init__()
 
@@ -79,8 +100,8 @@ class DiseasePlotClassifier(BaseClassifier):
     """
     Kelas untuk deteksi penyakit per plot/petak.
     """ 
-    MODEL1_PATH = AppPaths.MODELS / "disease_detection/disease_classification_model.h5"
-    SCALER1_PATH = AppPaths.SCALERS / "disease_classification_scaler.joblib"
+    MODEL_KEY_1 = "disease_detection"
+    SCALER_KEY_1 = "disease_scaler"
     def __init__(self):
         super().__init__()
 
@@ -101,9 +122,9 @@ class WaterPlotClassifier(BaseClassifier):
     """
     Kelas untuk deteksi ketersedian air per plot/petak.
     """ 
-    MODEL1_PATH = AppPaths.MODELS / "water_availability/water_regression_model.h5"
-    SCALER1_PATH = AppPaths.SCALERS / "water_regression_polynom.joblib"
-    SCALER2_PATH = AppPaths.SCALERS / "water_regression_scaler.joblib"
+    MODEL_KEY_1 = "water_availability"
+    SCALER_KEY_1 = "water_polynom"
+    SCALER_KEY_2 = "water_scaler"
     def __init__(self):
         super().__init__()
 
@@ -125,8 +146,10 @@ class NutrientPlotClassifier(BaseClassifier):
     """
     Kelas untuk deteksi ketersediaan nitrogen per plot/petak.
     """ 
-    MODEL1_PATH = AppPaths.MODELS / "nutrient_availability/nitrogen_classification_model.h5"
-    SCALER1_PATH = AppPaths.SCALERS / "disease_classification_scaler.joblib"
+    MODEL_KEY_1 = "nitrogen_availability"
+    MODEL_KEY_2 = "phospor_availability"
+    MODEL_KEY_3 = "kalium_availability"
+    SCALER_KEY_1 = "nitrogen_scaler"
 
     def __init__(self):
         super().__init__()
@@ -138,8 +161,8 @@ class NutrientPlotClassifier(BaseClassifier):
             scaler_p=self.scaler_1,
             scaler_k=self.scaler_1,
             model_n=self.model_1,
-            model_p=self.model_1, 
-            model_k=self.model_1,
+            model_p=self.model_2, 
+            model_k=self.model_3,
             input_folder=input_folder, 
             shp_path=shp_path, 
             output_folder=output_folder, 

@@ -15,9 +15,9 @@ logger = logging.getLogger(__name__)
 
 def safe_div(num, denom):
     with np.errstate(divide='ignore', invalid='ignore'):
-        res = num / denom
-    val = np.where(np.isfinite(res), res, 0.0)
-    return float(val) if np.isscalar(val) or val.size == 1 else val.astype(float)
+        res = np.true_divide(num, denom)
+    res = np.where(np.isnan(res) | np.isinf(res), 0.0, res)
+    return res
 
 def trim_norm_df(df, low_per=10, high_per=90):
     data_array = df.values.astype(float)
@@ -49,9 +49,13 @@ def hitung_savi(nir, m_red, L):
     """
 
     # Hindari pembagian dengan nol
-    with np.errstate(divide='ignore', invalid='ignore'):
-        savi = ((nir.astype(float) - m_red.astype(float)) * (1 + L)) / (nir.astype(float) + m_red.astype(float) + L)
-    savi = np.nan_to_num(savi, nan=0.0, posinf=0.0, neginf=0.0) 
+    nir_f = nir.astype(np.float32)
+    m_red_f = m_red.astype(np.float32)
+    num = nir_f - m_red_f 
+    denom = nir_f + m_red_f + L
+    res = safe_div(num, denom)
+    savi = res * (1.0 + L)
+    savi = np.clip(savi, -1.0, 1.0)
     return savi
 
 def hitung_ndvi(nir, m_red):
@@ -65,9 +69,12 @@ def hitung_ndvi(nir, m_red):
     Returns:
         np.ndarray: Array NumPy NDVI.
     """
-
-    ndvi = safe_div(nir - m_red, nir + m_red)
-    ndvi = np.nan_to_num(ndvi, nan=0.0, posinf=0.0, neginf=0.0)
+    nir_f = nir.astype(np.float32)
+    m_red_f = m_red.astype(np.float32)
+    num = nir_f - m_red_f
+    denom = nir_f + m_red_f
+    ndvi = safe_div(num, denom)
+    ndvi = np.clip(ndvi, -1.0, 1.0)
     return ndvi
 
 def hitung_gndvi(nir, m_green):
@@ -81,9 +88,12 @@ def hitung_gndvi(nir, m_green):
     Returns:
         np.ndarray: Array NumPy GNDVI.
     """
- 
-    gndvi = safe_div(nir - m_green, nir + m_green)
-    gndvi = np.nan_to_num(gndvi, nan=0.0, posinf=0.0, neginf=0.0)
+    nir_f = nir.astype(np.float32)
+    m_green_f = m_green.astype(np.float32)
+    num = nir_f - m_green_f
+    denom = nir_f + m_green_f
+    gndvi = safe_div(num, denom)
+    gndvi = np.clip(gndvi, -1.0, 1.0)
     return gndvi
 
 def hitung_ndre(nir, red_edge):
@@ -97,9 +107,12 @@ def hitung_ndre(nir, red_edge):
     Returns:
         np.ndarray: Array NumPy NDRE.
     """
-
-    ndre = safe_div(nir - red_edge, nir + red_edge)
-    ndre = np.nan_to_num(ndre, nan=0.0, posinf=0.0, neginf=0.0)
+    nir_f = nir.astype(np.float32)
+    re_f = red_edge.astype(np.float32)
+    num = nir_f - re_f 
+    denom = nir_f + re_f 
+    ndre = safe_div(num, denom)
+    ndre = np.clip(ndre, -1.0, 1.0)
     return ndre
 
 def hitung_evi(nir, m_red, blue):
@@ -114,9 +127,12 @@ def hitung_evi(nir, m_red, blue):
     Returns:
         np.ndarray: Array NumPy EVI.
     """
-
-    evi = np.clip(2.5 * safe_div(nir - m_red, (nir + 6 * m_red - 7.5 * blue + 1)), -1.0, 1.0)
-    evi = np.nan_to_num(evi, nan=0.0, posinf=0.0, neginf=0.0)
+    nir_f = nir.astype(np.float32)
+    m_red_f = m_red.astype(np.float32)
+    blue_f = blue.astype(np.float32)
+    num = nir_f - m_red_f
+    denom = nir_f + 6 * m_red_f - 7.5 * blue_f + 1
+    evi = np.clip(2.5 * safe_div(num, denom), -1.0, 1.0)
     return evi
 
 def hitung_vidvi(red, green, blue):
@@ -131,9 +147,12 @@ def hitung_vidvi(red, green, blue):
     Returns:
         np.ndarray: Array NumPy VIDVI.
     """
-
-    vidvi = safe_div(2 * green - red - blue, 2 * green + red + blue)
-    vidvi = np.nan_to_num(vidvi, nan=0.0, posinf=0.0, neginf=0.0)
+    red_f = red.astype(np.float32)
+    green_f = green.astype(np.float32)
+    blue_f = blue.astype(np.float32)
+    num = 2 * green_f - red_f - blue_f
+    denom = 2 * green_f + red_f + blue_f
+    vidvi = safe_div(num, denom)
     return vidvi
 
 def hitung_cive(red, green, blue):
@@ -148,8 +167,10 @@ def hitung_cive(red, green, blue):
     Returns:
         np.ndarray: Array NumPy CIVE.
     """
-    cive = (0.441 * red) - (0.81 * green) + (0.385 * blue) + 18.7874
-    cive = np.nan_to_num(cive, nan=0.0, posinf=0.0, neginf=0.0)
+    red_f = red.astype(np.float32)
+    green_f = green.astype(np.float32)
+    blue_f = blue.astype(np.float32)
+    cive = (0.441 * red_f) - (0.81 * green_f) + (0.385 * blue_f) + 18.7874
     return cive
 
 # Fungsi untuk melakukan proses transformasi
@@ -233,7 +254,7 @@ def proses_segmentasi(input_folder, ndvi_path, output_folder, check_cancel, on_p
     """
 
     # Membuat peta segmentasi gulma dan padi
-    model_gulma = AppPaths.models("model_deteksi_gulma_v1.joblib")
+    model_gulma = str(AppPaths.assets("defaults/models/model_deteksi_gulma_v1.joblib"))
     peta_segmentasi_gulma = pisahkan_gulma(model_gulma, input_folder, output_folder, "segmentasi_gulma.tif", check_cancel, on_progress)
     print("Memuat file hasil transformasi...")
     with (
