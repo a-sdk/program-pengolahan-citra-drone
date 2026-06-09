@@ -285,6 +285,6 @@ def proses_segmentasi(input_folder, ndvi_path, output_folder, check_cancel, on_p
     hasil_threshold = mask_final.astype(float)
 
     # Menyimpan hasil threshold
-    threshold_file_path = simpan_raster(hasil_threshold, profile, output_folder, "hasil_threshold_model.tif", nilai_nodata)
+    threshold_file_path = simpan_raster(hasil_threshold, profile, output_folder, "threshold_result.tif", nilai_nodata)
     os.remove(peta_segmentasi_gulma)
     return threshold_file_path

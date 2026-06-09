@@ -85,6 +85,9 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, check
                 # Bentuk kembali 1D -> 2D dan tulis ke file output
                 result_chunk_2d = result_chunk.reshape(window.height, window.width)
                 dest.write(result_chunk_2d.astype(rio.uint8), window=window, indexes=1)
+                import json
+                isThreshold = json.dumps(True)
+                dest.update_tags(THRESHOLD=isThreshold)
                 
     print(f"Pemisahan selesai! Peta segmentasi disimpan di: {output_folder}")
     return output_path
@@ -103,6 +106,8 @@ def deteksi_penyakit_rumpun(scaler, model, input_folder, output_folder, check_ca
 
     output_names = ["blas", "blb", "bs", "nbs"] 
     path_hasil = []
+    import json
+    isPrediction = json.dumps(True)
     print(f"Memprediksi citra...")
     with rio.open(input_folder) as src:
         base_profile = src.profile
@@ -112,10 +117,10 @@ def deteksi_penyakit_rumpun(scaler, model, input_folder, output_folder, check_ca
             nodata=0
         )
         output_dests = {}
-        output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Rumpun"
+        output_folder = f"{output_folder}/Preds_Result/Sebaran_Rumpun"
         os.makedirs(output_folder, exist_ok=True)
         for i, name in enumerate(output_names):
-            output_path = os.path.join(output_folder, f"peta_sebaran_penyakit_{name}.tif")
+            output_path = os.path.join(output_folder, f"{name}_prediction_map.tif")
             path_hasil.append(output_path)
             output_profile = base_profile.copy()
             if os.path.exists(output_path):
@@ -173,6 +178,7 @@ def deteksi_penyakit_rumpun(scaler, model, input_folder, output_folder, check_ca
                 # Menyimpan hasil prediksi
                 dest = output_dests[name]
                 dest.write(result_chunk_2d, window=window, indexes=1)
+                dest.update_tags(PREDICTION=isPrediction)
                 
         # Menutup semua file output setelah loop selesai
         for dest in output_dests.values():
@@ -207,11 +213,11 @@ def deteksi_penyakit_petak(scaler, model, input_folder, shp_path, output_folder,
     disease_names = ["blas", "blb", "bs", "nbs"]
     map_label = {1: "Sehat", 2: "Ringan", 3: "Sedang", 4: "Parah"}
 
-    output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Petak/Penyakit"
+    output_folder = f"{output_folder}/Preds_Result/Plot/Disease"
     os.makedirs(output_folder, exist_ok=True)
-    output_xlsx = os.path.join(output_folder, "Hasil_Prediksi.xlsx")
-    output_shp = os.path.join(output_folder, "Hasil_Prediksi.shp")
-    output_gpkg = os.path.join(output_folder, "Hasil_Prediksi.gpkg")
+    output_xlsx = os.path.join(output_folder, "Preds_Result.xlsx")
+    output_shp = os.path.join(output_folder, "Preds_Result.shp")
+    output_gpkg = os.path.join(output_folder, "Preds_Result.gpkg")
     gdf_single = gdf.copy()
     count = 0
     for i, name in enumerate(disease_names):
@@ -266,12 +272,12 @@ def deteksi_air_petak(polynom, scaler, model_reg, input_folder, shp_path, output
     reg_raw_preds = np.round(model_reg.predict(X_poly_scaled, verbose=0).flatten(), 4)
     # model = ["klasifikasi", "regresi"]
     map_label = {1: "Cukup", 2: "Kurang"}
-    output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Petak/Air Tersedia"
+    output_folder = f"{output_folder}/Preds_Result/Plot/Water"
     # preds = [class_idx, reg_raw_preds]
     os.makedirs(output_folder, exist_ok=True)
-    output_xlsx = os.path.join(output_folder, "Hasil_Prediksi.xlsx")
-    output_shp = os.path.join(output_folder, "Hasil_Prediksi.shp")
-    output_gpkg = os.path.join(output_folder, "Hasil_Prediksi.gpkg")
+    output_xlsx = os.path.join(output_folder, "Preds_Result.xlsx")
+    output_shp = os.path.join(output_folder, "Preds_Result.shp")
+    output_gpkg = os.path.join(output_folder, "Preds_Result.gpkg")
     gdf_single = gdf.copy()
     for i in range(5):
         # Memeriksa interupsi
@@ -331,11 +337,11 @@ def deteksi_nutrisi_petak(scaler_n, scaler_p, scaler_k, model_n, model_p, model_
     
     map_label = {1: "Kurang", 2: "Cukup", 3: "Berlebih"}
     nutrient = ["nitrogen", "phospor", "kalium"]
-    output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Petak/Nutrisi"
+    output_folder = f"{output_folder}/Preds_Result/Plot/Nutrient"
     os.makedirs(output_folder, exist_ok=True)
-    output_xlsx = os.path.join(output_folder, "Hasil_Prediksi.xlsx")
-    output_shp = os.path.join(output_folder, "Hasil_Prediksi.shp")
-    output_gpkg = os.path.join(output_folder, "Hasil_Prediksi.gpkg")
+    output_xlsx = os.path.join(output_folder, "Preds_Result.xlsx")
+    output_shp = os.path.join(output_folder, "Preds_Result.shp")
+    output_gpkg = os.path.join(output_folder, "Preds_Result.gpkg")
     gdf_single = gdf.copy()
     prediciton = [n_class_idx, p_class_idx, k_class_idx]
     for i, name in enumerate(nutrient):
@@ -366,7 +372,7 @@ def deteksi_nutrisi_petak(scaler_n, scaler_p, scaler_k, model_n, model_p, model_
 if __name__ == "__main__":
     from modul_utilitas import PlantDiseaseAnalyzer
     import glob
-    input_folder = r"C:\Users\acer_\Documents\Orthomosaic\tes aplikasi\Lahan percobaan\Hasil_Prediksi\Sebaran_Rumpun"
+    input_folder = r"C:\Users\acer_\Documents\Orthomosaic\tes aplikasi\Lahan percobaan\Preds_Result\Sebaran_Rumpun"
     shp_path = r"C:\Users\acer_\Documents\Orthomosaic\tes aplikasi\Lahan percobaan\multipoligon\Lahan 2_0_1029_komponen.shp"
     output_folder = r"C:\Users\acer_\Documents\Orthomosaic\tes aplikasi\Lahan percobaan"
     usep = PlantDiseaseAnalyzer()

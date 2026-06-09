@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Fungsi untuk memotong citra bedasarkan shapefile poligon
-def potong_raster(input_folder, shp_path, output_folder, output_filename="hasil_potong.tif", nilai_nodata=0):
+def potong_raster(input_folder, shp_path, output_folder, output_filename="clip_result.tif", nilai_nodata=0):
     """
     Memotong citra sesuai dengan shapefile poligon yang dibuat.
 

@@ -73,30 +73,40 @@ def restore_scalers(config):
             target
         )
 
-        
+
 def initialize_runtime():
 
     AppPaths.ensure_runtime_dirs()
 
-    default_config = AppPaths.assets(
+    default_model_config = AppPaths.assets(
         "defaults/config/models.json"
     )
 
-    runtime_config = AppPaths.CONFIG / "models.json"
+    default_info_config = AppPaths.assets(
+        "defaults/config/info.json"
+    )
+
+    runtime_model_config = AppPaths.CONFIG / "models.json"
+    runtime_info_config = AppPaths.CONFIG / "info.json"
 
     copy_if_missing(
-        default_config,
-        runtime_config
+        default_model_config,
+        runtime_model_config
+    )
+
+    copy_if_missing(
+        default_info_config,
+        runtime_info_config
     )
 
     with open(
-        runtime_config,
+        runtime_model_config,
         "r",
         encoding="utf-8"
     ) as f:
 
-        config = json.load(f)
+        model_config = json.load(f)
 
-    restore_models(config)
+    restore_models(model_config)
 
-    restore_scalers(config)
+    restore_scalers(model_config)

@@ -9,9 +9,7 @@ from PyQt5.QtGui import (
     QTransform, QPainterPath
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QPointF, QEvent
-import rasterio as rio
 import geopandas as gpd
-from shapely.geometry import Point, LineString, Polygon
 import numpy as np
 import json
 import logging
@@ -56,6 +54,8 @@ class Viewer(QWidget):
         self._zoom = 0
 
     def add_raster(self, name, path, isPrediction=False):
+        import rasterio as rio
+        
         logger.info("Membuka raster")
         if path.lower().endswith((".png", ".jpg", ".jpeg")):
             pixmap = QPixmap(path)
@@ -64,25 +64,41 @@ class Viewer(QWidget):
             isGeoTiff = True
             with rio.open(path) as src:
                 dtype = src.dtypes[0]
-                bands = src.read().astype(np.float32)
-                mask = src.read_masks(1)
-                alpha = mask.astype(np.uint8)
                 count = src.count
                 crs = src.crs
                 nodata = src.nodata
                 tag = src.tags()
                 h, w = src.shape
                 t = src.transform
-                pixel_width = abs(t.a)
-                img_max = bands.max()
-                img_min = bands.min()
+                pixel_width = abs(t.a) 
+                factor = 10
+                out_h = h // factor
+                out_w = w // factor
+                mask = src.read_masks(1, out_shape=(out_h, out_w))
+                alpha = mask.astype(np.uint8)
+                if count >= 3:
+                    bands = src.read(
+                        [1, 2, 3],
+                        out_shape=(3, out_h, out_w)
+                    )
+                if count < 3:
+                    bands = src.read(
+                        out_shape=(count, out_h, out_w)
+                    )
+                from rasterio.transform import Affine
+                t1 = t * Affine.scale(
+                    w / out_w,
+                    h / out_h   
+                )
+
                 ch = 4
                 qt_transform = QTransform(
-                    t.a, t.b, 
-                    t.d, t.e, 
-                    t.c, t.f
+                    t1.a, t1.b, 
+                    t1.d, t1.e, 
+                    t1.c, t1.f
                     )
-                if img_max <= 4 and dtype == 'uint8':
+
+                if "PREDICTION" in tag and dtype == 'uint8':
                     isPrediction = True
 
                 if isPrediction:
@@ -100,18 +116,10 @@ class Viewer(QWidget):
                 # Jika bukan hasil prediksi
                 else: 
                     # Normalisasi per band 
-                    for i in range(count):
-                        b = bands[i]
-                        
-                        if img_max > 0:
-                            if img_max <= 5:
-                                bands[i] = np.clip(b / img_max, 0, 1)
-                            elif dtype == 'uint8':
-                                bands[i] = np.clip(b / 255.0, 0, 1)
-                            elif dtype == 'uint16':
-                                bands[i] = np.clip(b / 65535.0, 0, 1)
-                        else:
-                            bands[i] = np.clip(b, 0, 1)
+                    if dtype == 'uint8':
+                        bands = np.clip(bands.astype(np.float32) / 255.0, 0, 1)
+                    elif dtype == 'uint16':
+                        bands = np.clip(bands.astype(np.float32) / 65535.0, 0, 1)
 
                     # Penanganan Channel (RGB vs Grayscale)
                     if count >= 3:
@@ -123,14 +131,17 @@ class Viewer(QWidget):
                     else:
                         # Jika hanya 1 atau 2 band, tampilkan sebagai grayscale 
                         gray = (bands[0] * 255).astype(np.uint8)
-                        alpha = np.full_like(gray, 255, dtype=np.uint8)
+                        alpha = np.full((out_h, out_w), 255, dtype=np.uint8)
                         if mask is not None and np.any(mask):
                             alpha = mask.astype(np.uint8)
                         elif nodata is not None:
                             alpha[bands[0]==nodata] = 0
                         img = np.dstack((gray, gray, gray, alpha))
-                
-                qimg = QImage(img.tobytes(), w, h, ch * w, QImage.Format_RGBA8888).copy() 
+                from PyQt5 import sip
+                img = np.ascontiguousarray(img)
+                ptr = sip.voidptr(img.ctypes.data)
+                img_h, img_w = img.shape[:2]
+                qimg = QImage(ptr, img_w, img_h, img.strides[0], QImage.Format_RGBA8888).copy()
                 pixmap = QPixmap.fromImage(qimg)
 
         # Assign layer ID
@@ -159,8 +170,9 @@ class Viewer(QWidget):
                 "crs": crs.to_string() if crs else "Non-Georeferenced",
                 "count": count,
                 "nodata": nodata,
-                "min_data": str(img_min),
-                "max_data": str(img_max),
+                "transform": t,
+                "height": h,
+                "width": w,
                 "res": f"{pixel_width:.4f} m ({pixel_width*100:.1f} cm/px)"
             }
         self.layer_items[layer_id] = item
@@ -475,6 +487,7 @@ class Viewer(QWidget):
         return None, None
     
     def finalize_polygon(self):
+        from shapely.geometry import Point, LineString, Polygon
         GEOM_MAPPING = {
             "Point": Point,
             "LineString": LineString,

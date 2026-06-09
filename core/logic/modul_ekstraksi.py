@@ -365,7 +365,7 @@ def ekstrak_tumpukan_fitur_optimized(shp_path, input_folder, output_folder, outp
     print(f"Selesai! Data disimpan secara bertahap di: {output_path}")
 
 # Fungsi untuk mengekstrak rata-rata nilai piksel dalam sub poligon
-def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename="hasil_ekstrak.csv"):
+def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename="pixel_val.csv"):
     """
     Mengekstrak rata-rata piksel dalam poligon dari tumpukan fitur.
 

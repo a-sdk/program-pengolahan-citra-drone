@@ -55,40 +55,6 @@ def generate_grid_points(polygon, target_count):
             if polygon.contains(p):
                 points.append(p)
     return points
-
-# Fungsi untuk meminta folder path
-def ambil_file(ekstensi):
-    """
-    Mengambil file dengan ekstensi tertentu
-    dalam suatu folder berdasarkan input.
-
-    Parameters:
-        ekstensi (str): Ekstensi file yang diambil.
-
-    Returns:
-        list: File target dan lokasi folder
-    """
-    while True:
-        lokasi_folder = input(f"\nMasukkan path folder berisi file {ekstensi}: ").strip('"').strip("'")
-        if  not os.path.isdir(lokasi_folder):
-            print(f"Folder tidak ditemukan: {lokasi_folder}")
-            print("Silahkan dicek dahulu.")
-            continue
-        folder_target = os.path.join(lokasi_folder, f"*{ekstensi}")
-        file_target = glob.glob(folder_target)
-        if not file_target:
-            print(f"Tidak ada file {ekstensi} ditemukan di folder tersebut.")
-            print("Silahkan dicek dahulu.")
-        else:
-            print(f"Ditemukan {len(file_target)} file {ekstensi} di folder {lokasi_folder}")
-            # Menampilkan file dalam folder 
-            print(f"Daftar File '{ekstensi}' dalam Folder {lokasi_folder}")
-            c = 1
-            for files in file_target:
-                nf = os.path.splitext(os.path.basename(files))[0]
-                print(f"\t {c}) {nf}")
-                c += 1
-            return file_target, lokasi_folder
         
 # Fungsi untuk membuat multipoligon (shahiban)
 def buat_multipoligon(shp_path, output_folder, on_progress):
@@ -137,7 +103,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
     jml_cluster = jml_poligon * jml_komponen
     print(f"Terdapat {jml_poligon} poligon, total luasan: {poly_area:.2f} m2")
     print(f"Jumlah komponen: {jml_komponen}")
-    output_intersection = os.path.join(output_folder, f"{filename}_{jml_cluster}_komponen.shp")
+    output_intersection = os.path.join(output_folder, f"{filename}_{jml_cluster}_part.shp")
     # ========================================
     # Tahap 2: Generate Random Points
     # ========================================
@@ -231,23 +197,6 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
     print(f"Intersection selesai")
 
     return output_intersection
-
-# Fungsi untuk memeriksa ukuran raster
-def cek_ukuran_raster(input_raster):
-    """
-    Menghitung ukuran raster dan menampilkannya di terminal/shell.
-
-    Parameters:
-        input_raster (np.ndarray): Array NumPy yang akan dihitung.
-        
-    Returns:
-        None.
-    """
-    nf = os.path.basename(input_raster)
-    with rio.open(input_raster) as src:
-        print(f"Memeriksa bentuk...")
-        band1 = src.read()
-        print(f"Bentuk (shape) dari {nf} adalah {band1.shape}")
 
 # Fungsi untuk menyimpan array NumPy ke dalam file GeoTIFF
 def simpan_raster(input_raster, profile, output_folder, output_filename, nilai_nodata=None):
@@ -403,381 +352,6 @@ def tumpuk_fitur(lst_fitur, output_folder, output_filename, nilai_nodata=0):
     print(f"Tumpukan fitur berhasil disimpan di: {output_folder}")
     return output_path
 
-# Fungsi untuk mengolah label penyakit 
-def olah_label(input_folder, output_folder, N, z):
-    """
-    Mengolah label skala penyakit dengan rentang status yang berbeda tiap penyakit.
-
-    Parameters:
-        input folder (str): Lokasi file label masing-masing HST.
-        output_folder (str): Nama folder tempat file akan disimpan.
-        N (int): Jumlah rumpun yang diamati.
-        z (int): Skala maksimum yang digunakan.
-
-
-
-    Returns:
-        str: Output path.
-    """
-    
-    config_penyakit = {
-        "blas": {
-            "ringan": 2,
-            "sedang": 15,
-        },
-        "blb": {
-            "ringan": 19,
-            "sedang": 35,
-        },
-        "bs": {
-            "ringan": 2,
-            "sedang": 15,
-        },
-        "nbs": {
-            "ringan": 5,
-            "sedang": 20,
-        }
-    }
-
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-
-    files = glob.glob(os.path.join(input_folder, "*.csv"))
-    
-    for file in files:
-        nf = os.path.splitext(os.path.basename(file))[0]
-        print(f"\nMemproses file {nf}...")
-        
-        try:
-            umur = nf.split(r" ")[1]
-        except IndexError:
-            umur = "unknown"
-
-        df = pd.read_csv(file)
-        grup = df.groupby("id") 
-        lst_skor = []
-
-        for id_titik, data in grup:
-            baris = {"id": id_titik, "hst": umur}
-            penyakit_list = ["blas", "blb", "bs", "nbs"]
-            
-            for nama_penyakit in penyakit_list:
-                if nama_penyakit not in data.columns:
-                    continue
-                
-                penyakit = data[nama_penyakit]
-                skor = penyakit.value_counts(dropna=False)
-                
-                # Perhitungan IP (Intensitas Penyakit)
-                sum_nv = (skor.get(1,0)*1 + skor.get(3,0)*3 + skor.get(5,0)*5 + 
-                          skor.get(7,0)*7 + skor.get(9,0)*9)
-                hitung_ip = round((sum_nv / (N * z)) * 100, 2)
-                
-                # Perhitungan DI (Disease Index)
-                hitung_di = round((skor.get(3,0) + skor.get(5,0) + 
-                                   skor.get(7,0) + skor.get(9,0)) / N, 2)
-
-                # LOGIKA PENENTUAN STATUS BERDASARKAN RENTANG KHUSUS
-                threshold = config_penyakit[nama_penyakit]
-                
-                if hitung_ip == 0:
-                    status = "sehat"
-                elif hitung_ip <= threshold["ringan"]:
-                    status = "ringan"
-                elif hitung_ip <= threshold["sedang"]:
-                    status = "sedang"
-                else:
-                    status = "parah"
-
-                # Penentuan Index DI (Bisa juga disesuaikan jika perlu)
-                if hitung_di == 0:
-                    idx = "sehat"
-                elif hitung_di <= 3:
-                    idx = "tahan"
-                elif hitung_di <= 6:
-                    idx = "rentan"
-                else: 
-                    idx = "sangat rentan"
-
-                baris[f"{nama_penyakit}"] = status
-                baris[f"{nama_penyakit}_ip"] = hitung_ip
-                baris[f"{nama_penyakit}_di"] = idx
-                
-            lst_skor.append(baris)
-
-        # Simpan Hasil
-        df_hasil = pd.DataFrame(lst_skor)
-        lst_kolom = ["id", "hst", "blas", "blb", "bs", "nbs", 
-                     "blas_ip", "blb_ip", "bs_ip", "nbs_ip",
-                     "blas_di", "blb_di", "bs_di", "nbs_di"]
-        
-        df_hasil = df_hasil[[c for c in lst_kolom if c in df_hasil.columns]]
-        output_path = os.path.join(output_folder, f"_{nf}.csv")
-        df_hasil.to_csv(output_path, index=False)
-        print(f"Selesai menyimpan {output_path}")
-
-# Fungsi untuk menggabungkan label penyakit
-def gabung_label(input_folder, output_folder, output_filename):
-    """
-    Menggabungkan beberapa file .csv hasil olah label
-    menjadi satu file .csv
-    
-    Parameters:
-        input_folder (str): Lokasi file label masing-masing HST.
-        output_folder (str): Nama folder tempat file akan disimpan.
-        output_filename (str): Nama file output, termasuk ekstensi.
-
-    Returns:
-        None.
-    """
-    print("Menggabungkan semua label penyakit...")
-    files = glob.glob(os.path.join(input_folder, "*.csv"))
-    labels = []
-    c = 1
-    for file in files:
-        nf = os.path.splitext(os.path.basename(file))[0]
-        print(f"\t {c}. {nf}")
-        c += 1
-        umur = nf.split(r" ")[1]
-        df_label = pd.read_csv(file)
-        df_label["hst"] = umur
-        labels.append(df_label)
-
-    label_hasil = pd.concat(labels, axis=0, ignore_index=True)
-    output_path = os.path.join(output_folder, output_filename)
-    os.makedirs(output_folder, exist_ok=True)
-    label_hasil.to_csv(output_path, index=False)
-    print(f"File {output_filename} berhasl disimpan di: \n{output_folder}")
-
-# Fungsi untuk menggabungkan dataset dan label
-def olah_dataset(dataset_folder, label_folder, output_folder, output_filename):
-    """
-    Menggabungkan file dataset dengan label
-    
-    Parameters:
-        dataset_folder (str): Lokasi folder dataset.
-        label_file (str): Lokasi file gabungan label. 
-        output_folder (str): Nama folder tempat file akan disimpan.
-        output_filename (str): Nama file output, termasuk ekstensi.
-
-    Returns:
-        None.
-    """
-    files_ekstraksi = glob.glob(os.path.join(dataset_folder, "*.csv"))
-    output_path = os.path.join(output_folder, output_filename)
-    os.makedirs(output_folder, exist_ok=True)
-    # Membaca file ke dataframe dan menambah kolom hst
-    print("Membaca file hasil ekstraksi...")
-    df0 = pd.read_csv(files_ekstraksi[0])
-    df1 = pd.read_csv(files_ekstraksi[1])
-    df2 = pd.read_csv(files_ekstraksi[2])
-    df3 = pd.read_csv(files_ekstraksi[3])
-    df4 = pd.read_csv(files_ekstraksi[4])
-    df5 = pd.read_csv(files_ekstraksi[5])
-    df6 = pd.read_csv(files_ekstraksi[6])
-
-    df0["hst"] = 40
-    df1["hst"] = 40
-    df2["hst"] = 30
-    df3["hst"] = 45
-    df4["hst"] = 45
-    df5["hst"] = 60
-
-    # Menggabungkan semua file hasil ekstraksi
-    lst_df = [df0, df1, df2, df3, df4, df5]
-    df = pd.concat(lst_df, axis=0)
-    df_label = pd.read_csv(label_folder)
-    # Menggabungkan data dengan label
-    print("Menambahkan label...")
-    df_lengkap = df.merge(df_label, on=["id", "hst"])
-    kolom_umur = df_lengkap.pop("hst")
-
-    df_lengkap = df_lengkap.drop(columns=["blas_ip", "blb_ip", "bs_ip", "nbs_ip", 
-                                          "blas_di", "blb_di", "bs_di", "nbs_di"])
-    df_lengkap.insert(loc=2, column="HST", value=kolom_umur)
-    df_lengkap.rename(columns={"id": "ID"}, inplace=True)
-    print("Menyimpan dataset...")
-    print(f"File {output_filename} disimpan di:\n{output_folder}")
-    df_lengkap.to_csv(output_path, index=False)
-
-# Fungsi untuk membuat peta sebaran mengacu pada koordinat verteks petakan (nurohman pupuk N)
-def buat_petak_sebaran(input_geotiff, file_metadata, folder_verteks, output_folder):
-    """
-    Membuat peta sebaran mengacu pada koordinat verteks petakan.
-    
-    Parameters:
-        input_geotiff (str): Lokasi file GeoTIFF hasil klip.
-        file_metadata (str): Lokasi file hasil prediksi model (.xlsx). 
-        folder_verteks (str): Lokasi folder koordinat verteks.
-        output_folder (str): Nama folder tempat file akan disimpan.
-
-    Returns:
-        None.
-    """
-    ################################################################################
-    # * Define Classification Mapping
-    ################################################################################
-    output_path = os.path.join(output_folder, "Sebaran_Petakan")
-    os.makedirs(output_path, exist_ok=True)
-    # Choose which classification field to use
-    penyakit = ["Blas", "BLB", "BS", "NBS"]
-    for nama in penyakit: 
-        class_type = f"Prediksi_{nama}"
-        nf_tif = f"{output_path}/{nama}.tif"
-        nf_png = f"{output_path}/{nama}.png"
-        # Define class labels and their corresponding RGB colors
-        CLASS_COLORS = {
-            "Sehat": (0, 128,00, 0),       # Green
-            "Ringan": (144, 238, 144),     # Light Green
-            "Agak parah": (255, 255, 116), # Light Orange
-            "Parah": (215, 25, 28)         # Red
-        }
-        
-        ################################################################################
-        # * Load Metadata
-        ################################################################################
-
-        print("\n[INFO] Loading metadata...")
-        metadata = pd.read_excel(file_metadata)
-        print(f"[INFO] Metadata loaded: {len(metadata)} records found.")
-
-        ################################################################################
-        # * Load and Process Polygon Data
-        ################################################################################
-
-        polygons = [] # Store polygon geometries and class labels
-
-        print("\n[INFO] Processing polygons...")
-        for _, row in metadata.iterrows():
-            polygon_filename = row["Nama"]
-            polygon_label = str(row[class_type]).strip() # Ensure it's a string and remove whitespace
-            polygon_file = f"{folder_verteks}/{polygon_filename}.csv"
-
-            # Check if the class label is valid
-            if polygon_label not in CLASS_COLORS:
-                print(f"[WARNING] Unknown class '{polygon_label}' in {polygon_file}, skipping.")
-                continue # Skip unknown labels
-
-            # Load polygon coordinates
-            try:
-                coords = pd.read_csv(polygon_file).values
-                polygon_geom = Polygon(coords)
-                polygons.append({"geometry": polygon_geom, "ClassLabel": polygon_label})
-
-                # Print polygon name, coordinates, and label
-                print(f"[INFO] Polygon: {polygon_filename}")
-                print(f"       Coordinates: {coords.tolist()}") # Convert numpy array to list for readability
-                print(f"       Label: {polygon_label}\n")
-
-            except Exception as e:
-                print(f"[ERROR] Error loading {polygon_file}: {e}")
-
-        print(f"[INFO] Total polygons processed: {len(polygons)}")
-
-        ################################################################################
-        # * Convert to GeoDataFrame
-        ################################################################################
-
-        # Convert the list of polygons into a GeoDataFrame with the correct coordinate system (UTM Zone 48S)
-        gdf = gpd.GeoDataFrame(polygons, crs="EPSG:32748")
-
-        ################################################################################
-        # * Load GeoTIFF Raster
-        ################################################################################
-
-        print("\n[INFO] Loading raster data...")
-        with rio.open(input_geotiff) as src:
-            meta = src.meta.copy()
-            meta.update(dtype=rio.uint16, count=src.count, nodata=0) # Ensure original uint16 format is retained
-
-            # Read original bands
-            bands = src.read()
-            height, width = src.height, src.width
-            print(f"[INFO] Raster size: {width} x {height}")
-
-        ################################################################################
-        # * Rasterize Polygons onto the GeoTIFF
-        ################################################################################
-
-        print("\n[INFO] Rasterizing polygons...")
-        for i, (geom, class_label) in enumerate(zip(gdf.geometry, gdf["ClassLabel"])):
-            r, g, b = CLASS_COLORS[class_label] # Get RGB values
-            mask = rasterize([(geom, 1)], out_shape=(height, width), transform=src.transform, fill=0, dtype=np.uint8)
-            
-            bands[0] = np.where(mask > 0, r * 257, bands[0]) # Scale 255 to 65535
-            bands[1] = np.where(mask > 0, g * 257, bands[1])
-            bands[2] = np.where(mask > 0, b * 257, bands[2])
-            print(f"[INFO] Rasterized polygon {i+1}/{len(gdf)}: {class_label}")
-
-        ################################################################################
-        # * Save Classified Raster as GeoTIFF
-        ################################################################################
-        
-        print("\n[INFO] Saving classified GeoTIFF...")
-        with rio.open(nf_tif, "w", **meta) as dst:
-            dst.write(bands)
-        print(f"[SUCCESS] RGB GeoTIFF saved at {output_path}")
-
-        ################################################################################
-        # * Convert Raster to PNG for Visualization
-        ################################################################################
-
-        print("\n[INFO] Generating PNG output...")
-        rgb_image = np.stack([bands[0] // 257, bands[1] // 257, bands[2] // 257], axis=-1).astype(np.uint8)
-        alpha_channel = np.where(np.sum(rgb_image, axis=-1) > 0, 255, 0).astype(np.uint8) # Set transparent background
-        rgba_image = np.dstack([rgb_image, alpha_channel])
-
-        plt.imsave(nf_png, rgba_image, format='png')
-        print(f"[SUCCESS] PNG image saved at {output_path}")
-        print(f"Selesai. Peta sebaran {nama} berhasil dibuat!")
-
-
-    print(f"\nBerhasil membuat {len(penyakit)} peta sebaran penyakit.")
-        
-# Fungsi menampilkan hasil prediksi model per rumpun
-def tampilkan_penyakit_rumpun(input_folder, output_folder):
-    """
-    Menampilkan peta sebaran pada grafik.
-    
-    Parameters:
-        input_folder (str): Lokasi file GeoTIFF hasil prediksi model.
-        penyakit (str): Nama penyakit.
-
-    Returns:
-        str: Output path.
-    """
-    nf = os.path.splitext(os.path.basename(input_folder))[0]
-    penyakit = nf.split("_")[-1]
-    output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Rumpun"
-    output_path = f"{output_folder}/peta_sebaran_{penyakit}.png"
-    print(f"\nMenampilkan peta sebaran penyakit {penyakit.title()}...")
-    os.makedirs(output_folder, exist_ok=True)
-    alpha = "#00000000"
-    hg = "#008000ff"
-    ht = "#90ee90ff"
-    kuning = "#ffff74ff"
-    merah = "#d7191cff"
-    warna = [alpha, hg, ht, kuning, merah]
-    cmaps = mcolor.ListedColormap(warna)
-
-    bounds = np.arange(-0.5, 5, 1)
-    norms = mcolor.BoundaryNorm(bounds, 5)
-    patches = [
-        mpatch.Patch(color=hg, label="Sehat", ec="black"),
-        mpatch.Patch(color=ht, label="Ringan", ec="black"),
-        mpatch.Patch(color=kuning, label="Sedang", ec="black"),
-        mpatch.Patch(color=merah, label="Parah", ec="black")
-    ]
-    # fig, ax = plt.subplots(1, 1, figsize=(10, 8))
-    # plt.legend(handles=patches, loc="lower right", title="Tingkat Kerusakan")
-    plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}", fontsize=14)
-    with rio.open(input_folder) as src:
-        data = src.read(1) 
-        plt.imshow(data, cmap=cmaps, norm=norms) 
-        # plt.show() 
-        plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    return output_path
-
 # Fungsi untuk menghitung sebaran penyakit per rumpun
 def hitung_sebaran_rumpun(input_folder, legend_dict):
     """
@@ -790,6 +364,7 @@ def hitung_sebaran_rumpun(input_folder, legend_dict):
     Returns:
         None.
     """
+    from path_config import InfoRegistry
     nf = os.path.splitext(os.path.basename(input_folder))[0]
     penyakit = nf.split("_")[-1]
     print(f"\nMenghitung sebaran penyakit {penyakit.title()}...")
@@ -817,16 +392,16 @@ def hitung_sebaran_rumpun(input_folder, legend_dict):
     print("-" * 30)
     if val_ > val_1 and val_ > val_2:
         # recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
-        recom = "High severity level, immediate action required!"
-        print(f"Rekomendasi: {recom}")
+        recom = InfoRegistry.get_info("disease", "severe")
+        # print(f"Rekomendasi: {recom}")
     elif val_2 > val_1 and val_2 > val_ :  
         # recom = "Lakukan pemantauan rutin dan tindakan pencegahan." 
-        recom = "Perform routine monitoring and take preventive action!" 
-        print(f"Rekomendasi: {recom}")
+        recom = InfoRegistry.get_info("disease", "low")
+        # print(f"Rekomendasi: {recom}")
     else:
         # recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
-        recom = "The majority of vegetation is healthy."
-        print(f"{recom}")
+        recom = InfoRegistry.get_info("disease", "healthy")
+        # print(f"{recom}")
 
     stats["rekomendasi"] = recom
 
@@ -892,10 +467,10 @@ def tampilkan_penyakit_petak(gpkg_path, penyakit, output_folder):
     plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}", fontsize=14)
     # plt.show()
     plt.savefig(output_path)
-    
-    
+       
 # Fungsi untuk menghitung sebaran per petak
 def hitung_sebaran_petak(gpkg_path, legend_dict):
+    from path_config import InfoRegistry
     """
     Menghitung sebaran penyakit.
     
@@ -966,11 +541,11 @@ def hitung_sebaran_petak(gpkg_path, legend_dict):
             val_3 = stats.get(labels[2], 0)
             val_ = val_2 + val_3 # gabungan cukup + berlebih
             if val_1 > val_2 and val_1 > val_3:
-                recom = "Increase fertilizer application rate to restore nutrient balance!"
+                recom = InfoRegistry.get_info("nutrient", "deficit")
             elif val_2 > val_1 and val_2 > val_3:
-                recom = "Fertilizer should be applied at a maintenance rate to sustain current nutrient levels without causing accumulation."
+                recom = InfoRegistry.get_info("nutrient", "adequate")
             else:
-                recom = "Reduce or temporarily withhold fertilizer application to prevent nutrient buildup, leaching, and potential environmental impact!"
+                recom = InfoRegistry.get_info("nutrient", "excess")
         
         elif len(labels) == 4: # Penyakit (sehat, ringan, sedang, parah)
             val_3 = stats.get(labels[2], 0)
@@ -978,30 +553,30 @@ def hitung_sebaran_petak(gpkg_path, legend_dict):
             val_ = val_3 + val_4 # gabungan sedang + parah
 
             if val_ > val_1 and val_ > val_2:
-                recom = "High severity level, immediate action required!"
+                recom = InfoRegistry.get_info("disease", "severe")
                 # recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
             elif val_2 > val_1 and val_2 > val_: 
-                recom =  "Perform routine monitoring and take preventive action!"
+                recom =  InfoRegistry.get_info("disease", "low")
                 # recom = "Lakukan pemantauan rutin dan tindakan pencegahan."  
             else:
-                recom = "The majority of vegetation is healthy."
+                recom = InfoRegistry.get_info("disease","healthy")
                 # recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
  
         elif len(labels) == 5: # Air (rentang)
             val_3 = stats.get(labels[2], 0)
             val_4 = stats.get(labels[3], 0) 
             val_5 = stats.get(labels[4], 0) 
-            val_ = val_4 + val_5 # gabungan sedang + parah
+            val_ = val_4 + val_5 
             if val_1 > val_2 + val_3 and val_1 > val_:
-                recom = "Irrigation should be applied only as needed to maintain soil moisture near field capacity and to avoid unnecessary water application."
+                recom = InfoRegistry.get_info("water", "adequate")
             elif val_2 + val_3 > val_ and val_2 + val_3 > val_1:
-                recom = "More frequent irrigation with appropriate water volumes is recommended to restore soil moisture toward field capacity."
+                recom = InfoRegistry.get_info("water", "mid")
             elif val_ > val_2 + val_3 and val_ > val_1:
-                recom = "Immediate irrigation is critically required to restore soil moisture above the permanent wilting threshold. Larger irrigation volumes should be applied promptly to re-establish soil moisture toward field capacity and to prevent irreversible crop stress and yield loss."
+                recom = InfoRegistry.get_info("water", "dry")
         # Simpan hasil per layer ke dictionary utama
         stats["rekomendasi"] = recom
         legend = legend_dict
-
+        
         # Masukkan ke database
         cur.execute("""
         INSERT OR REPLACE INTO app_layer_metadata
@@ -1025,4 +600,3 @@ if __name__ == "__main__":
     koords_verteks = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\Koordinat Vertek"
     hasil_prediksi = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\Deteksi\Hasil_Prediksi.xlsx"
     folder_hasil = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\Deteksi" 
-    buat_petak_sebaran(geotiff_file, hasil_prediksi, koords_verteks, folder_hasil)

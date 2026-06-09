@@ -1,4 +1,5 @@
 from core.logic.modul_utilitas import hitung_sebaran_rumpun, hitung_sebaran_petak
+from path_config import InfoRegistry
 import logging
 logger = logging.getLogger(__name__)
 

@@ -120,3 +120,41 @@ class ModelRegistry:
             AppPaths.SCALERS
             / relative
         )
+    
+class InfoRegistry:
+
+    @staticmethod
+    def load_config():
+
+        with open(
+            AppPaths.CONFIG / "info.json",
+            "r",
+            encoding="utf-8"
+        ) as f:
+
+            return json.load(f)
+        
+    @staticmethod
+    def get_info(name, key):
+
+        config = InfoRegistry.load_config()
+
+        recom = (
+            config["info"]
+            [name]
+            [key]
+        )
+
+        return recom
+    
+    @staticmethod
+    def get_legend(name):
+
+        config = InfoRegistry.load_config()
+
+        legend = (
+            config["legend"]
+            [name]
+        )
+
+        return legend

@@ -1,0 +1,35 @@
+{
+  "legend": {
+    "water": {
+      "path": "water_regression_model.h5"
+    },
+
+    "nutrient": {
+      "path": "nitrogen_classification_model.h5"
+    },
+
+    "disease": {
+      "path": "nitrogen_classification_model.h5"
+    }
+  },
+
+  "info": {
+    "water": {
+      "adequate": "Irrigation should be applied only as needed to maintain soil moisture near field capacity and to avoid unnecessary water application.",
+      "dry": "Immediate irrigation is critically required to restore soil moisture above the permanent wilting threshold. Larger irrigation volumes should be applied promptly to re-establish soil moisture toward field capacity and to prevent irreversible crop stress and yield loss.",
+      "mid": "More frequent irrigation with appropriate water volumes is recommended to restore soil moisture toward field capacity."
+    },
+
+    "nutrient": {
+        "deficit": "Increase fertilizer application rate to restore nutrient balance!",
+        "adequate": "Fertilizer should be applied at a maintenance rate to sustain current nutrient levels without causing accumulation.",
+        "excess": "Reduce or temporarily withhold fertilizer application to prevent nutrient buildup, leaching, and potential environmental impact!"
+    },
+
+    "disease": {
+        "healthy": "The majority of vegetation is healthy.",
+        "low": "Perform routine monitoring and take preventive action!",
+        "severe": "High severity level, immediate action required!"
+    }
+  }
+}
