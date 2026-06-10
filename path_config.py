@@ -20,7 +20,6 @@ class AppPaths:
 
     # External runtime data
     RUNTIME = BASE_DIR / "runtime"
-    CACHE = RUNTIME / "cache"
     CONFIG = RUNTIME / "config"
     LOGS = RUNTIME / "logs"
     MODELS = RUNTIME / "models"
@@ -35,7 +34,6 @@ class AppPaths:
             AppPaths.MODELS,
             AppPaths.SCALERS,
             AppPaths.CONFIG,
-            AppPaths.CACHE,
             AppPaths.LOGS,
             AppPaths.TEMP
         ]

@@ -357,6 +357,7 @@ class MainWindow(QMainWindow):
             self.run_analysis(self.nutrient_ctrl, tif, shp, out)
 
     def closeEvent(self, event):
+        from path_config import AppPaths
         logger.info("Mencoba menutup aplikasi...")
         reply = QMessageBox.question(self, 'Exit', 'Are you sure?',
                                      QMessageBox.StandardButton.Yes |
@@ -370,6 +371,10 @@ class MainWindow(QMainWindow):
                     self.pd.close()
                 if not self.worker_thread.wait(2000):
                     logger.warning("Worker thread tidak merespon interupsi tepat waktu")
+            if AppPaths.TEMP.exists():
+                logger.info("Menghapus cache di temporary folder...")
+                import shutil
+                shutil.rmtree(AppPaths.TEMP)
             logger.info("Cleanup selesai. Aplikasi ditutup")
             event.accept()
         else:

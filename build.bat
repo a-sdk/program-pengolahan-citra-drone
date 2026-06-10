@@ -4,7 +4,7 @@ rmdir /s dist\
 rmdir /s build\
 
 call .venv_stable\Scripts\activate.bat
-
+pause
 pyinstaller ^
 --noconfirm ^
 --windowed ^

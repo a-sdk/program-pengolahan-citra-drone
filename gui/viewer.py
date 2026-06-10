@@ -9,6 +9,7 @@ from PyQt5.QtGui import (
     QTransform, QPainterPath
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QPointF, QEvent
+from path_config import AppPaths
 import geopandas as gpd
 import numpy as np
 import json
@@ -20,6 +21,7 @@ class Viewer(QWidget):
     mouseMoved = pyqtSignal(float, float)
     infoMsg = pyqtSignal(str)
     drawFinished = pyqtSignal(bool, str)
+    OVERVIEW_FACTORS = [2,4,8,16,32]
     def __init__(self, parent=None):
         super().__init__(parent)
         self.main_layout = QVBoxLayout(self)
@@ -52,10 +54,93 @@ class Viewer(QWidget):
         self.viewer.setFocusPolicy(Qt.StrongFocus)
         self.main_layout.addWidget(self.viewer)
         self._zoom = 0
+        self.base_view_scale = None
+
+    def update_transform(self, transform, w, h, out_w, out_h):
+        from rasterio.transform import Affine
+        t1 = transform * Affine.scale(
+            w / out_w,
+            h / out_h   
+        ) 
+        final_transform = QTransform(
+            t1.a, t1.b, 
+            t1.d, t1.e, 
+            t1.c, t1.f
+        )
+        return final_transform
+    
+    def build_overview(self, src, factor): 
+        h, w = src.shape
+        out_h = max(1, h // factor)
+        out_w = max(1, w // factor)
+        if src.count >= 3:
+            data = src.read(
+                [1, 2, 3],
+                out_shape=(3, out_h, out_w)
+            )
+        else:
+            data = src.read(
+                out_shape=(src.count, out_h, out_w)
+            )
+        
+        mask = src.read_masks(
+            1, 
+            out_shape=(out_h, out_w)
+        )
+
+        return data, mask
+
+    def build_pixmap(self, bands, mask, dtype, count, nodata=None, isPrediction=False):
+        alpha = mask.astype(np.uint8)
+
+        if isPrediction:
+            h, w = bands.shape[1:]
+            img = np.zeros((h, w, 4), dtype=np.uint8)
+            img_data = bands[0]
+            colors = {
+                0: [0, 0, 0, 0],
+                1: [0, 128, 0, 255],
+                2: [144, 238, 144, 255],
+                3: [255, 255, 116, 255],
+                4: [215, 25, 28, 255]
+            }
+            for val, color in colors.items():
+                img[img_data == val] = color
+        # Jika bukan hasil prediksi
+        else: 
+            # Normalisasi per band 
+            if dtype == 'uint8':
+                bands = np.clip(bands.astype(np.float32) / 255.0, 0, 1)
+            elif dtype == 'uint16':
+                bands = np.clip(bands.astype(np.float32) / 65535.0, 0, 1)
+
+            # Penanganan Channel (RGB vs Grayscale)
+            if count >= 3:
+                # Ambil 3 band pertama untuk visualisasi RGB
+                img_data = bands[:3]
+                rgb = (np.transpose(img_data, (1, 2, 0)) * 255).astype(np.uint8)
+                img = np.dstack((rgb, alpha))
+
+            else:
+                # Jika hanya 1 atau 2 band, tampilkan sebagai grayscale 
+                gray = (bands[0] * 255).astype(np.uint8)
+                if nodata is not None:
+                    alpha = np.where(bands[0] == nodata, 0, alpha).astype(np.uint8)
+                img = np.dstack((gray, gray, gray, alpha))
+
+        from PyQt5 import sip
+        img = np.ascontiguousarray(img)
+        ptr = sip.voidptr(img.ctypes.data)
+        img_h, img_w = img.shape[:2]
+        qimg = QImage(ptr, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGBA8888)
+        pixmap = QPixmap.fromImage(qimg)
+        return pixmap
 
     def add_raster(self, name, path, isPrediction=False):
         import rasterio as rio
-        
+        filename = name.split(".")[0]
+        cache_dir = AppPaths.TEMP / filename
+        cache_dir.mkdir(parents=True, exist_ok=True)
         logger.info("Membuka raster")
         if path.lower().endswith((".png", ".jpg", ".jpeg")):
             pixmap = QPixmap(path)
@@ -63,6 +148,7 @@ class Viewer(QWidget):
         else:  # GeoTIFF Logic
             isGeoTiff = True
             with rio.open(path) as src:
+                # Metadata raster
                 dtype = src.dtypes[0]
                 count = src.count
                 crs = src.crs
@@ -71,78 +157,34 @@ class Viewer(QWidget):
                 h, w = src.shape
                 t = src.transform
                 pixel_width = abs(t.a) 
-                factor = 10
-                out_h = h // factor
-                out_w = w // factor
-                mask = src.read_masks(1, out_shape=(out_h, out_w))
-                alpha = mask.astype(np.uint8)
-                if count >= 3:
-                    bands = src.read(
-                        [1, 2, 3],
-                        out_shape=(3, out_h, out_w)
+                display_factor = 8
+                # Buat overview
+                for build_factor in self.OVERVIEW_FACTORS:
+                    preview, mask = self.build_overview(src, build_factor)
+                    np.savez_compressed(
+                        str(cache_dir/f"f{build_factor}.npz"),
+                        bands=preview,
+                        mask=mask
                     )
-                if count < 3:
-                    bands = src.read(
-                        out_shape=(count, out_h, out_w)
-                    )
-                from rasterio.transform import Affine
-                t1 = t * Affine.scale(
-                    w / out_w,
-                    h / out_h   
+
+                    build_factor *= 2
+                # Load overview
+                arr = np.load(str(cache_dir/f"f{display_factor}.npz"))
+                bands = arr["bands"]
+                mask = arr["mask"]
+                # Transform overview
+                out_h = bands.shape[1]
+                out_w = bands.shape[2]
+
+                qt_transform = self.update_transform(
+                    t, w, h, out_w, out_h
                 )
 
-                ch = 4
-                qt_transform = QTransform(
-                    t1.a, t1.b, 
-                    t1.d, t1.e, 
-                    t1.c, t1.f
-                    )
-
+                # Cek jenis citra
                 if "PREDICTION" in tag and dtype == 'uint8':
                     isPrediction = True
-
-                if isPrediction:
-                    img = np.zeros((h, w, ch), dtype=np.uint8)
-                    img_data = bands[0]
-                    colors = {
-                        0: [0, 0, 0, 0],
-                        1: [0, 128, 0, 255],
-                        2: [144, 238, 144, 255],
-                        3: [255, 255, 116, 255],
-                        4: [215, 25, 28, 255]
-                    }
-                    for val, color in colors.items():
-                        img[img_data == val] = color
-                # Jika bukan hasil prediksi
-                else: 
-                    # Normalisasi per band 
-                    if dtype == 'uint8':
-                        bands = np.clip(bands.astype(np.float32) / 255.0, 0, 1)
-                    elif dtype == 'uint16':
-                        bands = np.clip(bands.astype(np.float32) / 65535.0, 0, 1)
-
-                    # Penanganan Channel (RGB vs Grayscale)
-                    if count >= 3:
-                        # Ambil 3 band pertama untuk visualisasi RGB
-                        img_data = bands[:3]
-                        rgb = (np.transpose(img_data, (1, 2, 0)) * 255).astype(np.uint8)
-                        img = np.dstack((rgb, alpha))
-
-                    else:
-                        # Jika hanya 1 atau 2 band, tampilkan sebagai grayscale 
-                        gray = (bands[0] * 255).astype(np.uint8)
-                        alpha = np.full((out_h, out_w), 255, dtype=np.uint8)
-                        if mask is not None and np.any(mask):
-                            alpha = mask.astype(np.uint8)
-                        elif nodata is not None:
-                            alpha[bands[0]==nodata] = 0
-                        img = np.dstack((gray, gray, gray, alpha))
-                from PyQt5 import sip
-                img = np.ascontiguousarray(img)
-                ptr = sip.voidptr(img.ctypes.data)
-                img_h, img_w = img.shape[:2]
-                qimg = QImage(ptr, img_w, img_h, img.strides[0], QImage.Format_RGBA8888).copy()
-                pixmap = QPixmap.fromImage(qimg)
+                # Build pixmap
+                pixmap = self.build_pixmap(bands, mask, dtype, count, nodata, isPrediction)
 
         # Assign layer ID
         self._layer_id += 1
@@ -173,13 +215,18 @@ class Viewer(QWidget):
                 "transform": t,
                 "height": h,
                 "width": w,
-                "res": f"{pixel_width:.4f} m ({pixel_width*100:.1f} cm/px)"
+                "res": f"{pixel_width:.4f} m ({pixel_width*100:.1f} cm/px)",
+                "current_factor": display_factor,
+                "cache_dir": str(cache_dir),
+                "is_prediction": isPrediction
             }
+
         self.layer_items[layer_id] = item
         # logger.info(f"{self.layer_items}")
         item.setTransformationMode(Qt.FastTransformation)
         item.setAcceptHoverEvents(False)
         self.fit_to_view()
+        logger.info(f"sceneRect center = {self.scene.sceneRect().center()}")
         return layer_id
     
     def _draw_poly_feature(self, coords, group, color):
@@ -243,8 +290,7 @@ class Viewer(QWidget):
                 self._draw_line_feature(geom.coords, group, color)
             elif geom.geom_type == "Point":
                 self._draw_point_feature(geom.x, geom.y, group, color)
-            self.fit_to_view()
-
+            
     def add_shapefile(self, name, path):
         logger.info("Membuka shapefile")
         self._layer_id += 1
@@ -308,10 +354,81 @@ class Viewer(QWidget):
         if t.m22() > 0:
             self.viewer.scale(1, -1)
 
+    def choose_factor(self, scale):
+        if self.base_view_scale is not None:
+            ratio = scale / self.base_view_scale
+        if ratio < 0.5:
+            return 32
+        elif ratio < 1:
+            return 16
+        elif ratio < 2:
+            return 8
+        elif ratio < 4:
+            return 4
+        else:
+            return 2
+        
+    def reload_overview(self, layer_id, factor):
+        from pathlib import Path
+        info = self.raster_info[layer_id]
+
+        if factor == info["current_factor"]:
+            return
+
+        cache_dir = Path(info["cache_dir"])
+        arr = np.load(str(cache_dir/f"f{factor}.npz"))
+        bands = arr["bands"]
+        mask = arr["mask"]
+
+        pixmap = self.build_pixmap(
+            bands,
+            mask,
+            info["dtype"],
+            info["count"],
+            info["nodata"],
+            info["is_prediction"]
+        )
+        
+        pixmap_transform = self.update_transform(
+            info["transform"], 
+            info["width"], 
+            info["height"], 
+            bands.shape[2],
+            bands.shape[1]
+        )
+
+        item = self.layer_items[layer_id]
+        item.setPixmap(pixmap)
+        item.setTransform(pixmap_transform)
+        info["current_factor"] = factor     
+        logger.info(f"Reload layer {layer_id} -> f{factor} {bands.shape}")
+        logger.info(f"scene bounding = {self.scene.itemsBoundingRect()}")
+        logger.info(f"item rect = {item.boundingRect()}, scene rect = {self.scene.sceneRect()}")
+        logger.info(f"VScroll max = {self.viewer.verticalScrollBar().maximum()}")
+        logger.info(f"HScroll max = {self.viewer.horizontalScrollBar().maximum()}")
+
+    def update_overview_level(self):
+        logger.info(
+            f"ENTER update_overview_level: "
+            f"base={self.base_view_scale}"
+        )
+        scale = self.viewer.transform().m11()
+        if self.base_view_scale is None:
+            self.base_view_scale = scale 
+        if self.base_view_scale == 1:
+            self.base_view_scale *= scale
+        for layer_id, info in self.raster_info.items():
+            if self.base_view_scale is not None:
+                factor = self.choose_factor(scale)    
+            logger.info(f"layer={layer_id}, scale={scale:.4f}, base={self.base_view_scale:.4f}, factor={factor}")
+            if factor != info["current_factor"]:
+                self.reload_overview(layer_id, factor)
+      
     def fit_to_view(self):
         rect = self.scene.itemsBoundingRect()
         self.viewer.fitInView(rect, Qt.KeepAspectRatio)
         self.apply_view_transform()
+        self.update_overview_level()    
 
     def set_pan_mode(self, enabled: bool):
         if enabled:
@@ -322,20 +439,20 @@ class Viewer(QWidget):
             self.viewer.setDragMode(QGraphicsView.DragMode.NoDrag)
 
     def zoom_in(self):
+        self._zoom += 1
         self.viewer.scale(1.25, 1.25)
+        self.update_overview_level()
 
     def zoom_out(self):
+        self._zoom -= 1
         self.viewer.scale(0.8, 0.8)
+        self.update_overview_level()
 
     def wheelEvent(self, event):
         if event.angleDelta().y() > 0:
-            factor = 1.25
-            self._zoom += 1
+            self.zoom_in()
         else:
-            factor = 0.8
-            self._zoom -= 1
-
-        self.viewer.scale(factor, factor)
+            self.zoom_out
 
     def eventFilter(self, source, event):
         if source is self.viewer.viewport() and event.type() == QEvent.Type.MouseMove:
