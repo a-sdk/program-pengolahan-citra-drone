@@ -1,6 +1,11 @@
 # Changelogs
 
 ## Beta version changelogs
+### Versi 0.0.5 - 7 Juni 2026
+* **Pembaruan Fitur & Perbaikan Bug**:
+    * Memperbaiki bug cwd saat freezing.
+    * Menambah fitur layer-based Geopackage.
+    * Memodifikasi pembuatan multipoligon.
 ### Versi 0.0.4 - 25 April 2026
 * **Pembaruan Fitur & Perbaikan Bug**:
     * Mengintegrasikan model kecukupan air.

@@ -30,6 +30,7 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon(str(AppPaths.assets("defaults/textures/icon/edit-image.png"))))
         self.elapsed_sec = 0
         self.time_str = str(0)
+        self.current_crs = "Unknown"
         self.current_msg = "Processing..."
         self.viewer = Viewer(self.containerViewer)
         viewer_layout = QVBoxLayout(self.containerViewer)
@@ -62,6 +63,7 @@ class MainWindow(QMainWindow):
         self.statusBar().addPermanentWidget(self.progress_bar)
         self._connect_signals()
         self.viewer.mouseMoved.connect(self.update_coord_label)
+        self.viewer.infoCRS.connect(self.update_crs_label)
         self.viewer.fit_to_view()
 
         self.dockLayers.setWindowTitle("Layers")
@@ -114,6 +116,8 @@ class MainWindow(QMainWindow):
 
     def _setup_statusbar(self):
         self.coord_label = QLabel("X: -, Y: -")
+        self.crs_label = QLabel("CRS: -")
+        self.statusBar().addPermanentWidget(self.crs_label)
         self.statusBar().addPermanentWidget(self.coord_label)
 
     def _setup_progress_dialog(self):
@@ -141,6 +145,10 @@ class MainWindow(QMainWindow):
 
     def update_coord_label(self, x, y):
         self.coord_label.setText(f"X: {x:.2f}, Y: {y:.2f}")
+
+    def update_crs_label(self, crs):
+        self.crs_label.setText(f"CRS: {crs}")
+        self.current_crs = crs 
 
     def _status_bar_loadfile(self, filename):
         self.statusBar().showMessage(f"Loading: {filename}...", 3000)
@@ -186,7 +194,7 @@ class MainWindow(QMainWindow):
     
     def create_new_shapefile(self):
         logger.info("Action: action_new_shp_layer ditekan")
-        dialog = CreateShapefileDialog(self)
+        dialog = CreateShapefileDialog(self, crs=self.current_crs)
         if dialog.exec_():
             path, dtype, crs = dialog.get_values()
             logger.info(f"Tipe geometri: {dtype}, CRS: {crs}")
@@ -318,6 +326,7 @@ class MainWindow(QMainWindow):
         msg.setInformativeText(f"Duration: {self.time_str}") 
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
+        self.time_str = str(0)
 
     def show_error_msg(self, error_msg):
         self.timer.stop()
@@ -331,6 +340,7 @@ class MainWindow(QMainWindow):
         msg.setInformativeText(str(error_msg)) 
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
+        self.time_str = str(0)
 
     def run_disease_prediction(self):
         logger.info("action_disease_predict ditekan")

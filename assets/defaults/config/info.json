@@ -1,18 +1,4 @@
 {
-  "legend": {
-    "water": {
-      "path": "water_regression_model.h5"
-    },
-
-    "nutrient": {
-      "path": "nitrogen_classification_model.h5"
-    },
-
-    "disease": {
-      "path": "nitrogen_classification_model.h5"
-    }
-  },
-
   "info": {
     "water": {
       "adequate": "Irrigation should be applied only as needed to maintain soil moisture near field capacity and to avoid unnecessary water application.",

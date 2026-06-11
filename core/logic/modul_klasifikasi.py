@@ -117,7 +117,7 @@ def deteksi_penyakit_rumpun(scaler, model, input_folder, output_folder, check_ca
             nodata=0
         )
         output_dests = {}
-        output_folder = f"{output_folder}/Preds_Result/Sebaran_Rumpun"
+        output_folder = f"{output_folder}/Preds_Result"
         os.makedirs(output_folder, exist_ok=True)
         for i, name in enumerate(output_names):
             output_path = os.path.join(output_folder, f"{name}_prediction_map.tif")

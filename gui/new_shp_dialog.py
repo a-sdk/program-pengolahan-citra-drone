@@ -7,12 +7,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 class CreateShapefileDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, crs=None):
         super().__init__(parent)
         uic.loadUi(str(AppPaths.ui("new_shp_dialog.ui")), self)
-
+        self.viewer_crs = crs
         self.setWindowTitle("New Shapefile Layer")
         self.setWindowIcon(QIcon(str(AppPaths.assets("defaults/textures/icon/poly.png"))))
+        self._init_crs()
         self.btn_save_shp.clicked.connect(self._handle_save_shp)
 
     def _handle_save_shp(self):
@@ -24,4 +25,8 @@ class CreateShapefileDialog(QDialog):
         return (self.lineEdit_new_shp.text(), 
                 self.comboBox_geom_type_shp.currentText(), 
                 self.lineEdit_crs_new_shp.text()) 
+    
+    def _init_crs(self):
+        if self.viewer_crs:
+            self.lineEdit_crs_new_shp.setText(self.viewer_crs)
     

@@ -19,9 +19,10 @@ logger = logging.getLogger(__name__)
 
 class Viewer(QWidget):
     mouseMoved = pyqtSignal(float, float)
+    infoCRS = pyqtSignal(str)
     infoMsg = pyqtSignal(str)
     drawFinished = pyqtSignal(bool, str)
-    OVERVIEW_FACTORS = [2,4,8,16,32]
+    OVERVIEW_FACTORS = [1,2,4,8,16,32]
     def __init__(self, parent=None):
         super().__init__(parent)
         self.main_layout = QVBoxLayout(self)
@@ -39,6 +40,7 @@ class Viewer(QWidget):
         self.list_poly = []
         self.isDrawing = False
         self._layer_id = 0
+        self._layer_isTiff = False
         self.raster_info = {}
         self.vector_info = {}
         self.setMouseTracking(True)
@@ -53,8 +55,15 @@ class Viewer(QWidget):
         self.viewer.setStyleSheet("border: none;")
         self.viewer.setFocusPolicy(Qt.StrongFocus)
         self.main_layout.addWidget(self.viewer)
+        self.scene_origin_x = None
+        self.scene_origin_y = None
         self._zoom = 0
         self.base_view_scale = None
+
+    def ensure_scene_origin(self, xmin, ymax):
+        if self.scene_origin_x is None:
+            self.scene_origin_x = xmin
+            self.scene_origin_y = ymax
 
     def update_transform(self, transform, w, h, out_w, out_h):
         from rasterio.transform import Affine
@@ -65,10 +74,10 @@ class Viewer(QWidget):
         final_transform = QTransform(
             t1.a, t1.b, 
             t1.d, t1.e, 
-            t1.c, t1.f
+            t1.c - self.scene_origin_x, t1.f - self.scene_origin_y
         )
         return final_transform
-    
+
     def build_overview(self, src, factor): 
         h, w = src.shape
         out_h = max(1, h // factor)
@@ -147,6 +156,7 @@ class Viewer(QWidget):
             isGeoTiff = False
         else:  # GeoTIFF Logic
             isGeoTiff = True
+            self._layer_isTiff = isGeoTiff
             with rio.open(path) as src:
                 # Metadata raster
                 dtype = src.dtypes[0]
@@ -156,6 +166,7 @@ class Viewer(QWidget):
                 tag = src.tags()
                 h, w = src.shape
                 t = src.transform
+                self.ensure_scene_origin(t.c, t.f)
                 pixel_width = abs(t.a) 
                 display_factor = 8
                 # Buat overview
@@ -225,12 +236,19 @@ class Viewer(QWidget):
         # logger.info(f"{self.layer_items}")
         item.setTransformationMode(Qt.FastTransformation)
         item.setAcceptHoverEvents(False)
+        self.infoCRS.emit(crs.to_string() if crs else "Unknown")
         self.fit_to_view()
         logger.info(f"sceneRect center = {self.scene.sceneRect().center()}")
         return layer_id
     
     def _draw_poly_feature(self, coords, group, color):
-        points = [QPointF(x, y) for x, y in coords]
+        points = [
+            QPointF(
+                x - self.scene_origin_x, 
+                y - self.scene_origin_y
+            ) 
+            for x, y in coords
+        ]
         polygon_item = self.scene.addPolygon(QPolygonF(points))
         pen = QPen(QColor(0, 0, 0, 150))
         pen.setWidth(1)
@@ -241,7 +259,13 @@ class Viewer(QWidget):
 
     def _draw_line_feature(self, coords, group, color):
         path = QPainterPath()
-        points = [QPointF(x, y) for x, y in coords]
+        points = [
+            QPointF(
+                x - self.scene_origin_x,
+                y - self.scene_origin_y
+            ) 
+            for x, y in coords
+        ]
         if points:
             path.moveTo(points[0])
             for pt in points[1:]:
@@ -256,12 +280,19 @@ class Viewer(QWidget):
 
     def _draw_point_feature(self, x, y, group, color):
         r = 0.2
-        point_item = self.scene.addEllipse(x-r, y-r, r*2, r*2)
+        sx = x - self.scene_origin_x
+        sy = y - self.scene_origin_y
+        point_item = self.scene.addEllipse(sx-r, sy-r, r*2, r*2)
         point_item.setPen(QPen(Qt.black, 0))
         point_item.setBrush(QColor(*color))
         group.addToGroup(point_item)
 
     def _add_vector(self, gdf, group, legend_dict=None, class_col=None):
+        self.infoCRS.emit(gdf.crs.to_string() if gdf.crs else "Unknown")
+        self._layer_isTiff = False
+        bounds = gdf.total_bounds
+        xmin, ymin, xmax, ymax = bounds
+        self.ensure_scene_origin(xmin, ymax)
         for _, feature in gdf.iterrows():
             geom = feature.geometry
             color = (255, 255, 116, 80)
@@ -310,6 +341,7 @@ class Viewer(QWidget):
         }
 
         self._add_vector(gdf, group)
+        self.fit_to_view()
         return layer_id
     
     def add_gpkg_layer(self, name, path, layer_name):
@@ -340,6 +372,7 @@ class Viewer(QWidget):
             legend,
             "preds"
         )
+        self.fit_to_view()
         return layer_id
     
     def set_visible(self, layer_id, visible):
@@ -365,8 +398,10 @@ class Viewer(QWidget):
             return 8
         elif ratio < 4:
             return 4
-        else:
+        elif ratio < 8:
             return 2
+        else:
+            return 1
         
     def reload_overview(self, layer_id, factor):
         from pathlib import Path
@@ -428,7 +463,8 @@ class Viewer(QWidget):
         rect = self.scene.itemsBoundingRect()
         self.viewer.fitInView(rect, Qt.KeepAspectRatio)
         self.apply_view_transform()
-        self.update_overview_level()    
+        if self._layer_isTiff == True: 
+            self.update_overview_level()    
 
     def set_pan_mode(self, enabled: bool):
         if enabled:
@@ -458,10 +494,13 @@ class Viewer(QWidget):
         if source is self.viewer.viewport() and event.type() == QEvent.Type.MouseMove:
             # Ambil posisi dan konversi ke scene
             scene_pos = self.viewer.mapToScene(event.pos())
-            x = round(scene_pos.x(), 2)
-            y = round(scene_pos.y(), 2)
-            # print(f"Detected via Filter: {x}, {y}")
-            self.mouseMoved.emit(x, y)
+            if self.scene_origin_x is not None and self.scene_origin_y is not None:
+                world_x = round(scene_pos.x() + self.scene_origin_x, 2)
+                world_y = round(scene_pos.y() + self.scene_origin_y, 2)
+            else:
+                world_x = round(scene_pos.x(), 2)
+                world_y = round(scene_pos.y(), 2)
+            self.mouseMoved.emit(world_x, world_y)
         return super().eventFilter(source, event)
 
     def update_draw_polygon(self):
@@ -487,7 +526,10 @@ class Viewer(QWidget):
             pixel_pos = event.pos()
             scene_pos = self.viewer.mapToScene(pixel_pos)
             self.temp_shp_points.append(scene_pos)
-            coords = (scene_pos.x(), scene_pos.y())
+            if self.scene_origin_x is not None and self.scene_origin_y is not None:
+                world_x = scene_pos.x() + self.scene_origin_x
+                world_y = scene_pos.y() + self.scene_origin_y
+            coords = (world_x, world_y)
             self.geo_coords.append(coords)
             if self.temp_shp_type == "Point":
                 self.finalize_polygon()
