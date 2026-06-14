@@ -1,6 +1,11 @@
 # Changelogs
 
 ## Beta version changelogs
+### Versi 0.0.6 - 11 Juni 2026
+* **Pembaruan Fitur & Perbaikan Bug**:
+    * Menambah fitur overview raster.
+    * Mengoptasi penggunaan memori saat menampilkan raster.
+    * Memperbaiki bug scene-world coordinate.
 ### Versi 0.0.5 - 7 Juni 2026
 * **Pembaruan Fitur & Perbaikan Bug**:
     * Memperbaiki bug cwd saat freezing.
