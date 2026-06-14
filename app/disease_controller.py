@@ -28,6 +28,7 @@ class DiseaseAnalysis:
 
     def run(self, raw_tif_path, shp_path, output_folder, hooks=None):
         result = AnalysisResult()
+        
         def emit_progress(val, msg):
             if hooks and "on_progress" in hooks: hooks["on_progress"](val, msg)
             
