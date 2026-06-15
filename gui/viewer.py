@@ -148,9 +148,10 @@ class Viewer(QWidget):
     def add_raster(self, name, path, isPrediction=False):
         import rasterio as rio
         filename = name.split(".")[0]
-        cache_dir = AppPaths.TEMP / filename
-        cache_dir.mkdir(parents=True, exist_ok=True)
+        temp_dir = AppPaths.TEMP / filename
+        temp_dir.mkdir(parents=True, exist_ok=True)
         logger.info("Membuka raster")
+        logger.info(f"scene_origin = ({self.scene_origin_x}, {self.scene_origin_y})")
         if path.lower().endswith((".png", ".jpg", ".jpeg")):
             pixmap = QPixmap(path)
             isGeoTiff = False
@@ -173,14 +174,14 @@ class Viewer(QWidget):
                 for build_factor in self.OVERVIEW_FACTORS:
                     preview, mask = self.build_overview(src, build_factor)
                     np.savez_compressed(
-                        str(cache_dir/f"f{build_factor}.npz"),
+                        str(temp_dir/f"f{build_factor}.npz"),
                         bands=preview,
                         mask=mask
                     )
 
                     build_factor *= 2
                 # Load overview
-                arr = np.load(str(cache_dir/f"f{display_factor}.npz"))
+                arr = np.load(str(temp_dir/f"f{display_factor}.npz"))
                 bands = arr["bands"]
                 mask = arr["mask"]
                 # Transform overview
@@ -228,7 +229,7 @@ class Viewer(QWidget):
                 "width": w,
                 "res": f"{pixel_width:.4f} m ({pixel_width*100:.1f} cm/px)",
                 "current_factor": display_factor,
-                "cache_dir": str(cache_dir),
+                "cache_dir": str(temp_dir),
                 "is_prediction": isPrediction
             }
 
@@ -239,6 +240,7 @@ class Viewer(QWidget):
         self.infoCRS.emit(crs.to_string() if crs else "Unknown")
         self.fit_to_view()
         logger.info(f"sceneRect center = {self.scene.sceneRect().center()}")
+        logger.info(f"scene_origin = ({self.scene_origin_x}, {self.scene_origin_y})")
         return layer_id
     
     def _draw_poly_feature(self, coords, group, color):
@@ -380,7 +382,18 @@ class Viewer(QWidget):
 
     def remove_layer(self, layer_id):
         item = self.layer_items.pop(layer_id)
-        self.scene.removeItem(item)
+        self.raster_info.pop(layer_id, None)
+        self.vector_info.pop(layer_id, None)
+        if item:
+            self.scene.removeItem(item)
+        logger.info(f"layer_items  : {list(self.layer_items.keys())}")
+        logger.info(f"raster_info  : {list(self.raster_info.keys())}")
+        logger.info(f"vector_info  : {list(self.vector_info.keys())}")
+        if not self.layer_items:
+            self.base_view_scale = None
+            self.scene_origin_x = None
+            self.scene_origin_y = None
+            self.infoCRS.emit("Unknown")
 
     def apply_view_transform(self):
         t = self.viewer.transform()
