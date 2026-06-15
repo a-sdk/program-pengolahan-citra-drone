@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import (
     QTreeWidgetItemIterator, QAbstractItemView, QMenu
 )
 import os
+import shutil
 import logging
 
 logger = logging.getLogger(__name__)
@@ -46,7 +47,6 @@ class LayerPanel(QWidget):
             for lyr in layers:
                 if lyr != "app_layer_metadata":
                     layer_id = self.viewer.add_gpkg_layer(file_name, path, lyr)
-
                     item = QTreeWidgetItem([f"{file_name} | {lyr}"])
                     item.setData(0, Qt.UserRole, layer_id)
                     item.setCheckState(0, Qt.Checked)
@@ -115,12 +115,21 @@ class LayerPanel(QWidget):
         self.layerSelected.emit(layer_id)
         logger.info(f"Layer {layer_id} diklik")
         
-    # Menghapus layer
     def remove_layer(self, item):
         logger.info("Menghapus layer")
-        data = item.data(0, Qt.UserRole)
-        if data:
-            self.viewer.remove_layer(data)
+        layer_id = item.data(0, Qt.UserRole)
+        layer_name = os.path.splitext(item.text(0))[0]
+        if layer_id:
+            try:
+                if layer_name:
+                    from path_config import AppPaths
+                    temp_dir = AppPaths.TEMP / layer_name
+                    if os.path.exists(temp_dir):
+                        shutil.rmtree(str(temp_dir))
+                        # logger.info(f"Folder temp dihapus: {temp_dir}")
+            except Exception as e:
+                logger.error(f"Gagal menghapus: {e}")
+            self.viewer.remove_layer(layer_id)
         parent = item.parent() or self.tree.invisibleRootItem()
         parent.removeChild(item)
 
