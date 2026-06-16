@@ -5,18 +5,48 @@ class Worker(QThread):
     finished_signal = pyqtSignal(object)
     error_signal = pyqtSignal(str)
 
-    def __init__(self, controller, tif, shp, out):
+    def __init__(self, func, *args, **kwargs):
         super().__init__()
-        self.controller = controller
-        self.tif = tif
-        self.shp = shp
-        self.out = out
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
 
     def run(self):
-        hooks = {
-            "on_progress": lambda val, msg: self.progress_signal.emit(val, msg),
-            "on_error": lambda err: self.error_signal.emit(err),
-            "on_finished": lambda result: self.finished_signal.emit(result), 
-            "check_interruption": lambda: self.isInterruptionRequested()
-        }
-        self.controller.run(self.tif, self.shp, self.out, hooks)
+        try:
+            hooks = {
+                "on_progress": lambda val, msg: self.progress_signal.emit(val, msg),
+                "on_error": lambda err: self.error_signal.emit(err), 
+                "check_interruption": lambda: self.isInterruptionRequested()
+            }
+            result = self.func(
+                *self.args,
+                hooks=hooks,
+                **self.kwargs
+            )
+            self.finished_signal.emit(result)
+        except  Exception as e:
+            self.error_signal.emit(str(e))
+
+
+class WorkerHelper:
+
+    def __init__(self, hooks=None):
+        self.hooks = hooks or {}
+
+    def progress(self, val, msg):
+        cb = self.hooks.get("on_progress")
+        if cb:
+            cb(val, msg)
+
+    def error(self, msg):
+        cb = self.hooks.get("on_error")
+        if cb:
+            cb(msg)
+
+    def cancelled(self):
+        cb = self.hooks.get("check_interruption")
+        return cb() if cb else False
+    
+
+
+        

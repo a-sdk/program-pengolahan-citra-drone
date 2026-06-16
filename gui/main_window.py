@@ -28,6 +28,7 @@ class MainWindow(QMainWindow):
         uic.loadUi(str(AppPaths.ui("main_window.ui")), self)
         self.setWindowTitle("mY App")
         self.setWindowIcon(QIcon(str(AppPaths.assets("defaults/textures/icon/edit-image.png"))))
+        self._layer_id = 0
         self.elapsed_sec = 0
         self.time_str = str(0)
         self.current_crs = "Unknown"
@@ -80,8 +81,6 @@ class MainWindow(QMainWindow):
         self.action_layer_panel.setChecked(True)
         self.dockLegend.hide()
         self.action_legend_panel.setChecked(False)
-
-        
 
     def _setup_icons(self):
         icon_tif = QIcon(str(AppPaths.assets("defaults/textures/icon/add_img.png")))
@@ -153,6 +152,30 @@ class MainWindow(QMainWindow):
     def _status_bar_info(self, msg):
         self.statusBar().showMessage(f"{msg}", 3000)
 
+    def start_worker(self, worker, show_progress=True):
+        self.worker_thread = worker
+
+        if show_progress:
+            self._setup_progress_dialog()
+
+            worker.progress_signal.connect(
+                self.handle_progress_dialog
+            )
+
+            worker.progress_signal.connect(
+                self.update_progress_bar
+            )
+
+        worker.error_signal.connect(
+            self.show_error_msg
+        )
+
+        self.pd.canceled.connect(
+            worker.requestInterruption
+        )
+
+        worker.start()
+
     def _connect_signals(self):
         logger.info("Sinyal Action terhubung")
         self.layer_panel.infoMsg.connect(self._status_bar_info)
@@ -173,6 +196,42 @@ class MainWindow(QMainWindow):
         self.action_water_predict.triggered.connect(self.run_water_prediction)
         self.action_nutrient_predict.triggered.connect(self.run_nutrient_prediction)
         # self.action_debug.triggered.connect(self.simulate_finished)
+            
+    def load_raster_layer(self, path):
+        file_name = os.path.basename(path)
+        self._layer_id += 1
+        layer_id = self._layer_id
+        raster_loader = Worker(
+            self.viewer.add_raster,
+            file_name,
+            layer_id,
+            path
+        )
+        raster_loader.finished_signal.connect(
+            self.on_img_loaded
+        )
+        self.start_worker(
+            raster_loader,
+            show_progress=True
+        )
+
+    def load_vector_layer(self, path):
+        file_name = os.path.basename(path)
+        import fiona
+        if path.lower().endswith(".gpkg"):
+            layers = fiona.listlayers(path)
+            for lyr in layers:
+                if lyr != "app_layer_metadata":
+                    self._layer_id += 1
+                    layer_id = self._layer_id
+                    self.viewer.add_gpkg_layer(file_name, layer_id, path, lyr)
+                    layer_name = f"{file_name} | {lyr}"
+                    self.layer_panel.add_layer_item(layer_id, layer_name)
+            return     
+        elif path.lower().endswith((".shp")):
+            self._layer_id += 1
+            self.viewer.add_shapefile(file_name, path)
+            self.layer_panel.add_layer_item(layer_id, file_name)
 
     def open_img_file(self):
         logger.info("Action: open_img ditekan")
@@ -180,15 +239,29 @@ class MainWindow(QMainWindow):
             self, "Open Supported Raster", "", "GeoTIFF (*.tif *.tiff);;Images (*.jpg *.png)"
         )
         if path:
-            self.layer_panel.add_layer(path)
+            self.load_raster_layer(path)
+            self.progress_bar.setVisible(True)
+            self.progress_bar.setValue(0)
+            self.statusBar().showMessage("Ready")
 
     def open_vector_file(self):
         logger.info("Action: open_shp ditekan")
         path, _ = QFileDialog.getOpenFileName(self, "Open Supported Vector", "", "ESRI Shapefile (*.shp);;Geopackage (*.gpkg)")
         
-        if path:      
-            self.layer_panel.add_layer(path)
+        if path:
+            self.load_vector_layer(path)
     
+    def on_img_loaded(self, result):
+        self.timer.stop()
+        self.pd.close()
+
+        name = result["name"]
+        layer_id = result["layer_id"] 
+        img = result["img"]
+        qt_transform = result["img_transform"]
+        self.viewer.display_raster(layer_id, img, qt_transform)
+        self.layer_panel.add_layer_item(layer_id, name)
+
     def create_new_shapefile(self):
         logger.info("Action: action_new_shp_layer ditekan")
         dialog = CreateShapefileDialog(self, crs=self.current_crs)
@@ -273,18 +346,9 @@ class MainWindow(QMainWindow):
 
     def run_analysis(self, controller, tif, shp, out):
         # Inisiasi worker thread
-        self.worker_thread = Worker(controller, tif, shp, out)
-        # Inisiasi progress dialog
-        self._setup_progress_dialog()
-        # Menghubungkan sinyal worker ke progress dialog
-        self.worker_thread.progress_signal.connect(self.handle_progress_dialog)
-        self.worker_thread.progress_signal.connect(self.update_progress_bar)
-        self.worker_thread.finished_signal.connect(self.on_analysis_finished)
-        self.worker_thread.error_signal.connect(self.show_error_msg)
-        # Menghubungkan tombol 'cancel'
-        self.pd.canceled.connect(self.worker_thread.requestInterruption)
-        # Memulai proses
-        self.worker_thread.start()
+        analysis_worker = Worker(controller.run, tif, shp, out)
+        analysis_worker.finished_signal.connect(self.on_analysis_finished)
+        self.start_worker(analysis_worker, show_progress=True)
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(0)
         self.statusBar().showMessage("Ready")
@@ -302,12 +366,12 @@ class MainWindow(QMainWindow):
                 return
             for file in result.prediction_path:
                 try:
-                    self.layer_panel.add_layer(file, isPrediction=True)
+                    self.load_raster_layer(file)
                 except Exception as e:
                     self.show_error_msg(f"{str(e)}")
         else:
             try:
-                self.layer_panel.add_layer(result.prediction_path)
+                self.load_vector_layer(result.prediction_path)
             except Exception as e:
                 self.show_error_msg(f"{str(e)}")
 
@@ -338,6 +402,7 @@ class MainWindow(QMainWindow):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
         self.time_str = str(0)
+        self.statusBar().clearMessage()
 
     def run_disease_prediction(self):
         logger.info("action_disease_predict ditekan")

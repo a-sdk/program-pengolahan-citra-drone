@@ -38,32 +38,13 @@ class LayerPanel(QWidget):
         self.tree.setSelectionMode(QAbstractItemView.SingleSelection)
 
     # Menambah layer
-    def add_layer(self, path, isPrediction=False):
-        import fiona
-        file_name = os.path.basename(path)
-        if path.lower().endswith(".gpkg"):
-            layers = fiona.listlayers(path)
-
-            for lyr in layers:
-                if lyr != "app_layer_metadata":
-                    layer_id = self.viewer.add_gpkg_layer(file_name, path, lyr)
-                    item = QTreeWidgetItem([f"{file_name} | {lyr}"])
-                    item.setData(0, Qt.UserRole, layer_id)
-                    item.setCheckState(0, Qt.Checked)
-                    self.tree.insertTopLevelItem(0, item)
-            return
-        
-        elif path.lower().endswith((".shp")):
-            layer_id = self.viewer.add_shapefile(file_name, path)
-        else:
-            layer_id = self.viewer.add_raster(file_name, path, isPrediction)
-            
-        item = QTreeWidgetItem([file_name])
+    def add_layer_item(self, layer_id, name):
+        item = QTreeWidgetItem([name])
         item.setData(0, Qt.UserRole, layer_id)
         item.setCheckState(0, Qt.Checked)
-        self.tree.insertTopLevelItem(0, item)  
-        self.infoMsg.emit(f"{file_name} loaded.")
-        logger.info(f"Berhasil menambah '{file_name}' dengan ID: {layer_id}")
+        self.tree.insertTopLevelItem(0, item)
+        self.infoMsg.emit(f"{name} loaded.")
+        logger.info(f"Berhasil menambah '{name}' dengan ID: {layer_id}")
 
     # Toggle visibility (checkbox)
     def on_item_changed(self, item):

@@ -8,6 +8,7 @@ from PyQt5.QtGui import (
     QPolygonF, QBrush, QPen, QColor,
     QTransform, QPainterPath
 )
+from gui.worker import WorkerHelper
 from PyQt5.QtCore import Qt, pyqtSignal, QPointF, QEvent
 from path_config import AppPaths
 import geopandas as gpd
@@ -42,7 +43,6 @@ class Viewer(QWidget):
         self.geo_coords = []
         self.list_poly = []
         self.isDrawing = False
-        self._layer_id = 0
         self._layer_isTiff = False
         self.raster_info = {}
         self.vector_info = {}
@@ -117,9 +117,10 @@ class Viewer(QWidget):
 
         return data, mask
 
-    def build_pixmap(self, bands, mask, dtype, count, nodata=None, isPrediction=False):
+    def prepare_raster(self, bands, mask, dtype, count, nodata, isPrediction):
         alpha = mask.astype(np.uint8)
         logger.info(f"bands.nbytes={bands.nbytes/1024**2:.1f} MB")
+        logger.info(f"alpha.nbytes={alpha.nbytes/1024**2:.1f} MB")
         if isPrediction:
             h, w = bands.shape[1:]
             img = np.zeros((h, w, 4), dtype=np.uint8)
@@ -140,27 +141,29 @@ class Viewer(QWidget):
                 # Ambil 3 band pertama untuk visualisasi RGB
                 logger.info("Melakukan transpose...")
                 img_data = bands[:3]
-                rgb = np.transpose((img_data >> 8), (1, 2, 0)).astype(np.uint8) # (np.transpose(img_data, (1, 2, 0)) * 255).astype(np.uint8)
-                del bands
+                rgb = np.transpose((img_data >> 8), (1, 2, 0)).astype(np.uint8) 
+                logger.info(f"rgb.nbytes={rgb.nbytes/1024**2:.1f} MB")
                 # logger.info(f"rgb:{rgb.flags['C_CONTIGUOUS']}")
                 # logger.info(f"rgb:{rgb.flags['OWNDATA']}")
                 img = np.dstack((rgb, alpha))
-                logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
+                del bands
+                del rgb
+                # logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
 
             else:
                 # Jika hanya 1 atau 2 band, tampilkan sebagai grayscale 
                 gray = (bands[0] * 255).astype(np.uint8)
-                del bands
+                logger.info(f"gray.nbytes={gray.nbytes/1024**2:.1f} MB")
                 if nodata is not None:
                     alpha = np.where(bands[0] == nodata, 0, alpha).astype(np.uint8)
                 img = np.dstack((gray, gray, gray, alpha))
-
-        from PyQt5 import sip
-        logger.info(f"rgb.nbytes={rgb.nbytes/1024**2:.1f} MB")
+                del bands
+                del gray
         logger.info(f"img.nbytes={img.nbytes/1024**2:.1f} MB")
-        # logger.info(f"img:{img.flags['C_CONTIGUOUS']}")
-        # logger.info(f"img:{img.flags['OWNDATA']}")
-        img = np.ascontiguousarray(img)
+        return img
+    
+    def display_raster(self, layer_id, img, qt_transform):
+        from PyQt5 import sip
         ptr = sip.voidptr(img.ctypes.data)
         logger.info("Membuat QImage...")
         qimg = QImage(ptr, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGBA8888)
@@ -169,31 +172,42 @@ class Viewer(QWidget):
         logger.info("Membuat QPixmap...")
         pixmap = QPixmap.fromImage(qimg)
         logger.info(f"RAM sebelum del: {process.memory_info().rss / 1024**2:.1f} MB")
-        del rgb
         del img
         del qimg
         import gc
         gc.collect()
         logger.info(f"RAM setelah del: {process.memory_info().rss / 1024**2:.1f} MB")
-        return pixmap
+        # Tambahkan ke Scene
+        item = self.scene.addPixmap(pixmap)
+        item.setTransform(qt_transform)
+        self.layer_items[layer_id] = item
+        # logger.info(f"{self.layer_items}")
+        item.setTransformationMode(Qt.FastTransformation)
+        item.setAcceptHoverEvents(False)
+        self.fit_to_view()
 
-    def add_raster(self, name, path, isPrediction=False):
+    def add_raster(self, name, layer_id, path, hooks=None):
         import rasterio as rio
+        helper = WorkerHelper(hooks)
         filename = name.split(".")[0]
         temp_dir = AppPaths.TEMP / filename
         temp_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
         logger.info("Membuka raster...")
+        helper.progress(20, "Loading raster...")
+        if helper.cancelled(): return None
         if path.lower().endswith((".png", ".jpg", ".jpeg")):
-            pixmap = QPixmap(path)
             isGeoTiff = False
+            return path
+        
         else:  # GeoTIFF Logic
             isGeoTiff = True
             self._layer_isTiff = isGeoTiff
             logger.info("Membaca metadata raster...")
+            helper.progress(45, "Fetching raster metadata...")
+            if helper.cancelled(): return None
             with rio.open(path) as src:
                 # Metadata raster
-                logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
                 dtype = src.dtypes[0]
                 count = src.count
                 crs = src.crs
@@ -201,82 +215,89 @@ class Viewer(QWidget):
                 tag = src.tags()
                 h, w = src.shape
                 t = src.transform
+                has_overview = len(src.overviews(1)) > 0
                 self.ensure_scene_origin(t.c, t.f)
                 pixel_width = abs(t.a) 
                 display_factor = self.choose_display_factor(w)
                 self._factor = display_factor
                 logger.info(f"Display factor: {display_factor}")
-                # Buat overview
-                for build_factor in self.OVERVIEW_FACTORS:
-                    preview, mask = self.build_overview(src, build_factor)
-                    np.savez_compressed(
-                        str(temp_dir/f"f{build_factor}.npz"),
-                        bands=preview,
-                        mask=mask
-                    )
-
-                    build_factor *= 2
-                # Load overview
-                arr = np.load(str(temp_dir/f"f{display_factor}.npz"))
-                bands = arr["bands"]
-                mask = arr["mask"]
-                # Transform overview
-                out_h = bands.shape[1]
-                out_w = bands.shape[2]
-
-                qt_transform = self.update_transform(
-                    t, w, h, out_w, out_h
-                )
-
-                # Cek jenis citra
-                if "PREDICTION" in tag and dtype == 'uint8':
-                    isPrediction = True
-                # Build pixmap
-                pixmap = self.build_pixmap(bands, mask, dtype, count, nodata, isPrediction)
-
-        # Assign layer ID
-        self._layer_id += 1
-        layer_id = self._layer_id
-        # Tambahkan ke Scene
-        item = self.scene.addPixmap(pixmap)
+                # Buat overview jika raster tidak punya
+                if not has_overview:
+                    helper.progress(55, "Generating overview...")
+                    for build_factor in self.OVERVIEW_FACTORS:
+                        if helper.cancelled(): return None
+                        current_build = 1
+                        total_build = len(self.OVERVIEW_FACTORS)
+                        rel_progress = 60 + int((current_build/total_build) * 25)
+                        helper.progress(rel_progress, f"Generating overview {current_build}/{total_build}")
+                        preview, mask = self.build_overview(src, build_factor)
+                        np.savez_compressed(
+                            str(temp_dir/f"f{build_factor}.npz"),
+                            bands=preview,
+                            mask=mask
+                        )
+                        build_factor *= 2
+                        current_build += 1
+            # Load overview
+            helper.progress(85, "Loading overview...")
+            if helper.cancelled(): return None
+            arr = np.load(str(temp_dir/f"f{display_factor}.npz"))
+            bands = arr["bands"]
+            mask = arr["mask"]
+            # Transform overview
+            out_h = bands.shape[1]
+            out_w = bands.shape[2]
+            qt_transform = self.update_transform(
+                t, w, h, out_w, out_h
+            )
+            # Cek jenis citra
+            if "PREDICTION" in tag and dtype == 'uint8':
+                isPrediction = True
+            else:
+                isPrediction = False
+            
+            img = self.prepare_raster(bands, mask, dtype, count, nodata, isPrediction)
+            img = np.ascontiguousarray(img)
+ 
         if isGeoTiff:
-            item.setTransform(qt_transform)
-            # Memeriksa legend dan stats jika citra hasil prediksi
-            legend_dict = {}
-            stats_dict = {}
-            if isPrediction:
-                if "LEGEND" in tag:
-                    legend_dict = json.loads(tag.get("LEGEND", "{}"))
-                if "STATS" in tag:
-                    stats_dict = json.loads(tag.get("STATS", "{}"))
-
-            # Simpan info raster
-            self.raster_info[layer_id] = {
-                "name": name,
-                "path": path,
-                "legend": legend_dict,
-                "stats": stats_dict,
-                "dtype": str(dtype),
-                "crs": crs.to_string() if crs else "Non-Georeferenced",
-                "count": count,
-                "nodata": nodata,
-                "transform": t,
-                "height": h,
-                "width": w,
-                "res": f"{pixel_width:.4f} m ({pixel_width*100:.1f} cm/px)",
-                "current_factor": display_factor,
-                "base_factor": display_factor,
-                "cache_dir": str(temp_dir),
-                "is_prediction": isPrediction
-            }
-
-        self.layer_items[layer_id] = item
-        # logger.info(f"{self.layer_items}")
-        item.setTransformationMode(Qt.FastTransformation)
-        item.setAcceptHoverEvents(False)
+                # Memeriksa legend dan stats jika citra hasil prediksi
+                legend_dict = {}
+                stats_dict = {}
+                if isPrediction:
+                    if "LEGEND" in tag:
+                        legend_dict = json.loads(tag.get("LEGEND", "{}"))
+                    if "STATS" in tag:
+                        stats_dict = json.loads(tag.get("STATS", "{}"))
+                helper.progress(95, "Saving raster metadata...")
+                if helper.cancelled(): return None
+                # Simpan info raster
+                self.raster_info[layer_id] = {
+                    "name": name,
+                    "path": path,
+                    "legend": legend_dict,
+                    "stats": stats_dict,
+                    "dtype": str(dtype),
+                    "crs": crs.to_string() if crs else "Non-Georeferenced",
+                    "count": count,
+                    "nodata": nodata,
+                    "transform": t,
+                    "height": h,
+                    "width": w,
+                    "res": f"{pixel_width:.4f} m ({pixel_width*100:.1f} cm/px)",
+                    "current_factor": display_factor,
+                    "base_factor": display_factor,
+                    "cache_dir": str(temp_dir),
+                    "is_prediction": isPrediction
+                }
         self.infoCRS.emit(crs.to_string() if crs else "Unknown")
         self.fit_to_view()
-        return layer_id
+        helper.progress(100, "Done")
+        return {
+            "name": name,
+            "layer_id": layer_id,
+            "img": img,
+            "img_transform": qt_transform
+        }
     
     def _draw_poly_feature(self, coords, group, color):
         points = [
@@ -358,10 +379,8 @@ class Viewer(QWidget):
             elif geom.geom_type == "Point":
                 self._draw_point_feature(geom.x, geom.y, group, color)
             
-    def add_shapefile(self, name, path):
+    def add_shapefile(self, name, layer_id, path):
         logger.info("Membuka shapefile")
-        self._layer_id += 1
-        layer_id = self._layer_id
         gdf = gpd.read_file(path)
         group = QGraphicsItemGroup()
         self.scene.addItem(group)
@@ -378,13 +397,10 @@ class Viewer(QWidget):
 
         self._add_vector(gdf, group)
         self.fit_to_view()
-        return layer_id
-    
-    def add_gpkg_layer(self, name, path, layer_name):
+        
+    def add_gpkg_layer(self, name, layer_id, path, layer_name):
         logger.info(f"Membuka GPKG: {layer_name}")
         gdf = gpd.read_file(path, layer=layer_name)
-        self._layer_id += 1
-        layer_id = self._layer_id
         legend, stats = self.read_gpkg_metadata(path, layer_name)
         group = QGraphicsItemGroup()
         self.scene.addItem(group)
@@ -409,8 +425,7 @@ class Viewer(QWidget):
             "preds"
         )
         self.fit_to_view()
-        return layer_id
-    
+        
     def set_visible(self, layer_id, visible):
         self.layer_items[layer_id].setVisible(visible)
 
@@ -464,7 +479,7 @@ class Viewer(QWidget):
         bands = arr["bands"]
         mask = arr["mask"]
 
-        pixmap = self.build_pixmap(
+        img = self.prepare_raster(
             bands,
             mask,
             info["dtype"],
@@ -481,11 +496,7 @@ class Viewer(QWidget):
             bands.shape[1]
         )
 
-        item = self.layer_items[layer_id]
-        logger.info("Memperbarui pixmap...")
-        item.setPixmap(pixmap)
-        logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
-        item.setTransform(pixmap_transform)
+        self.display_raster(layer_id, img, pixmap_transform)
         info["current_factor"] = factor     
         logger.info(f"Reload layer {layer_id} -> f{factor} {bands.shape}")
         # logger.info(f"scene bounding = {self.scene.itemsBoundingRect()}")
@@ -532,7 +543,7 @@ class Viewer(QWidget):
 
     def zoom_in(self):
         self._zoom += 1
-        self.viewer.scale(1.25, 1.25)
+        self.viewer.scale(1.05, 1.05)
         self.update_overview_level()
 
     def zoom_out(self):
