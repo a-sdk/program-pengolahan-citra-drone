@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class LayerPanel(QWidget):
-    fileLoaded = pyqtSignal(str)
+    infoMsg = pyqtSignal(str)
     layerSelected = pyqtSignal(int)
 
     def __init__(self, parent, viewer):
@@ -62,7 +62,7 @@ class LayerPanel(QWidget):
         item.setData(0, Qt.UserRole, layer_id)
         item.setCheckState(0, Qt.Checked)
         self.tree.insertTopLevelItem(0, item)  
-        self.fileLoaded.emit(file_name)  
+        self.infoMsg.emit(f"{file_name} loaded.")
         logger.info(f"Berhasil menambah '{file_name}' dengan ID: {layer_id}")
 
     # Toggle visibility (checkbox)
@@ -132,6 +132,7 @@ class LayerPanel(QWidget):
             self.viewer.remove_layer(layer_id)
         parent = item.parent() or self.tree.invisibleRootItem()
         parent.removeChild(item)
+        self.infoMsg.emit(f"{item.text(0)} removed.")
 
     # Properties layer
     def _show_properties(self, item):

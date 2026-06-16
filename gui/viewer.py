@@ -58,7 +58,19 @@ class Viewer(QWidget):
         self.scene_origin_x = None
         self.scene_origin_y = None
         self._zoom = 0
+        self._factor = 0
         self.base_view_scale = None
+
+    def choose_display_factor(self, width):
+        if width >= 10000:
+            factor = 32
+        elif width > 8000:
+            factor = 16
+        elif width > 5000:
+            factor = 8
+        else:
+            factor = 4
+        return factor
 
     def ensure_scene_origin(self, xmin, ymax):
         if self.scene_origin_x is None:
@@ -151,7 +163,6 @@ class Viewer(QWidget):
         temp_dir = AppPaths.TEMP / filename
         temp_dir.mkdir(parents=True, exist_ok=True)
         logger.info("Membuka raster")
-        logger.info(f"scene_origin = ({self.scene_origin_x}, {self.scene_origin_y})")
         if path.lower().endswith((".png", ".jpg", ".jpeg")):
             pixmap = QPixmap(path)
             isGeoTiff = False
@@ -169,7 +180,9 @@ class Viewer(QWidget):
                 t = src.transform
                 self.ensure_scene_origin(t.c, t.f)
                 pixel_width = abs(t.a) 
-                display_factor = 8
+                display_factor = self.choose_display_factor(w)
+                self._factor = display_factor
+                logger.info(f"Display factor: {display_factor}")
                 # Buat overview
                 for build_factor in self.OVERVIEW_FACTORS:
                     preview, mask = self.build_overview(src, build_factor)
@@ -229,6 +242,7 @@ class Viewer(QWidget):
                 "width": w,
                 "res": f"{pixel_width:.4f} m ({pixel_width*100:.1f} cm/px)",
                 "current_factor": display_factor,
+                "base_factor": display_factor,
                 "cache_dir": str(temp_dir),
                 "is_prediction": isPrediction
             }
@@ -239,8 +253,6 @@ class Viewer(QWidget):
         item.setAcceptHoverEvents(False)
         self.infoCRS.emit(crs.to_string() if crs else "Unknown")
         self.fit_to_view()
-        logger.info(f"sceneRect center = {self.scene.sceneRect().center()}")
-        logger.info(f"scene_origin = ({self.scene_origin_x}, {self.scene_origin_y})")
         return layer_id
     
     def _draw_poly_feature(self, coords, group, color):
@@ -291,7 +303,6 @@ class Viewer(QWidget):
 
     def _add_vector(self, gdf, group, legend_dict=None, class_col=None):
         self.infoCRS.emit(gdf.crs.to_string() if gdf.crs else "Unknown")
-        self._layer_isTiff = False
         bounds = gdf.total_bounds
         xmin, ymin, xmax, ymax = bounds
         self.ensure_scene_origin(xmin, ymax)
@@ -386,9 +397,9 @@ class Viewer(QWidget):
         self.vector_info.pop(layer_id, None)
         if item:
             self.scene.removeItem(item)
-        logger.info(f"layer_items  : {list(self.layer_items.keys())}")
-        logger.info(f"raster_info  : {list(self.raster_info.keys())}")
-        logger.info(f"vector_info  : {list(self.vector_info.keys())}")
+        # logger.info(f"layer_items  : {list(self.layer_items.keys())}")
+        # logger.info(f"raster_info  : {list(self.raster_info.keys())}")
+        # logger.info(f"vector_info  : {list(self.vector_info.keys())}")
         if not self.layer_items:
             self.base_view_scale = None
             self.scene_origin_x = None
@@ -400,21 +411,23 @@ class Viewer(QWidget):
         if t.m22() > 0:
             self.viewer.scale(1, -1)
 
-    def choose_factor(self, scale):
-        if self.base_view_scale is not None:
-            ratio = scale / self.base_view_scale
-        if ratio < 0.5:
-            return 32
-        elif ratio < 1:
-            return 16
-        elif ratio < 2:
-            return 8
-        elif ratio < 4:
-            return 4
-        elif ratio < 8:
-            return 2
+    def choose_factor(self, base_factor, ratio):
+        import math
+        if ratio >=1:
+            zoom_steps = math.ceil(math.log2(ratio))
         else:
-            return 1
+            zoom_steps = -math.ceil(math.log2(1/ratio))   
+        steps = {
+            1: 0,
+            2: 1,
+            4: 2,
+            8: 3,
+            16: 4,
+            32: 5
+        }
+        level = steps[base_factor] - zoom_steps
+        level = max(0, min(5, level))
+        return [1, 2, 4, 8, 16, 32][level]
         
     def reload_overview(self, layer_id, factor):
         from pathlib import Path
@@ -450,10 +463,10 @@ class Viewer(QWidget):
         item.setTransform(pixmap_transform)
         info["current_factor"] = factor     
         logger.info(f"Reload layer {layer_id} -> f{factor} {bands.shape}")
-        logger.info(f"scene bounding = {self.scene.itemsBoundingRect()}")
-        logger.info(f"item rect = {item.boundingRect()}, scene rect = {self.scene.sceneRect()}")
-        logger.info(f"VScroll max = {self.viewer.verticalScrollBar().maximum()}")
-        logger.info(f"HScroll max = {self.viewer.horizontalScrollBar().maximum()}")
+        # logger.info(f"scene bounding = {self.scene.itemsBoundingRect()}")
+        # logger.info(f"item rect = {item.boundingRect()}, scene rect = {self.scene.sceneRect()}")
+        # logger.info(f"VScroll max = {self.viewer.verticalScrollBar().maximum()}")
+        # logger.info(f"HScroll max = {self.viewer.horizontalScrollBar().maximum()}")
 
     def update_overview_level(self):
         logger.info(
@@ -465,19 +478,24 @@ class Viewer(QWidget):
             self.base_view_scale = scale 
         if self.base_view_scale == 1:
             self.base_view_scale *= scale
+        zoom_ratio = scale // self.base_view_scale
         for layer_id, info in self.raster_info.items():
-            if self.base_view_scale is not None:
-                factor = self.choose_factor(scale)    
-            logger.info(f"layer={layer_id}, scale={scale:.4f}, base={self.base_view_scale:.4f}, factor={factor}")
-            if factor != info["current_factor"]:
-                self.reload_overview(layer_id, factor)
+            base_factor = info["base_factor"]
+            current_factor = self.choose_factor(base_factor, zoom_ratio)    
+            logger.info(
+                f"layer={layer_id}, scale={scale:.4f},"
+                f"base={self.base_view_scale:.4f}, factor={current_factor}"
+                )
+            if current_factor != info["current_factor"]:
+                self.reload_overview(layer_id, current_factor)
       
     def fit_to_view(self):
         rect = self.scene.itemsBoundingRect()
         self.viewer.fitInView(rect, Qt.KeepAspectRatio)
         self.apply_view_transform()
         if self._layer_isTiff == True: 
-            self.update_overview_level()    
+            self.update_overview_level()
+            self._layer_isTiff = False  
 
     def set_pan_mode(self, enabled: bool):
         if enabled:
@@ -534,7 +552,7 @@ class Viewer(QWidget):
 
     def mousePressEvent(self, event):
         if self.isDrawing and event.button() == Qt.MouseButton.LeftButton:
-            logger.info("Mode gambar: klik kiri")
+            # logger.info("Mode gambar: klik kiri")
             # Tambah titik sudut
             pixel_pos = event.pos()
             scene_pos = self.viewer.mapToScene(pixel_pos)
@@ -550,7 +568,7 @@ class Viewer(QWidget):
                 self.update_draw_polygon()
             
         elif self.isDrawing and event.button() == Qt.MouseButton.RightButton:
-            logger.info("Mode gambar: klik kanan")
+            # logger.info("Mode gambar: klik kanan")
             num_points = len(self.temp_shp_points)
             if self.temp_shp_type == "Polygon" and num_points < 3:
                 self.infoMsg.emit("Polygon require 3 or more points!")

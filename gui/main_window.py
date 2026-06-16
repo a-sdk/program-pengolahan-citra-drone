@@ -150,15 +150,12 @@ class MainWindow(QMainWindow):
         self.crs_label.setText(f"CRS: {crs}")
         self.current_crs = crs 
 
-    def _status_bar_loadfile(self, filename):
-        self.statusBar().showMessage(f"Loading: {filename}...", 3000)
-
     def _status_bar_info(self, msg):
         self.statusBar().showMessage(f"{msg}", 3000)
 
     def _connect_signals(self):
         logger.info("Sinyal Action terhubung")
-        self.layer_panel.fileLoaded.connect(self._status_bar_loadfile)
+        self.layer_panel.infoMsg.connect(self._status_bar_info)
         self.layer_panel.layerSelected.connect(self.update_legend_from_layer)
         self.viewer.infoMsg.connect(self._status_bar_info)
         self.viewer.drawFinished.connect(self.draw_shp_finished)
