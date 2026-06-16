@@ -43,7 +43,6 @@ class Viewer(QWidget):
         self.geo_coords = []
         self.list_poly = []
         self.isDrawing = False
-        self._layer_isTiff = False
         self.raster_info = {}
         self.vector_info = {}
         self.setMouseTracking(True)
@@ -94,7 +93,6 @@ class Viewer(QWidget):
         return final_transform
 
     def build_overview(self, src, factor): 
-        logger.info("Membuat overview...")
         h, w = src.shape
         out_h = max(1, h // factor)
         out_w = max(1, w // factor)
@@ -103,12 +101,12 @@ class Viewer(QWidget):
                 [1, 2, 3],
                 out_shape=(3, out_h, out_w)
             )
-            logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
+            # logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
         else:
             data = src.read(
                 out_shape=(src.count, out_h, out_w)
             )
-            logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
+            # logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
         
         mask = src.read_masks(
             1, 
@@ -119,8 +117,8 @@ class Viewer(QWidget):
 
     def prepare_raster(self, bands, mask, dtype, count, nodata, isPrediction):
         alpha = mask.astype(np.uint8)
-        logger.info(f"bands.nbytes={bands.nbytes/1024**2:.1f} MB")
-        logger.info(f"alpha.nbytes={alpha.nbytes/1024**2:.1f} MB")
+        # logger.info(f"bands.nbytes={bands.nbytes/1024**2:.1f} MB")
+        # logger.info(f"alpha.nbytes={alpha.nbytes/1024**2:.1f} MB")
         if isPrediction:
             h, w = bands.shape[1:]
             img = np.zeros((h, w, 4), dtype=np.uint8)
@@ -139,10 +137,10 @@ class Viewer(QWidget):
             # Penanganan Channel (RGB vs Grayscale)
             if count >= 3 and dtype == 'uint16':
                 # Ambil 3 band pertama untuk visualisasi RGB
-                logger.info("Melakukan transpose...")
+                # logger.info("Melakukan transpose...")
                 img_data = bands[:3]
                 rgb = np.transpose((img_data >> 8), (1, 2, 0)).astype(np.uint8) 
-                logger.info(f"rgb.nbytes={rgb.nbytes/1024**2:.1f} MB")
+                # logger.info(f"rgb.nbytes={rgb.nbytes/1024**2:.1f} MB")
                 # logger.info(f"rgb:{rgb.flags['C_CONTIGUOUS']}")
                 # logger.info(f"rgb:{rgb.flags['OWNDATA']}")
                 img = np.dstack((rgb, alpha))
@@ -153,30 +151,30 @@ class Viewer(QWidget):
             else:
                 # Jika hanya 1 atau 2 band, tampilkan sebagai grayscale 
                 gray = (bands[0] * 255).astype(np.uint8)
-                logger.info(f"gray.nbytes={gray.nbytes/1024**2:.1f} MB")
+                # logger.info(f"gray.nbytes={gray.nbytes/1024**2:.1f} MB")
                 if nodata is not None:
                     alpha = np.where(bands[0] == nodata, 0, alpha).astype(np.uint8)
                 img = np.dstack((gray, gray, gray, alpha))
                 del bands
                 del gray
-        logger.info(f"img.nbytes={img.nbytes/1024**2:.1f} MB")
+        # logger.info(f"img.nbytes={img.nbytes/1024**2:.1f} MB")
         return img
     
-    def display_raster(self, layer_id, img, qt_transform):
+    def display_raster(self, layer_id, img, qt_transform, init_view=False):
         from PyQt5 import sip
         ptr = sip.voidptr(img.ctypes.data)
         logger.info("Membuat QImage...")
         qimg = QImage(ptr, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGBA8888)
-        logger.info(f"qimg.inbytes={qimg.sizeInBytes()/1024**2:.1f} MB")
-        logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
+        # logger.info(f"qimg.inbytes={qimg.sizeInBytes()/1024**2:.1f} MB")
+        # logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
         logger.info("Membuat QPixmap...")
         pixmap = QPixmap.fromImage(qimg)
-        logger.info(f"RAM sebelum del: {process.memory_info().rss / 1024**2:.1f} MB")
+        # logger.info(f"RAM sebelum del: {process.memory_info().rss / 1024**2:.1f} MB")
         del img
         del qimg
         import gc
         gc.collect()
-        logger.info(f"RAM setelah del: {process.memory_info().rss / 1024**2:.1f} MB")
+        # logger.info(f"RAM setelah del: {process.memory_info().rss / 1024**2:.1f} MB")
         # Tambahkan ke Scene
         item = self.scene.addPixmap(pixmap)
         item.setTransform(qt_transform)
@@ -184,7 +182,8 @@ class Viewer(QWidget):
         # logger.info(f"{self.layer_items}")
         item.setTransformationMode(Qt.FastTransformation)
         item.setAcceptHoverEvents(False)
-        self.fit_to_view()
+        if init_view:
+            self.fit_to_view()
 
     def add_raster(self, name, layer_id, path, hooks=None):
         import rasterio as rio
@@ -202,7 +201,6 @@ class Viewer(QWidget):
         
         else:  # GeoTIFF Logic
             isGeoTiff = True
-            self._layer_isTiff = isGeoTiff
             logger.info("Membaca metadata raster...")
             helper.progress(45, "Fetching raster metadata...")
             if helper.cancelled(): return None
@@ -224,9 +222,9 @@ class Viewer(QWidget):
                 # Buat overview jika raster tidak punya
                 if not has_overview:
                     helper.progress(55, "Generating overview...")
+                    current_build = 1
                     for build_factor in self.OVERVIEW_FACTORS:
                         if helper.cancelled(): return None
-                        current_build = 1
                         total_build = len(self.OVERVIEW_FACTORS)
                         rel_progress = 60 + int((current_build/total_build) * 25)
                         helper.progress(rel_progress, f"Generating overview {current_build}/{total_build}")
@@ -496,7 +494,7 @@ class Viewer(QWidget):
             bands.shape[1]
         )
 
-        self.display_raster(layer_id, img, pixmap_transform)
+        self.display_raster(layer_id, img, pixmap_transform, init_view=False)
         info["current_factor"] = factor     
         logger.info(f"Reload layer {layer_id} -> f{factor} {bands.shape}")
         # logger.info(f"scene bounding = {self.scene.itemsBoundingRect()}")
@@ -514,7 +512,7 @@ class Viewer(QWidget):
             self.base_view_scale = scale 
         if self.base_view_scale == 1:
             self.base_view_scale *= scale
-        zoom_ratio = scale // self.base_view_scale
+        zoom_ratio = scale / self.base_view_scale
         for layer_id, info in self.raster_info.items():
             base_factor = info["base_factor"]
             current_factor = self.choose_factor(base_factor, zoom_ratio)    
@@ -529,9 +527,7 @@ class Viewer(QWidget):
         rect = self.scene.itemsBoundingRect()
         self.viewer.fitInView(rect, Qt.KeepAspectRatio)
         self.apply_view_transform()
-        if self._layer_isTiff == True: 
-            self.update_overview_level()
-            self._layer_isTiff = False  
+ 
 
     def set_pan_mode(self, enabled: bool):
         if enabled:
@@ -555,7 +551,7 @@ class Viewer(QWidget):
         if event.angleDelta().y() > 0:
             self.zoom_in()
         else:
-            self.zoom_out
+            self.zoom_out()
 
     def eventFilter(self, source, event):
         if source is self.viewer.viewport() and event.type() == QEvent.Type.MouseMove:

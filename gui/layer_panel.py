@@ -97,8 +97,8 @@ class LayerPanel(QWidget):
         logger.info(f"Layer {layer_id} diklik")
         
     def remove_layer(self, item):
-        logger.info("Menghapus layer")
         layer_id = item.data(0, Qt.UserRole)
+        logger.info(f"Menghapus layer {layer_id}")
         layer_name = os.path.splitext(item.text(0))[0]
         if layer_id:
             try:

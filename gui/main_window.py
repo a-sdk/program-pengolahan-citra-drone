@@ -152,10 +152,10 @@ class MainWindow(QMainWindow):
     def _status_bar_info(self, msg):
         self.statusBar().showMessage(f"{msg}", 3000)
 
-    def start_worker(self, worker, show_progress=True):
+    def start_worker(self, worker, show_progress=False):
         self.worker_thread = worker
 
-        if show_progress:
+        if show_progress == True:
             self._setup_progress_dialog()
 
             worker.progress_signal.connect(
@@ -230,7 +230,8 @@ class MainWindow(QMainWindow):
             return     
         elif path.lower().endswith((".shp")):
             self._layer_id += 1
-            self.viewer.add_shapefile(file_name, path)
+            layer_id = self._layer_id
+            self.viewer.add_shapefile(file_name, layer_id, path)
             self.layer_panel.add_layer_item(layer_id, file_name)
 
     def open_img_file(self):
@@ -259,7 +260,7 @@ class MainWindow(QMainWindow):
         layer_id = result["layer_id"] 
         img = result["img"]
         qt_transform = result["img_transform"]
-        self.viewer.display_raster(layer_id, img, qt_transform)
+        self.viewer.display_raster(layer_id, img, qt_transform, init_view=True)
         self.layer_panel.add_layer_item(layer_id, name)
 
     def create_new_shapefile(self):
