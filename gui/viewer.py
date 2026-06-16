@@ -13,9 +13,12 @@ from path_config import AppPaths
 import geopandas as gpd
 import numpy as np
 import json
+import os
 import logging
+import psutil 
 
 logger = logging.getLogger(__name__)
+process = psutil.Process(os.getpid())
 
 class Viewer(QWidget):
     mouseMoved = pyqtSignal(float, float)
@@ -60,7 +63,7 @@ class Viewer(QWidget):
         self._zoom = 0
         self._factor = 0
         self.base_view_scale = None
-
+        
     def choose_display_factor(self, width):
         if width >= 10000:
             factor = 32
@@ -91,6 +94,7 @@ class Viewer(QWidget):
         return final_transform
 
     def build_overview(self, src, factor): 
+        logger.info("Membuat overview...")
         h, w = src.shape
         out_h = max(1, h // factor)
         out_w = max(1, w // factor)
@@ -99,10 +103,12 @@ class Viewer(QWidget):
                 [1, 2, 3],
                 out_shape=(3, out_h, out_w)
             )
+            logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
         else:
             data = src.read(
                 out_shape=(src.count, out_h, out_w)
             )
+            logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
         
         mask = src.read_masks(
             1, 
@@ -113,7 +119,7 @@ class Viewer(QWidget):
 
     def build_pixmap(self, bands, mask, dtype, count, nodata=None, isPrediction=False):
         alpha = mask.astype(np.uint8)
-
+        logger.info(f"bands.nbytes={bands.nbytes/1024**2:.1f} MB")
         if isPrediction:
             h, w = bands.shape[1:]
             img = np.zeros((h, w, 4), dtype=np.uint8)
@@ -129,32 +135,46 @@ class Viewer(QWidget):
                 img[img_data == val] = color
         # Jika bukan hasil prediksi
         else: 
-            # Normalisasi per band 
-            if dtype == 'uint8':
-                bands = np.clip(bands.astype(np.float32) / 255.0, 0, 1)
-            elif dtype == 'uint16':
-                bands = np.clip(bands.astype(np.float32) / 65535.0, 0, 1)
-
             # Penanganan Channel (RGB vs Grayscale)
-            if count >= 3:
+            if count >= 3 and dtype == 'uint16':
                 # Ambil 3 band pertama untuk visualisasi RGB
+                logger.info("Melakukan transpose...")
                 img_data = bands[:3]
-                rgb = (np.transpose(img_data, (1, 2, 0)) * 255).astype(np.uint8)
+                rgb = np.transpose((img_data >> 8), (1, 2, 0)).astype(np.uint8) # (np.transpose(img_data, (1, 2, 0)) * 255).astype(np.uint8)
+                del bands
+                # logger.info(f"rgb:{rgb.flags['C_CONTIGUOUS']}")
+                # logger.info(f"rgb:{rgb.flags['OWNDATA']}")
                 img = np.dstack((rgb, alpha))
+                logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
 
             else:
                 # Jika hanya 1 atau 2 band, tampilkan sebagai grayscale 
                 gray = (bands[0] * 255).astype(np.uint8)
+                del bands
                 if nodata is not None:
                     alpha = np.where(bands[0] == nodata, 0, alpha).astype(np.uint8)
                 img = np.dstack((gray, gray, gray, alpha))
 
         from PyQt5 import sip
+        logger.info(f"rgb.nbytes={rgb.nbytes/1024**2:.1f} MB")
+        logger.info(f"img.nbytes={img.nbytes/1024**2:.1f} MB")
+        # logger.info(f"img:{img.flags['C_CONTIGUOUS']}")
+        # logger.info(f"img:{img.flags['OWNDATA']}")
         img = np.ascontiguousarray(img)
         ptr = sip.voidptr(img.ctypes.data)
-        img_h, img_w = img.shape[:2]
+        logger.info("Membuat QImage...")
         qimg = QImage(ptr, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGBA8888)
+        logger.info(f"qimg.inbytes={qimg.sizeInBytes()/1024**2:.1f} MB")
+        logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
+        logger.info("Membuat QPixmap...")
         pixmap = QPixmap.fromImage(qimg)
+        logger.info(f"RAM sebelum del: {process.memory_info().rss / 1024**2:.1f} MB")
+        del rgb
+        del img
+        del qimg
+        import gc
+        gc.collect()
+        logger.info(f"RAM setelah del: {process.memory_info().rss / 1024**2:.1f} MB")
         return pixmap
 
     def add_raster(self, name, path, isPrediction=False):
@@ -162,15 +182,18 @@ class Viewer(QWidget):
         filename = name.split(".")[0]
         temp_dir = AppPaths.TEMP / filename
         temp_dir.mkdir(parents=True, exist_ok=True)
-        logger.info("Membuka raster")
+        logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
+        logger.info("Membuka raster...")
         if path.lower().endswith((".png", ".jpg", ".jpeg")):
             pixmap = QPixmap(path)
             isGeoTiff = False
         else:  # GeoTIFF Logic
             isGeoTiff = True
             self._layer_isTiff = isGeoTiff
+            logger.info("Membaca metadata raster...")
             with rio.open(path) as src:
                 # Metadata raster
+                logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
                 dtype = src.dtypes[0]
                 count = src.count
                 crs = src.crs
@@ -459,7 +482,9 @@ class Viewer(QWidget):
         )
 
         item = self.layer_items[layer_id]
+        logger.info("Memperbarui pixmap...")
         item.setPixmap(pixmap)
+        logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
         item.setTransform(pixmap_transform)
         info["current_factor"] = factor     
         logger.info(f"Reload layer {layer_id} -> f{factor} {bands.shape}")
