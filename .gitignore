@@ -14,4 +14,4 @@ runtime/
 temp/
 *.tif
 *.jpg
-
+tester.py

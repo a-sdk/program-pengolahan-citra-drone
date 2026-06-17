@@ -6,10 +6,10 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import (
     QPixmap, QImage, QPainter, 
     QPolygonF, QBrush, QPen, QColor,
-    QTransform, QPainterPath
+    QTransform, QPainterPath, QPixmapCache
 )
 from gui.worker import WorkerHelper
-from PyQt5.QtCore import Qt, pyqtSignal, QPointF, QEvent
+from PyQt5.QtCore import Qt, pyqtSignal, QPointF, QEvent, QTimer
 from path_config import AppPaths
 import geopandas as gpd
 import numpy as np
@@ -26,7 +26,7 @@ class Viewer(QWidget):
     infoCRS = pyqtSignal(str)
     infoMsg = pyqtSignal(str)
     drawFinished = pyqtSignal(bool, str)
-    OVERVIEW_FACTORS = [1,2,4,8,16,32]
+    OVERVIEW_FACTORS = [2,4,8,16,32,64]
     def __init__(self, parent=None):
         super().__init__(parent)
         self.main_layout = QVBoxLayout(self)
@@ -56,12 +56,18 @@ class Viewer(QWidget):
         self.viewer.setLineWidth(0)
         self.viewer.setStyleSheet("border: none;")
         self.viewer.setFocusPolicy(Qt.StrongFocus)
+        self.viewer.horizontalScrollBar().valueChanged.connect(self.trigger_update_overview_level)
+        self.viewer.verticalScrollBar().valueChanged.connect(self.trigger_update_overview_level)
         self.main_layout.addWidget(self.viewer)
         self.scene_origin_x = None
         self.scene_origin_y = None
         self._zoom = 0
         self._factor = 0
         self.base_view_scale = None
+        self.debounce_timer = QTimer()
+        self.debounce_timer.setSingleShot(True)
+        self.debounce_timer.timeout.connect(self.update_overview_level)
+        self.debounce_delay = 250 #ms
         
     def choose_display_factor(self, width):
         if width >= 10000:
@@ -92,7 +98,7 @@ class Viewer(QWidget):
         )
         return final_transform
 
-    def build_overview(self, src, factor): 
+    def read_overview(self, src, factor): 
         h, w = src.shape
         out_h = max(1, h // factor)
         out_w = max(1, w // factor)
@@ -158,17 +164,18 @@ class Viewer(QWidget):
                 del bands
                 del gray
         # logger.info(f"img.nbytes={img.nbytes/1024**2:.1f} MB")
+        img = np.ascontiguousarray(img)
         return img
     
     def display_raster(self, layer_id, img, qt_transform, init_view=False):
         from PyQt5 import sip
         ptr = sip.voidptr(img.ctypes.data)
-        logger.info("Membuat QImage...")
         qimg = QImage(ptr, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGBA8888)
+        logger.info(f"Membuat QImage: w={qimg.width()}, h={qimg.height()}")
         # logger.info(f"qimg.inbytes={qimg.sizeInBytes()/1024**2:.1f} MB")
         # logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
-        logger.info("Membuat QPixmap...")
         pixmap = QPixmap.fromImage(qimg)
+        logger.info(f"Membuat QPixmap: w={pixmap.width()}, h={pixmap.height()}")
         # logger.info(f"RAM sebelum del: {process.memory_info().rss / 1024**2:.1f} MB")
         del img
         del qimg
@@ -176,10 +183,20 @@ class Viewer(QWidget):
         gc.collect()
         # logger.info(f"RAM setelah del: {process.memory_info().rss / 1024**2:.1f} MB")
         # Tambahkan ke Scene
-        item = self.scene.addPixmap(pixmap)
-        item.setTransform(qt_transform)
-        self.layer_items[layer_id] = item
+        # Cek jika sudah ada
+        if layer_id in self.layer_items and self.layer_items[layer_id] != None:
+            logger.info(f"Layer {layer_id} sudah ada!")
+            item = self.layer_items[layer_id]
+            item.setPixmap(pixmap)
+            logger.info(f"Memperbarui pixmap di scene...")
+        else:
+            logger.info(f"Layer {layer_id} belum ada!")
+            item = self.scene.addPixmap(pixmap)
+            logger.info(f"Menambah pixmap ke scene...")
+            self.layer_items[layer_id] = item
+
         # logger.info(f"{self.layer_items}")
+        item.setTransform(qt_transform)
         item.setTransformationMode(Qt.FastTransformation)
         item.setAcceptHoverEvents(False)
         if init_view:
@@ -213,41 +230,41 @@ class Viewer(QWidget):
                 tag = src.tags()
                 h, w = src.shape
                 t = src.transform
-                has_overview = len(src.overviews(1)) > 0
+                # has_overview = len(src.overviews(1)) > 0
                 self.ensure_scene_origin(t.c, t.f)
                 pixel_width = abs(t.a) 
                 display_factor = self.choose_display_factor(w)
                 self._factor = display_factor
                 logger.info(f"Display factor: {display_factor}")
-                # Buat overview jika raster tidak punya
-                if not has_overview:
-                    helper.progress(55, "Generating overview...")
-                    current_build = 1
-                    for build_factor in self.OVERVIEW_FACTORS:
-                        if helper.cancelled(): return None
-                        total_build = len(self.OVERVIEW_FACTORS)
-                        rel_progress = 60 + int((current_build/total_build) * 25)
-                        helper.progress(rel_progress, f"Generating overview {current_build}/{total_build}")
-                        preview, mask = self.build_overview(src, build_factor)
-                        np.savez_compressed(
-                            str(temp_dir/f"f{build_factor}.npz"),
-                            bands=preview,
-                            mask=mask
-                        )
-                        build_factor *= 2
-                        current_build += 1
-            # Load overview
-            helper.progress(85, "Loading overview...")
-            if helper.cancelled(): return None
-            arr = np.load(str(temp_dir/f"f{display_factor}.npz"))
-            bands = arr["bands"]
-            mask = arr["mask"]
-            # Transform overview
-            out_h = bands.shape[1]
-            out_w = bands.shape[2]
-            qt_transform = self.update_transform(
-                t, w, h, out_w, out_h
-            )
+                helper.progress(55, "Generating overview...")
+                # Buat overview 
+                current_build = 1
+                for build_factor in self.OVERVIEW_FACTORS:
+                    if helper.cancelled(): return None
+                    total_build = len(self.OVERVIEW_FACTORS)
+                    rel_progress = 60 + int((current_build/total_build) * 25)
+                    helper.progress(rel_progress, f"Generating overview {current_build}/{total_build}")
+                    preview, mask = self.read_overview(src, build_factor)
+                    np.savez_compressed(
+                        str(temp_dir/f"f{build_factor}.npz"),
+                        bands=preview,
+                        mask=mask
+                    )
+                    build_factor *= 2
+                    current_build += 1
+                # Load overview yang dibuat
+                helper.progress(85, "Loading overview...")
+                if helper.cancelled(): return None
+                arr = np.load(str(temp_dir/f"f{display_factor}.npz"))
+                bands = arr["bands"]
+                mask = arr["mask"]
+                # Transform overview
+                out_h = bands.shape[1]
+                out_w = bands.shape[2]
+                qt_transform = self.update_transform(
+                    t, w, h, out_w, out_h
+                )
+
             # Cek jenis citra
             if "PREDICTION" in tag and dtype == 'uint8':
                 isPrediction = True
@@ -255,7 +272,7 @@ class Viewer(QWidget):
                 isPrediction = False
             
             img = self.prepare_raster(bands, mask, dtype, count, nodata, isPrediction)
-            img = np.ascontiguousarray(img)
+            
  
         if isGeoTiff:
                 # Memeriksa legend dan stats jika citra hasil prediksi
@@ -433,14 +450,22 @@ class Viewer(QWidget):
         self.vector_info.pop(layer_id, None)
         if item:
             self.scene.removeItem(item)
+            if hasattr(item, 'deleteLater'):
+                item.deleteLater()
+            if hasattr(item, 'setPixmap'):
+                item.setPixmap(QPixmap())
+            item = None
         # logger.info(f"layer_items  : {list(self.layer_items.keys())}")
-        # logger.info(f"raster_info  : {list(self.raster_info.keys())}")
-        # logger.info(f"vector_info  : {list(self.vector_info.keys())}")
         if not self.layer_items:
             self.base_view_scale = None
             self.scene_origin_x = None
             self.scene_origin_y = None
             self.infoCRS.emit("Unknown")
+            self.scene.clear()
+        # Clear viewer and scene
+        self.viewer.viewport().update()
+        self.scene.update()
+        QPixmapCache.clear()
 
     def apply_view_transform(self):
         t = self.viewer.transform()
@@ -472,41 +497,49 @@ class Viewer(QWidget):
         if factor == info["current_factor"]:
             return
 
-        cache_dir = Path(info["cache_dir"])
-        arr = np.load(str(cache_dir/f"f{factor}.npz"))
-        bands = arr["bands"]
-        mask = arr["mask"]
+        if factor != 1:
+            cache_dir = Path(info["cache_dir"])
+            arr = np.load(str(cache_dir/f"f{factor}.npz"))
+            bands = arr["bands"]
+            mask = arr["mask"]
 
-        img = self.prepare_raster(
-            bands,
-            mask,
-            info["dtype"],
-            info["count"],
-            info["nodata"],
-            info["is_prediction"]
-        )
-        
-        pixmap_transform = self.update_transform(
-            info["transform"], 
-            info["width"], 
-            info["height"], 
-            bands.shape[2],
-            bands.shape[1]
-        )
+            img = self.prepare_raster(
+                bands,
+                mask,
+                info["dtype"],
+                info["count"],
+                info["nodata"],
+                info["is_prediction"]
+            )
+            
+            pixmap_transform = self.update_transform(
+                info["transform"], 
+                info["width"], 
+                info["height"], 
+                bands.shape[2],
+                bands.shape[1]
+            )
 
-        self.display_raster(layer_id, img, pixmap_transform, init_view=False)
+            self.display_raster(layer_id, img, pixmap_transform, init_view=False)
+            logger.info(f"Reload layer {layer_id} -> f{factor} {bands.shape}")
+        else:
+            self.update_viewport_raster(layer_id)
+            logger.info(f"Reload layer {layer_id} -> f{factor} -> window_reading")
         info["current_factor"] = factor     
-        logger.info(f"Reload layer {layer_id} -> f{factor} {bands.shape}")
         # logger.info(f"scene bounding = {self.scene.itemsBoundingRect()}")
         # logger.info(f"item rect = {item.boundingRect()}, scene rect = {self.scene.sceneRect()}")
         # logger.info(f"VScroll max = {self.viewer.verticalScrollBar().maximum()}")
         # logger.info(f"HScroll max = {self.viewer.horizontalScrollBar().maximum()}")
 
     def update_overview_level(self):
+        logger.info("UPDATE OVERVIEW LEVEL!")
         logger.info(
             f"ENTER update_overview_level: "
             f"base={self.base_view_scale}"
         )
+        if not self.layer_items:
+            return
+        
         scale = self.viewer.transform().m11()
         if self.base_view_scale is None:
             self.base_view_scale = scale 
@@ -522,12 +555,70 @@ class Viewer(QWidget):
                 )
             if current_factor != info["current_factor"]:
                 self.reload_overview(layer_id, current_factor)
-      
+            
+    
+    def trigger_update_overview_level(self):
+        self.debounce_timer.stop() # Stop timer
+        self.debounce_timer.start(self.debounce_delay) # Mulai ulang
+
     def fit_to_view(self):
         rect = self.scene.itemsBoundingRect()
         self.viewer.fitInView(rect, Qt.KeepAspectRatio)
         self.apply_view_transform()
- 
+
+    def update_viewport_raster(self, layer_id):
+        logger.info("Membaca ukuran viewport...")
+        info = self.raster_info[layer_id]
+        canvas = self.viewer.mapToScene(self.viewer.viewport().rect()).boundingRect()
+        world_left  = canvas.left() + self.scene_origin_x
+        world_top   = canvas.top() + self.scene_origin_y
+        world_right = canvas.right() + self.scene_origin_x
+        world_bot   = canvas.bottom() + self.scene_origin_y
+        logger.info(f"Viewport rect={canvas}")
+        logger.info(f"Scene viewport:"
+                    f"x={canvas.x()},"
+                    f"y={canvas.y()},"
+                    f"w={canvas.width()},"
+                    f"h={canvas.height()}"
+                    )
+        logger.info(f"Raster size: w={info['width']}, h={info['height']}")
+        import rasterio as rio
+        from rasterio.windows import Window
+        logger.info("Melakukan window_reading...")
+        with rio.open(info["path"]) as src:
+            row0, col0 = src.index(world_left, world_top)
+            row1, col1 = src.index(world_right, world_bot)
+            x = min(col0, col1)
+            y = min(row0, row1)
+            w = abs(col1 - col0)
+            h = abs(row1 - row0)
+            window = Window(x, y, w, h)
+            bands = src.read([1, 2, 3], window=window)
+            mask = src.read_masks(1, window=window)
+            window_transform = rio.windows.transform(window, src.transform)
+            logger.info(f"Window x={x}, y={y}, w={w}, h={h}")
+            logger.info(f"Pixel size={window_transform.a}")
+
+        logger.info(f"Window read shape: {bands.shape}")
+        logger.info(f"Window mask shape: {mask.shape}")
+        img = self.prepare_raster(
+            bands,
+            mask,
+            info["dtype"],
+            info["count"],
+            info["nodata"],
+            info["is_prediction"]
+        )
+        final_transform = QTransform(
+            window_transform.a, window_transform.b, 
+            window_transform.d, window_transform.e, 
+            window_transform.c - self.scene_origin_x, window_transform.f - self.scene_origin_y
+        )
+        logger.info(f"img shape={img.shape if hasattr(img,'shape') else 'unknown'}")
+        # logger.info(f"Window transform={window_transform}")
+        # logger.info(f"Final window transform={final_transform}")
+        logger.info("Menampilkan hasil window_reading...")
+        self.display_raster(layer_id, img, final_transform, init_view=False)
 
     def set_pan_mode(self, enabled: bool):
         if enabled:
@@ -540,12 +631,12 @@ class Viewer(QWidget):
     def zoom_in(self):
         self._zoom += 1
         self.viewer.scale(1.05, 1.05)
-        self.update_overview_level()
+        self.trigger_update_overview_level()
 
     def zoom_out(self):
         self._zoom -= 1
         self.viewer.scale(0.8, 0.8)
-        self.update_overview_level()
+        self.trigger_update_overview_level()
 
     def wheelEvent(self, event):
         if event.angleDelta().y() > 0:
@@ -553,6 +644,10 @@ class Viewer(QWidget):
         else:
             self.zoom_out()
 
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self.trigger_update_overview_level()
+    
     def eventFilter(self, source, event):
         if source is self.viewer.viewport() and event.type() == QEvent.Type.MouseMove:
             # Ambil posisi dan konversi ke scene
@@ -565,7 +660,7 @@ class Viewer(QWidget):
                 world_y = round(scene_pos.y(), 2)
             self.mouseMoved.emit(world_x, world_y)
         return super().eventFilter(source, event)
-
+    
     def update_draw_polygon(self):
         if not self.temp_shp_points:
             return
