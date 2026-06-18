@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import (
     QPixmap, QImage, QPainter, 
     QPolygonF, QBrush, QPen, QColor,
-    QTransform, QPainterPath, QPixmapCache
+    QTransform, QPainterPath, QPixmapCache, QMouseEvent
 )
 from gui.worker import WorkerHelper
 from PyQt5.QtCore import Qt, pyqtSignal, QPointF, QEvent, QTimer
@@ -26,7 +26,7 @@ class Viewer(QWidget):
     infoCRS = pyqtSignal(str)
     infoMsg = pyqtSignal(str)
     drawFinished = pyqtSignal(bool, str)
-    OVERVIEW_FACTORS = [2,4,8,16,32,64]
+    OVERVIEW_FACTORS = [2,4,8,16,32]
     def __init__(self, parent=None):
         super().__init__(parent)
         self.main_layout = QVBoxLayout(self)
@@ -63,11 +63,12 @@ class Viewer(QWidget):
         self.scene_origin_y = None
         self._zoom = 0
         self._factor = 0
+        self._middle_pan = False
         self.base_view_scale = None
         self.debounce_timer = QTimer()
         self.debounce_timer.setSingleShot(True)
         self.debounce_timer.timeout.connect(self.update_overview_level)
-        self.debounce_delay = 250 #ms
+        self.debounce_delay = 350 #ms
         
     def choose_display_factor(self, width):
         if width >= 10000:
@@ -168,6 +169,9 @@ class Viewer(QWidget):
         return img
     
     def display_raster(self, layer_id, img, qt_transform, init_view=False):
+        info = self.raster_info[layer_id]
+        h = info["height"]
+        w = info["width"]
         from PyQt5 import sip
         ptr = sip.voidptr(img.ctypes.data)
         qimg = QImage(ptr, img.shape[1], img.shape[0], img.strides[0], QImage.Format_RGBA8888)
@@ -199,7 +203,7 @@ class Viewer(QWidget):
         item.setTransform(qt_transform)
         item.setTransformationMode(Qt.FastTransformation)
         item.setAcceptHoverEvents(False)
-        if init_view:
+        if init_view and h > 10000 and w > 10000:
             self.fit_to_view()
 
     def add_raster(self, name, layer_id, path, hooks=None):
@@ -209,6 +213,7 @@ class Viewer(QWidget):
         temp_dir = AppPaths.TEMP / filename
         temp_dir.mkdir(parents=True, exist_ok=True)
         logger.info(f"RAM: {process.memory_info().rss / 1024**2:.1f} MB")
+        logger.info(F"==== TAMBAH RASTER {name} DI LAYER: {layer_id} ====")
         logger.info("Membuka raster...")
         helper.progress(20, "Loading raster...")
         if helper.cancelled(): return None
@@ -236,6 +241,8 @@ class Viewer(QWidget):
                 display_factor = self.choose_display_factor(w)
                 self._factor = display_factor
                 logger.info(f"Display factor: {display_factor}")
+                if display_factor < 16:
+                    self.OVERVIEW_FACTORS.insert(0, 1)
                 helper.progress(55, "Generating overview...")
                 # Buat overview 
                 current_build = 1
@@ -305,7 +312,6 @@ class Viewer(QWidget):
                     "is_prediction": isPrediction
                 }
         self.infoCRS.emit(crs.to_string() if crs else "Unknown")
-        self.fit_to_view()
         helper.progress(100, "Done")
         return {
             "name": name,
@@ -380,7 +386,7 @@ class Viewer(QWidget):
                 elif val in legend_dict:
                     color = legend_dict[val]["color"]
                     label = legend_dict[val]["label"]
-                    logger.info(f"Value: {val} | Label: {label} | Color: {color}")
+                    # logger.info(f"Value: {val} | Label: {label} | Color: {color}")
 
             if geom is None or geom.is_empty:
                 continue
@@ -411,7 +417,6 @@ class Viewer(QWidget):
         }
 
         self._add_vector(gdf, group)
-        self.fit_to_view()
         
     def add_gpkg_layer(self, name, layer_id, path, layer_name):
         logger.info(f"Membuka GPKG: {layer_name}")
@@ -439,7 +444,6 @@ class Viewer(QWidget):
             legend,
             "preds"
         )
-        self.fit_to_view()
         
     def set_visible(self, layer_id, visible):
         self.layer_items[layer_id].setVisible(visible)
@@ -493,11 +497,13 @@ class Viewer(QWidget):
     def reload_overview(self, layer_id, factor):
         from pathlib import Path
         info = self.raster_info[layer_id]
-
-        if factor == info["current_factor"]:
-            return
-
-        if factor != 1:
+        raster_height = info["height"]
+        raster_width = info["width"]
+        
+        if factor == 1 and raster_width > 10000 and raster_height > 10000:
+            self.update_viewport_raster(layer_id)
+            logger.info(f"Reload layer {layer_id} -> f{factor} -> window_reading")
+        elif factor != info["current_factor"]:
             cache_dir = Path(info["cache_dir"])
             arr = np.load(str(cache_dir/f"f{factor}.npz"))
             bands = arr["bands"]
@@ -522,9 +528,6 @@ class Viewer(QWidget):
 
             self.display_raster(layer_id, img, pixmap_transform, init_view=False)
             logger.info(f"Reload layer {layer_id} -> f{factor} {bands.shape}")
-        else:
-            self.update_viewport_raster(layer_id)
-            logger.info(f"Reload layer {layer_id} -> f{factor} -> window_reading")
         info["current_factor"] = factor     
         # logger.info(f"scene bounding = {self.scene.itemsBoundingRect()}")
         # logger.info(f"item rect = {item.boundingRect()}, scene rect = {self.scene.sceneRect()}")
@@ -547,14 +550,14 @@ class Viewer(QWidget):
             self.base_view_scale *= scale
         zoom_ratio = scale / self.base_view_scale
         for layer_id, info in self.raster_info.items():
+            logger.info(f"==== INFO LAYER {layer_id} ====")
             base_factor = info["base_factor"]
-            current_factor = self.choose_factor(base_factor, zoom_ratio)    
+            current_factor = self.choose_factor(base_factor, zoom_ratio)
             logger.info(
                 f"layer={layer_id}, scale={scale:.4f},"
                 f"base={self.base_view_scale:.4f}, factor={current_factor}"
                 )
-            if current_factor != info["current_factor"]:
-                self.reload_overview(layer_id, current_factor)
+            self.reload_overview(layer_id, current_factor)
             
     
     def trigger_update_overview_level(self):
@@ -568,18 +571,20 @@ class Viewer(QWidget):
 
     def update_viewport_raster(self, layer_id):
         logger.info("Membaca ukuran viewport...")
+        import time
+        start = time.perf_counter()
         info = self.raster_info[layer_id]
         canvas = self.viewer.mapToScene(self.viewer.viewport().rect()).boundingRect()
         world_left  = canvas.left() + self.scene_origin_x
         world_top   = canvas.top() + self.scene_origin_y
         world_right = canvas.right() + self.scene_origin_x
         world_bot   = canvas.bottom() + self.scene_origin_y
-        logger.info(f"Viewport rect={canvas}")
+        # logger.info(f"Viewport rect={canvas}")
         logger.info(f"Scene viewport:"
-                    f"x={canvas.x()},"
-                    f"y={canvas.y()},"
-                    f"w={canvas.width()},"
-                    f"h={canvas.height()}"
+                    f"x={round(canvas.x(),2)},"
+                    f"y={round(canvas.y(),2)},"
+                    f"w={round(canvas.width(),2)},"
+                    f"h={round(canvas.height(),2)}"
                     )
         logger.info(f"Raster size: w={info['width']}, h={info['height']}")
         import rasterio as rio
@@ -593,14 +598,19 @@ class Viewer(QWidget):
             w = abs(col1 - col0)
             h = abs(row1 - row0)
             window = Window(x, y, w, h)
-            bands = src.read([1, 2, 3], window=window)
+            if src.count >= 3:
+                bands = src.read([1, 2, 3], window=window)
+            else:
+                bands = src.read(window=window)
             mask = src.read_masks(1, window=window)
             window_transform = rio.windows.transform(window, src.transform)
             logger.info(f"Window x={x}, y={y}, w={w}, h={h}")
-            logger.info(f"Pixel size={window_transform.a}")
+            logger.info(f"Pixel size={round(window_transform.a,2)}")
 
         logger.info(f"Window read shape: {bands.shape}")
         logger.info(f"Window mask shape: {mask.shape}")
+        elapsed = time.perf_counter() - start
+        logger.info(f"window reading time -> {elapsed:.3f}s")
         img = self.prepare_raster(
             bands,
             mask,
@@ -678,6 +688,23 @@ class Viewer(QWidget):
         self.scene.addItem(self.active_poly_item)
 
     def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.MiddleButton:
+            logger.info("Mode pan sementara ON")
+            self._middle_pan = True
+            self.viewer.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
+            self.viewer.setCursor(Qt.ClosedHandCursor)
+            self.viewer.viewport().setCursor(Qt.ClosedHandCursor)
+
+            fake_event = QMouseEvent(
+                QEvent.MouseButtonPress,
+                event.localPos(),
+                Qt.MouseButton.LeftButton,
+                Qt.MouseButton.LeftButton,
+                event.modifiers()
+            )
+            super().mousePressEvent(fake_event)
+            return
+        
         if self.isDrawing and event.button() == Qt.MouseButton.LeftButton:
             # logger.info("Mode gambar: klik kiri")
             # Tambah titik sudut
@@ -705,6 +732,26 @@ class Viewer(QWidget):
                 self.infoMsg.emit("Point not defined!")
             else:
                 self.finalize_polygon()
+        super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.MiddleButton:
+            logger.info("Mode pan sementara off")
+            self._middle_pan = False
+            self.viewer.setDragMode(QGraphicsView.DragMode.NoDrag)
+            self.viewer.setCursor(Qt.ArrowCursor)
+            self.viewer.viewport().setCursor(Qt.ArrowCursor)
+
+            fake_event = QMouseEvent(
+                QEvent.MouseButtonRelease,
+                event.localPos(),
+                Qt.MouseButton.LeftButton,
+                Qt.MouseButton.NoButton,
+                event.modifiers()
+            )
+            super().mouseReleaseEvent(fake_event)
+            return
+        super().mouseReleaseEvent(event)
 
     def keyPressEvent(self, event):
         if event.key() in (Qt.Key_Return, Qt.Key_Enter):

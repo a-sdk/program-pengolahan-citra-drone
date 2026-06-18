@@ -284,7 +284,7 @@ class MainWindow(QMainWindow):
         if conds:
             self.viewer.del_drawing()
             if path:
-                self.layer_panel.add_layer(path)
+                self.load_vector_layer(path)
 
     def get_pathname_layers(self):
         logger.info("Update list layer combo box")

@@ -58,7 +58,7 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, check
                 # Perbarui progres internal 
                 if on_progress and current_block % 10 == 0:
                     relative_prog = 40 + int((current_block/total_blocks) * 10)
-                    on_progress(relative_prog, f"Separating vegetation ({current_block}/{total_blocks})...")
+                    on_progress(relative_prog, f"Separating vegetation ({current_block}/{total_blocks})")
                 # Baca data untuk potongan ini
                 stack_chunk = src.read(window=window)
                 
@@ -140,7 +140,7 @@ def deteksi_penyakit_rumpun(scaler, model, input_folder, output_folder, check_ca
             # Perbarui progres internal 
             if on_progress and current_block % 10 == 0:
                 relative_prog = 70 + int((current_block/total_blocks) * 20)
-                on_progress(relative_prog, f"Generating prediction ({current_block}/{total_blocks})...")
+                on_progress(relative_prog, f"Generating prediction ({current_block}/{total_blocks})")
             
             # print(f"Memproses potongan di {window}...")
             
