@@ -63,7 +63,6 @@ class Viewer(QWidget):
         self.scene_origin_y = None
         self._zoom = 0
         self._factor = 0
-        self._middle_pan = False
         self.base_view_scale = None
         self.debounce_timer = QTimer()
         self.debounce_timer.setSingleShot(True)
@@ -261,6 +260,8 @@ class Viewer(QWidget):
                     current_build += 1
                 # Load overview yang dibuat
                 helper.progress(85, "Loading overview...")
+                if 1 in self.OVERVIEW_FACTORS:
+                    self.OVERVIEW_FACTORS.pop(0)
                 if helper.cancelled(): return None
                 arr = np.load(str(temp_dir/f"f{display_factor}.npz"))
                 bands = arr["bands"]
@@ -401,6 +402,7 @@ class Viewer(QWidget):
                 self._draw_point_feature(geom.x, geom.y, group, color)
             
     def add_shapefile(self, name, layer_id, path):
+        logger.info(F"==== TAMBAH VEKTOR {name} DI LAYER: {layer_id} ====")
         logger.info("Membuka shapefile")
         gdf = gpd.read_file(path)
         group = QGraphicsItemGroup()
@@ -419,7 +421,8 @@ class Viewer(QWidget):
         self._add_vector(gdf, group)
         
     def add_gpkg_layer(self, name, layer_id, path, layer_name):
-        logger.info(f"Membuka GPKG: {layer_name}")
+        logger.info(F"==== TAMBAH VEKTOR {layer_name} DI LAYER: {layer_id} ====")
+        logger.info("Membuka GPKG...")
         gdf = gpd.read_file(path, layer=layer_name)
         legend, stats = self.read_gpkg_metadata(path, layer_name)
         group = QGraphicsItemGroup()
@@ -558,7 +561,6 @@ class Viewer(QWidget):
                 f"base={self.base_view_scale:.4f}, factor={current_factor}"
                 )
             self.reload_overview(layer_id, current_factor)
-            
     
     def trigger_update_overview_level(self):
         self.debounce_timer.stop() # Stop timer
@@ -687,24 +689,7 @@ class Viewer(QWidget):
         self.active_poly_item.setBrush(QColor(255, 0, 0, 50))
         self.scene.addItem(self.active_poly_item)
 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.MiddleButton:
-            logger.info("Mode pan sementara ON")
-            self._middle_pan = True
-            self.viewer.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
-            self.viewer.setCursor(Qt.ClosedHandCursor)
-            self.viewer.viewport().setCursor(Qt.ClosedHandCursor)
-
-            fake_event = QMouseEvent(
-                QEvent.MouseButtonPress,
-                event.localPos(),
-                Qt.MouseButton.LeftButton,
-                Qt.MouseButton.LeftButton,
-                event.modifiers()
-            )
-            super().mousePressEvent(fake_event)
-            return
-        
+    def mousePressEvent(self, event): 
         if self.isDrawing and event.button() == Qt.MouseButton.LeftButton:
             # logger.info("Mode gambar: klik kiri")
             # Tambah titik sudut
@@ -732,26 +717,6 @@ class Viewer(QWidget):
                 self.infoMsg.emit("Point not defined!")
             else:
                 self.finalize_polygon()
-        super().mousePressEvent(event)
-
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.MouseButton.MiddleButton:
-            logger.info("Mode pan sementara off")
-            self._middle_pan = False
-            self.viewer.setDragMode(QGraphicsView.DragMode.NoDrag)
-            self.viewer.setCursor(Qt.ArrowCursor)
-            self.viewer.viewport().setCursor(Qt.ArrowCursor)
-
-            fake_event = QMouseEvent(
-                QEvent.MouseButtonRelease,
-                event.localPos(),
-                Qt.MouseButton.LeftButton,
-                Qt.MouseButton.NoButton,
-                event.modifiers()
-            )
-            super().mouseReleaseEvent(fake_event)
-            return
-        super().mouseReleaseEvent(event)
 
     def keyPressEvent(self, event):
         if event.key() in (Qt.Key_Return, Qt.Key_Enter):
@@ -866,7 +831,7 @@ class Viewer(QWidget):
             else:
                 geom = dtype(self.geo_coords)
                 self.list_poly.append(geom)
-                logger.info(f"Polygon yang dibuat: {self.list_poly}")
+                # logger.info(f"Polygon yang dibuat: {self.list_poly}")
             if not geom.is_valid:
                 self.infoMsg.emit("Geometry is not valid")
                 logger.info("Geometri tidak valid")
