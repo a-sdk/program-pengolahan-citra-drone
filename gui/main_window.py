@@ -30,6 +30,8 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon(str(AppPaths.assets("defaults/textures/icon/edit-image.png"))))
         self._layer_id = 0
         self.elapsed_sec = 0
+        self.active_thread = []
+        self.queue_files = None
         self.time_str = str(0)
         self.current_crs = "Unknown"
         self.current_msg = "Processing..."
@@ -153,7 +155,7 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(f"{msg}", 3000)
 
     def start_worker(self, worker, show_progress=False):
-        self.worker_thread = worker
+        self.active_thread.append(worker)
 
         if show_progress == True:
             self._setup_progress_dialog()
@@ -173,8 +175,12 @@ class MainWindow(QMainWindow):
         self.pd.canceled.connect(
             worker.requestInterruption
         )
-
+        worker.finished.connect(lambda: self.remove_worker(worker))
         worker.start()
+
+    def remove_worker(self, worker):
+        if worker in self.active_thread:
+            self.active_thread.remove(worker)
 
     def _connect_signals(self):
         logger.info("Sinyal Action terhubung")
@@ -196,8 +202,18 @@ class MainWindow(QMainWindow):
         self.action_water_predict.triggered.connect(self.run_water_prediction)
         self.action_nutrient_predict.triggered.connect(self.run_nutrient_prediction)
         # self.action_debug.triggered.connect(self.simulate_finished)
-            
-    def load_raster_layer(self, path):
+
+    def process_next_queue(self):
+        if not self.queue_files:
+            # Jika antrean benar-benar habis, baru tutup progress dialog
+            self.timer.stop()
+            logger.info("Semua raster berhasil dimuat ke workspace!")
+            return
+
+        file = self.queue_files.pop(0)
+        self.load_raster_layer(file, show_progress=False)      
+
+    def load_raster_layer(self, path, show_progress):
         file_name = os.path.basename(path)
         self._layer_id += 1
         layer_id = self._layer_id
@@ -210,9 +226,10 @@ class MainWindow(QMainWindow):
         raster_loader.finished_signal.connect(
             self.on_img_loaded
         )
+        raster_loader.finished.connect(self.process_next_queue)
         self.start_worker(
             raster_loader,
-            show_progress=True
+            show_progress=show_progress
         )
 
     def load_vector_layer(self, path):
@@ -240,7 +257,7 @@ class MainWindow(QMainWindow):
             self, "Open Supported Raster", "", "GeoTIFF (*.tif *.tiff);;Images (*.jpg *.png)"
         )
         if path:
-            self.load_raster_layer(path)
+            self.load_raster_layer(path, show_progress=True)
             self.progress_bar.setVisible(True)
             self.progress_bar.setValue(0)
             self.statusBar().showMessage("Ready")
@@ -253,15 +270,15 @@ class MainWindow(QMainWindow):
             self.load_vector_layer(path)
     
     def on_img_loaded(self, result):
-        self.timer.stop()
-        self.pd.close()
-
-        name = result["name"]
-        layer_id = result["layer_id"] 
-        img = result["img"]
-        qt_transform = result["img_transform"]
-        self.viewer.display_raster(layer_id, img, qt_transform, init_view=True)
-        self.layer_panel.add_layer_item(layer_id, name)
+        if result is None:
+            logger.info("Gagal memuat raster: result None atau thread error")
+        else:
+            name = result["name"]
+            layer_id = result["layer_id"] 
+            img = result["img"]
+            qt_transform = result["img_transform"]
+            self.viewer.display_raster(layer_id, img, qt_transform, init_view=True)
+            self.layer_panel.add_layer_item(layer_id, name)
 
     def create_new_shapefile(self):
         logger.info("Action: action_new_shp_layer ditekan")
@@ -300,7 +317,7 @@ class MainWindow(QMainWindow):
                         "Source": path
                     }
                 })
-            logger.info(f"Daftar layer: {layer_dict}")
+            # logger.info(f"Daftar layer: {layer_dict}")
         return layer_dict 
 
     def update_legend_from_layer(self, layer_id):
@@ -365,9 +382,10 @@ class MainWindow(QMainWindow):
             if not os.path.exists(result.prediction_path[0]):
                 self.show_error_msg(f"File not found.")
                 return
-            for file in result.prediction_path:
+            self.queue_files = result.prediction_path
+            if self.queue_files:
                 try:
-                    self.load_raster_layer(file)
+                    self.process_next_queue()
                 except Exception as e:
                     self.show_error_msg(f"{str(e)}")
         else:
@@ -430,6 +448,7 @@ class MainWindow(QMainWindow):
             self.run_analysis(self.nutrient_ctrl, tif, shp, out)
 
     def closeEvent(self, event):
+        thread_running = False
         from path_config import AppPaths
         logger.info("Mencoba menutup aplikasi...")
         reply = QMessageBox.question(self, 'Exit', 'Are you sure?',
@@ -437,13 +456,17 @@ class MainWindow(QMainWindow):
                                      QMessageBox.StandardButton.No,
                                      QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:
-            if hasattr(self, 'worker_thread') and self.worker_thread.isRunning():
-                logger.info("Menghentikan worker thread sebelum keluar...")
-                self.worker_thread.requestInterruption()
-                if hasattr(self, 'pd'):
-                    self.pd.close()
-                if not self.worker_thread.wait(2000):
-                    logger.warning("Worker thread tidak merespon interupsi tepat waktu")
+            for worker in self.active_thread:
+                if worker.isRunning():
+                    thread_running = True
+                    logger.info("Menghentikan worker thread sebelum keluar...")
+                    worker.requestInterruption()
+                    worker.quit()
+                    worker.wait()
+                    if hasattr(self, 'pd'):
+                        self.pd.close()
+            if thread_running:
+                logger.info("Menunggu seluruh background thread selesai...")
             if AppPaths.TEMP.exists():
                 logger.info("Menghapus cache di temporary folder...")
                 import shutil
@@ -451,7 +474,7 @@ class MainWindow(QMainWindow):
             logger.info("Cleanup selesai. Aplikasi ditutup")
             event.accept()
         else:
-            logger.info("Batal keluar.")
+            logger.info("Batal menutup aplikasi.")
             event.ignore()
 
     # DEBUGGING FINISH

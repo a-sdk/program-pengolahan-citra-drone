@@ -79,7 +79,7 @@ class DiseaseAnalysis:
                 if h.cancelled(): return None
                 stats = self.stats_calc.run(path)
                 h.progress(90+i, f"Calculating stats ({str(i)}/{str(len(classified_path))})...")
-            logger.info(f"Stats: {stats}")
+            # logger.info(f"Stats: {stats}")
             result.clip_path = clipped_path
             result.transform_path = transformed_path
             result.segmentation_path = segmented_path

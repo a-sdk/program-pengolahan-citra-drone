@@ -83,7 +83,7 @@ class WaterAnalysis:
             if h.cancelled(): return None
             stats = self.stats_calc.run(classified_path)
             h.progress(95, "Done")
-            logger.info(f"Stats: {stats}")
+            # logger.info(f"Stats: {stats}")
             result.clip_path = clipped_path
             result.transform_path = transformed_path
             result.segmentation_path = segmented_path

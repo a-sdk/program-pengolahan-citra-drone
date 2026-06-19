@@ -50,8 +50,8 @@ class LayerPanel(QWidget):
     def on_item_changed(self, item):
         layer_id = item.data(0, Qt.UserRole)
         logger.info(f"Mengubah visibilitas layer {layer_id}")
-        visible = item.checkState(0) == Qt.Checked
-        self.viewer.set_visible(layer_id, visible)
+        is_visible = item.checkState(0) == Qt.Checked
+        self.viewer.set_visible(layer_id, is_visible)
 
     # Update z-order
     def update_z_order(self):

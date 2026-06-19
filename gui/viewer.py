@@ -6,10 +6,10 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import (
     QPixmap, QImage, QPainter, 
     QPolygonF, QBrush, QPen, QColor,
-    QTransform, QPainterPath, QPixmapCache, QMouseEvent
+    QTransform, QPainterPath, QPixmapCache
 )
 from gui.worker import WorkerHelper
-from PyQt5.QtCore import Qt, pyqtSignal, QPointF, QEvent, QTimer
+from PyQt5.QtCore import Qt, pyqtSignal, QPointF, QRectF, QEvent, QTimer
 from path_config import AppPaths
 import geopandas as gpd
 import numpy as np
@@ -474,11 +474,6 @@ class Viewer(QWidget):
         self.scene.update()
         QPixmapCache.clear()
 
-    def apply_view_transform(self):
-        t = self.viewer.transform()
-        if t.m22() > 0:
-            self.viewer.scale(1, -1)
-
     def choose_factor(self, base_factor, ratio):
         import math
         if ratio >=1:
@@ -566,11 +561,6 @@ class Viewer(QWidget):
         self.debounce_timer.stop() # Stop timer
         self.debounce_timer.start(self.debounce_delay) # Mulai ulang
 
-    def fit_to_view(self):
-        rect = self.scene.itemsBoundingRect()
-        self.viewer.fitInView(rect, Qt.KeepAspectRatio)
-        self.apply_view_transform()
-
     def update_viewport_raster(self, layer_id):
         logger.info("Membaca ukuran viewport...")
         import time
@@ -631,6 +621,30 @@ class Viewer(QWidget):
         # logger.info(f"Final window transform={final_transform}")
         logger.info("Menampilkan hasil window_reading...")
         self.display_raster(layer_id, img, final_transform, init_view=False)
+
+    def apply_view_transform(self):
+        t = self.viewer.transform()
+        if t.m22() > 0:
+            self.viewer.scale(1, -1)
+
+    def fit_to_view(self):
+        logger.info("Fit to view diklik.")
+        combined_rect = QRectF()
+        all_items = self.scene.items()
+        has_visible_item = False
+        for item in all_items:
+            if item.isVisible() and hasattr(item, 'pixmap'):
+                if not has_visible_item:
+                    combined_rect = item.sceneBoundingRect()
+                    has_visible_item = True
+                else:
+                    combined_rect = combined_rect.united(item.sceneBoundingRect())
+        if has_visible_item and not combined_rect.isEmpty():
+            self.viewer.fitInView(combined_rect, Qt.KeepAspectRatio)
+        else:
+            rect = self.scene.itemsBoundingRect()
+            self.viewer.fitInView(rect, Qt.KeepAspectRatio)
+        self.apply_view_transform()
 
     def set_pan_mode(self, enabled: bool):
         if enabled:
