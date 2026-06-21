@@ -5,9 +5,9 @@ class PropertyDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle(f"Properties - {name}")
         self.resize(400, 300)
-        
+        hide_list = ["Legend", "Stats", "transform", "height", "width", "current_factor", "base_factor", "cache_dir", "is_prediction"]
         layout = QVBoxLayout(self)
-        filtered_metadata = {k: v for k, v in metadata.items() if k not in ["Legend", "Stats"]}
+        filtered_metadata = {k: v for k, v in metadata.items() if k not in hide_list}
         table = QTableWidget(len(filtered_metadata), 2)
         table.setHorizontalHeaderLabels(["Property", "Value"])
         table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)

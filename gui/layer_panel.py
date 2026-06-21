@@ -4,8 +4,6 @@ from PyQt5.QtWidgets import (
     QTreeWidget, QTreeWidgetItem,
     QTreeWidgetItemIterator, QAbstractItemView, QMenu
 )
-import os
-import shutil
 import logging
 
 logger = logging.getLogger(__name__)
@@ -13,15 +11,19 @@ logger = logging.getLogger(__name__)
 class LayerPanel(QWidget):
     infoMsg = pyqtSignal(str)
     layerSelected = pyqtSignal(int)
+    layerUpdated = pyqtSignal(list)
+    layerRemoveRequested = pyqtSignal(int)
 
-    def __init__(self, parent, viewer):
+    def __init__(self, layer_manager, parent, viewer):
         super().__init__(parent)
+        self.layer_manager = layer_manager
         self.viewer = viewer
         self.main_layout = QVBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.tree = QTreeWidget()
         self.main_layout.addWidget(self.tree)
         self.layer_ids = []
+        self.tree_items = {}
         self._setup_tree()
         self._connect_signals()
 
@@ -44,6 +46,7 @@ class LayerPanel(QWidget):
         item.setCheckState(0, Qt.Checked)
         self.tree.insertTopLevelItem(0, item)
         self.infoMsg.emit(f"{name} loaded.")
+        self.tree_items[layer_id] = item
         logger.info(f"Berhasil menambah '{name}' dengan ID: {layer_id}")
 
     # Toggle visibility (checkbox)
@@ -67,9 +70,8 @@ class LayerPanel(QWidget):
             
             iterator += 1
         self.layer_ids = ids
-        self.layer_ids.reverse()
-        logger.info(f"Layer IDs di panel: {self.layer_ids}")
-        self.viewer.set_z_order(self.layer_ids)
+        self.layerUpdated.emit(self.layer_ids)
+        logger.info(f"Layer IDs di panel (top down): {self.layer_ids}")
 
     # Context menu
     def _open_menu(self, pos):
@@ -86,7 +88,7 @@ class LayerPanel(QWidget):
             action = menu.exec_(self.tree.viewport().mapToGlobal(pos))
 
         if action == remove_action:
-            self.remove_layer(item)
+            self.req_remove_layer(item)
 
         if action == prop_action:
             self._show_properties(item)
@@ -96,21 +98,15 @@ class LayerPanel(QWidget):
         self.layerSelected.emit(layer_id)
         logger.info(f"Layer {layer_id} diklik")
         
-    def remove_layer(self, item):
+    def req_remove_layer(self, item):
         layer_id = item.data(0, Qt.UserRole)
+        self.layerRemoveRequested.emit(layer_id)
+
+    def remove_layer_item(self, layer_id):
         logger.info(f"Menghapus layer {layer_id}")
-        layer_name = os.path.splitext(item.text(0))[0]
-        if layer_id:
-            try:
-                if layer_name:
-                    from path_config import AppPaths
-                    temp_dir = AppPaths.TEMP / layer_name
-                    if os.path.exists(temp_dir):
-                        shutil.rmtree(str(temp_dir))
-                        # logger.info(f"Folder temp dihapus: {temp_dir}")
-            except Exception as e:
-                logger.error(f"Gagal menghapus: {e}")
-            self.viewer.remove_layer(layer_id)
+        item = self.tree_items.pop(layer_id, None)
+        if not item:
+            return
         parent = item.parent() or self.tree.invisibleRootItem()
         parent.removeChild(item)
         self.infoMsg.emit(f"{item.text(0)} removed.")
@@ -118,11 +114,10 @@ class LayerPanel(QWidget):
     # Properties layer
     def _show_properties(self, item):
         layer_id = item.data(0, Qt.UserRole)
-        name = item.text(0)
-        
-        metadata = self.viewer.get_metadata(layer_id)
-        
-        if metadata:
+        layer = self.layer_manager.get_layer(layer_id)
+        if layer:
+            metadata = layer.metadata
+            name = layer.name
             from gui.property_dialog import PropertyDialog 
             dialog = PropertyDialog(name, metadata, self)
             dialog.exec_()

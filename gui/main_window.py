@@ -12,6 +12,8 @@ from gui.legend_panel import LegendPanel
 from gui.input_dialog import InputDialog
 from gui.new_shp_dialog import CreateShapefileDialog
 from gui.worker import Worker
+from gui.raster_processor import RasterHandler
+from gui.layer_manager import LayerManager
 from app.disease_controller import DiseaseAnalysis
 from app.water_controller import WaterAnalysis
 from app.nutrient_controller import NutrientAnalysis
@@ -19,6 +21,7 @@ from app.result_model import AnalysisResult
 from path_config import AppPaths
 import os
 import logging
+import shutil
 
 logger = logging.getLogger(__name__)
 
@@ -35,13 +38,21 @@ class MainWindow(QMainWindow):
         self.time_str = str(0)
         self.current_crs = "Unknown"
         self.current_msg = "Processing..."
-        self.viewer = Viewer(self.containerViewer)
+        self.layer_manager = LayerManager()
+        self.viewer = Viewer(
+            layer_manager=self.layer_manager, 
+            parent=self.containerViewer
+            )
         viewer_layout = QVBoxLayout(self.containerViewer)
         viewer_layout.setContentsMargins(0, 0, 0, 0)
         viewer_layout.addWidget(self.viewer)
         # logger.info(f"Viewer panel tipe: {type(self.viewer)}, parent: {self.viewer.parent()}")
 
-        self.layer_panel = LayerPanel(self.containerLayer, self.viewer)
+        self.layer_panel = LayerPanel(
+            layer_manager=self.layer_manager,
+            parent=self.containerLayer, 
+            viewer=self.viewer
+            )
         layer_layout = QVBoxLayout(self.containerLayer)
         layer_layout.setContentsMargins(0, 0, 0, 0)
         layer_layout.addWidget(self.layer_panel)
@@ -56,7 +67,7 @@ class MainWindow(QMainWindow):
         self.progress_bar = QProgressBar()
         self.progress_bar.setMaximum(100)
         self.progress_bar.setVisible(False)
-        
+        self.raster_handler = RasterHandler(layer_manager=self.layer_manager)
         self.disease_ctrl = DiseaseAnalysis()
         self.water_ctrl = WaterAnalysis()
         self.nutrient_ctrl = NutrientAnalysis()
@@ -66,7 +77,7 @@ class MainWindow(QMainWindow):
         self.statusBar().addPermanentWidget(self.progress_bar)
         self._connect_signals()
         self.viewer.mouseMoved.connect(self.update_coord_label)
-        self.viewer.infoCRS.connect(self.update_crs_label)
+        self.raster_handler.crsDetected.connect(self.update_crs_label)
         self.viewer.fit_to_view()
 
         self.dockLayers.setWindowTitle("Layers")
@@ -154,24 +165,18 @@ class MainWindow(QMainWindow):
     def _status_bar_info(self, msg):
         self.statusBar().showMessage(f"{msg}", 3000)
 
-    def start_worker(self, worker, show_progress=False):
+    def start_worker(self, worker):
         self.active_thread.append(worker)
-
-        if show_progress == True:
-            self._setup_progress_dialog()
-
-            worker.progress_signal.connect(
-                self.handle_progress_dialog
-            )
-
-            worker.progress_signal.connect(
-                self.update_progress_bar
-            )
-
+        self._setup_progress_dialog()
+        worker.progress_signal.connect(
+            self.handle_progress_dialog
+        )
+        worker.progress_signal.connect(
+            self.update_progress_bar
+        )
         worker.error_signal.connect(
             self.show_error_msg
         )
-
         self.pd.canceled.connect(
             worker.requestInterruption
         )
@@ -184,9 +189,15 @@ class MainWindow(QMainWindow):
 
     def _connect_signals(self):
         logger.info("Sinyal Action terhubung")
-        self.layer_panel.infoMsg.connect(self._status_bar_info)
+        self.raster_handler.crsDetected.connect(self.update_crs_label)
+        self.raster_handler.originUpdated.connect(self.viewer.set_scene_origin)
+        self.raster_handler.rasterUpdated.connect(self.viewer.render_geotiff)
+        self.layer_panel.layerUpdated.connect(self.viewer.update_list_ids)
+        self.layer_panel.layerRemoveRequested.connect(self.remove_layer)
         self.layer_panel.layerSelected.connect(self.update_legend_from_layer)
+        self.layer_panel.infoMsg.connect(self._status_bar_info)
         self.viewer.infoMsg.connect(self._status_bar_info)
+        self.viewer.viewportChanged.connect(self.on_viewport_changed)
         self.viewer.drawFinished.connect(self.draw_shp_finished)
         self.action_open_shp.triggered.connect(self.open_vector_file)
         self.action_open_img.triggered.connect(self.open_img_file)
@@ -205,51 +216,51 @@ class MainWindow(QMainWindow):
 
     def process_next_queue(self):
         if not self.queue_files:
-            # Jika antrean benar-benar habis, baru tutup progress dialog
             self.timer.stop()
             logger.info("Semua raster berhasil dimuat ke workspace!")
             return
 
         file = self.queue_files.pop(0)
-        self.load_raster_layer(file, show_progress=False)      
+        self.load_raster_layer(file)      
 
-    def load_raster_layer(self, path, show_progress):
+    def load_raster_layer(self, path):
         file_name = os.path.basename(path)
         self._layer_id += 1
         layer_id = self._layer_id
-        raster_loader = Worker(
-            self.viewer.add_raster,
+        raster_worker = Worker(
+            self.raster_handler.add_raster,
             file_name,
             layer_id,
             path
         )
-        raster_loader.finished_signal.connect(
+        raster_worker.finished_signal.connect(
             self.on_img_loaded
         )
-        raster_loader.finished.connect(self.process_next_queue)
+        raster_worker.finished.connect(self.process_next_queue)
         self.start_worker(
-            raster_loader,
-            show_progress=show_progress
+            raster_worker
         )
 
     def load_vector_layer(self, path):
         file_name = os.path.basename(path)
         import fiona
         if path.lower().endswith(".gpkg"):
-            layers = fiona.listlayers(path)
-            for lyr in layers:
+            gpkg_layers = fiona.listlayers(path)
+            for lyr in gpkg_layers:
                 if lyr != "app_layer_metadata":
                     self._layer_id += 1
                     layer_id = self._layer_id
-                    self.viewer.add_gpkg_layer(file_name, layer_id, path, lyr)
-                    layer_name = f"{file_name} | {lyr}"
-                    self.layer_panel.add_layer_item(layer_id, layer_name)
+                    layer = self.viewer.add_gpkg_layer(file_name, layer_id, path, lyr)
+                    new_name = f"{file_name} | {lyr}"
+                    self.layer_manager.add_layer(layer)
+                    self.layer_panel.add_layer_item(layer.sid, new_name)
             return     
         elif path.lower().endswith((".shp")):
             self._layer_id += 1
             layer_id = self._layer_id
-            self.viewer.add_shapefile(file_name, layer_id, path)
-            self.layer_panel.add_layer_item(layer_id, file_name)
+            layer = self.viewer.add_shapefile(file_name, layer_id, path)
+            self.layer_manager.add_layer(layer)
+            self.layer_panel.add_layer_item(layer.sid, layer.name)
 
     def open_img_file(self):
         logger.info("Action: open_img ditekan")
@@ -257,7 +268,7 @@ class MainWindow(QMainWindow):
             self, "Open Supported Raster", "", "GeoTIFF (*.tif *.tiff);;Images (*.jpg *.png)"
         )
         if path:
-            self.load_raster_layer(path, show_progress=True)
+            self.load_raster_layer(path)
             self.progress_bar.setVisible(True)
             self.progress_bar.setValue(0)
             self.statusBar().showMessage("Ready")
@@ -273,13 +284,44 @@ class MainWindow(QMainWindow):
         if result is None:
             logger.info("Gagal memuat raster: result None atau thread error")
         else:
-            name = result["name"]
-            layer_id = result["layer_id"] 
-            img = result["img"]
-            qt_transform = result["img_transform"]
-            self.viewer.display_raster(layer_id, img, qt_transform, init_view=True)
-            self.layer_panel.add_layer_item(layer_id, name)
+            self.layer_manager.add_layer(result)
+            self.layer_panel.add_layer_item(result.sid, result.name)
+            self.viewer.render_geotiff(
+                result.sid,
+                init_view=True)
 
+    def on_viewport_changed(self):
+        canvas, zoom_ratio = self.viewer.get_viewport_state()
+        self.raster_handler.set_viewport_state(
+            canvas, 
+            zoom_ratio
+            )
+        self.raster_handler.trigger_update_overview_level()
+
+    def remove_layer(self, layer_id):
+        layer = self.layer_manager.remove_layer(layer_id)
+        if not layer:
+            return
+        self.delete_temp_folder(layer.name)
+        self.viewer.remove_item(layer_id)
+        self.layer_panel.remove_layer_item(layer_id)
+        self.raster_handler.remove_raster(layer_id)
+        if self.layer_manager.is_empty:
+            self.update_crs_label("Unknown")
+
+    def delete_temp_folder(self, layer_name):
+        name = layer_name.split(".")[0]
+        try:
+            if name:
+                from path_config import AppPaths
+                temp_dir = AppPaths.TEMP / name
+                logger.info(f"Menghapus folder temp: {name}")
+                if os.path.exists(temp_dir):
+                    shutil.rmtree(str(temp_dir))
+                    # logger.info(f"Folder temp dihapus: {temp_dir}")
+        except Exception as e:
+            logger.error(f"Gagal menghapus: {e}")
+            
     def create_new_shapefile(self):
         logger.info("Action: action_new_shp_layer ditekan")
         dialog = CreateShapefileDialog(self, crs=self.current_crs)
@@ -322,17 +364,17 @@ class MainWindow(QMainWindow):
 
     def update_legend_from_layer(self, layer_id):
         logger.info("Legenda diperbarui!")
-        info = self.viewer.get_metadata(layer_id)
-
+        layer = self.layer_manager.get_layer(layer_id)
+        if not layer:
+            return
+        info = layer.metadata
         if not info:
             self.legend_panel.clear()
             return
 
         legend = None
         stats = None
-
-        
-        if info.get("Type") == "GeoPackage Layer":
+        if info.get("type") == "GeoPackage Layer":
             legend, stats = self.viewer.read_gpkg_metadata(
                 info["Source"],
                 info["Layer Name"]
@@ -366,7 +408,7 @@ class MainWindow(QMainWindow):
         # Inisiasi worker thread
         analysis_worker = Worker(controller.run, tif, shp, out)
         analysis_worker.finished_signal.connect(self.on_analysis_finished)
-        self.start_worker(analysis_worker, show_progress=True)
+        self.start_worker(analysis_worker)
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(0)
         self.statusBar().showMessage("Ready")

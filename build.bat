@@ -7,7 +7,7 @@ call .venv_stable\Scripts\activate.bat
 pause
 pyinstaller ^
 --noconfirm ^
---windowed ^
+--console ^
 --hidden-import="sklearn" ^
 --hidden-import="sklearn.ensemble._forest" ^
 --icon=app_icon.ico ^
