@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QGraphicsView, QGraphicsScene, 
-    QGraphicsItemGroup, QGraphicsPixmapItem, QFrame,
+    QGraphicsItemGroup, QFrame,
     QGraphicsPolygonItem
 )
 from PyQt5.QtGui import (
@@ -9,10 +9,6 @@ from PyQt5.QtGui import (
     QPainterPath, QPixmapCache
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QPointF, QRectF, QEvent
-from gui.layer_manager import Layer
-import geopandas as gpd
-import numpy as np
-import json
 import logging
  
 
@@ -22,7 +18,6 @@ class Viewer(QWidget):
     infoMsg = pyqtSignal(str)
     drawFinished = pyqtSignal(bool, str)
     viewportChanged = pyqtSignal()
-    infoCRS = pyqtSignal(str)
     def __init__(self, layer_manager, parent=None):
         super().__init__(parent)
         self.main_layout = QVBoxLayout(self)
@@ -40,7 +35,6 @@ class Viewer(QWidget):
         self.geo_coords = []
         self.list_poly = []
         self.isDrawing = False
-        self.vector_info = {}
         self.setMouseTracking(True)
         self.viewer.setMouseTracking(True)
         self.viewer.viewport().setMouseTracking(True)
@@ -83,6 +77,8 @@ class Viewer(QWidget):
             self.base_view_scale = scale 
         if self.base_view_scale == 1:
             self.base_view_scale *= scale
+        if self.base_view_scale < 3:
+            self.base_view_scale = scale * 1
         zoom_ratio = scale / self.base_view_scale
         logger.info(
             f"scale={round(scale, 2)}, "
@@ -192,25 +188,34 @@ class Viewer(QWidget):
         point_item.setBrush(QColor(*color))
         group.addToGroup(point_item)
 
-    def _add_vector(self, gdf, group, legend_dict=None, class_col=None):
-        self.infoCRS.emit(gdf.crs.to_string() if gdf.crs else "Unknown")
-        bounds = gdf.total_bounds
-        xmin, ymin, xmax, ymax = bounds
-        if self.scene_origin_x is None:
-            self.set_origin(xmin, ymax)
+    def _render_vector(self, layer_id):
+        group = QGraphicsItemGroup()
+        self.scene.addItem(group)
+        self.layer_items[layer_id] = group
+        layer = self.layer_manager.get_layer(layer_id)
+        gdf = layer.item
+        info = layer.metadata
+        legend_dict = info.get("Legend")
+        class_col = info.get("class_col")
+        
         for _, feature in gdf.iterrows():
             geom = feature.geometry
             color = (255, 255, 116, 80)
             if legend_dict and class_col:
-                val = str(feature[class_col])
-                if float(val) < 1: # Cek jika hasil prediksi berupa regresi (0-1)
+                val = feature[class_col]
+                try:
+                    num_val = float(val)
+                    is_num = True
+                except (ValueError, TypeError):
+                    is_num = False
+                if is_num and num_val < 1: # Cek jika hasil prediksi berupa regresi (0-1)
                     for key, data in legend_dict.items():
                         low, high = data["range"]
-                        if low <= float(val) < high:
+                        if low <= num_val < high:
                             color = data["color"] # Warna berdasarkan rentang nilai
                             # logger.info(f"Value: {val} | Label: {data['label']} | Color: {color}")
                             break
-                elif val in legend_dict:
+                elif str(val) in legend_dict:
                     color = legend_dict[val]["color"]
                     label = legend_dict[val]["label"]
                     # logger.info(f"Value: {val} | Label: {label} | Color: {color}")
@@ -227,79 +232,23 @@ class Viewer(QWidget):
             elif geom.geom_type == "Point":
                 self._draw_point_feature(geom.x, geom.y, group, color)
         self.set_z_order(self.list_ids)
-            
-    def add_shapefile(self, name, layer_id, path):
-        logger.info(F"==== TAMBAH VEKTOR {name} DI LAYER: {layer_id} ====")
-        logger.info("Membuka shapefile")
-        gdf = gpd.read_file(path)
-        group = QGraphicsItemGroup()
-        self.scene.addItem(group)
-        self.layer_items[layer_id] = group
-        # logger.info(f"{self.layer_items}")
-        info = {
-            "Name": name,
-            "Source": path,
-            "Type": "shp",
-            "CRS": gdf.crs.to_string() if gdf.crs else "Unknown",
-            "Geom_type": str(gdf.geom_type.iloc[0]),
-            "Count": len(gdf)
-        }
-        self.vector_info[layer_id] = info
-        self._add_vector(gdf, group)
-        layer = Layer(
-            sid=layer_id,
-            name=name,
-            item=gdf,
-            metadata=info,
-            crs=info["CRS"],
-            qtransform=None
-        )
-        return layer
-        
-    def add_gpkg_layer(self, name, layer_id, path, layer_name):
-        logger.info(F"==== TAMBAH VEKTOR {layer_name} DI LAYER: {layer_id} ====")
-        logger.info("Membuka GPKG...")
-        gdf = gpd.read_file(path, layer=layer_name)
-        legend, stats = self.read_gpkg_metadata(path, layer_name)
-        group = QGraphicsItemGroup()
-        self.scene.addItem(group)
-        self.layer_items[layer_id] = group
-        # logger.info(f"{self.layer_items}")
-        info = {
-            "Name": name, 
-            "Source": path,
-            "Type": "gpkg",
-            "Layer_name": layer_name,
-            "CRS": gdf.crs.to_string() if gdf.crs else "Unknown",
-            "Geom_type": str(gdf.geom_type.iloc[0]),
-            "Count": len(gdf),
-            "Legend": legend,
-            "Stats": stats
-        }
-        self.vector_info[layer_id] = info
-        self._add_vector(
-            gdf, 
-            group,
-            legend,
-            "preds"
-        )
-
-        layer = Layer(
-            sid=layer_id,
-            name=layer_name,
-            item=gdf,
-            metadata=info,
-            crs=info["CRS"],
-            qtransform=None
-        )
-        return layer
         
     def set_visible(self, layer_id, visible):
         self.layer_items[layer_id].setVisible(visible)
 
+    def set_z_order(self, ordered_ids):
+        for i, lid in enumerate(ordered_ids):
+            if lid in self.layer_items:
+                z = len(ordered_ids) - i
+                self.layer_items[lid].setZValue(z)
+                logger.info(
+                    f"Mengatur z-order: "
+                    f"id={lid} -> z-order={z}"
+                    )
+        self.viewer.viewport().update()
+
     def remove_item(self, layer_id):
         item = self.layer_items.pop(layer_id, None)
-        self.vector_info.pop(layer_id, None)
         self.base_raster_size.pop(layer_id, None)
         if item:
             self.scene.removeItem(item)
@@ -382,22 +331,6 @@ class Viewer(QWidget):
                 world_y = round(scene_pos.y(), 2)
             self.mouseMoved.emit(world_x, world_y)
         return super().eventFilter(source, event)
-    
-    def update_draw_polygon(self):
-        if not self.temp_shp_points:
-            return
-        
-        if self.active_poly_item:
-            self.scene.removeItem(self.active_poly_item)
-
-        polygon_data = QPolygonF(self.temp_shp_points)
-        self.active_poly_item = QGraphicsPolygonItem(polygon_data)
-        pen = QPen(QColor(255, 0, 0, 150))
-        pen.setWidth(1)
-        pen.setCosmetic(True)
-        self.active_poly_item.setPen(pen)
-        self.active_poly_item.setBrush(QColor(255, 0, 0, 50))
-        self.scene.addItem(self.active_poly_item)
 
     def mousePressEvent(self, event): 
         if self.isDrawing and event.button() == Qt.MouseButton.LeftButton:
@@ -455,38 +388,24 @@ class Viewer(QWidget):
         self.geo_coords.clear()
         self.list_poly.clear()
         self.commit_poly_item.clear()
-        self.viewer.viewport().update()
+        self.viewer.viewport().update() 
 
-    def set_z_order(self, ordered_ids):
-        for i, lid in enumerate(ordered_ids):
-            if lid in self.layer_items:
-                z = len(ordered_ids) - i
-                self.layer_items[lid].setZValue(z)
-                logger.info(
-                    f"Mengatur z-order: "
-                    f"id={lid} -> z-order={z}"
-                    )
-        self.viewer.viewport().update()       
+    def update_draw_polygon(self):
+        if not self.temp_shp_points:
+            return
+        
+        if self.active_poly_item:
+            self.scene.removeItem(self.active_poly_item)
 
-    def read_gpkg_metadata(self, path, layer_name):
-        import sqlite3
-        conn = sqlite3.connect(path)
-        cur = conn.cursor()
+        polygon_data = QPolygonF(self.temp_shp_points)
+        self.active_poly_item = QGraphicsPolygonItem(polygon_data)
+        pen = QPen(QColor(255, 0, 0, 150))
+        pen.setWidth(1)
+        pen.setCosmetic(True)
+        self.active_poly_item.setPen(pen)
+        self.active_poly_item.setBrush(QColor(255, 0, 0, 50))
+        self.scene.addItem(self.active_poly_item)
 
-        cur.execute("""
-        SELECT legend_json, stats_json
-        FROM app_layer_metadata
-        WHERE layer_name = ?
-        """, (layer_name,))
-
-        row = cur.fetchone()
-        conn.close()
-
-        if row:
-            return json.loads(row[0]), json.loads(row[1])
-
-        return None, None
-    
     def finalize_polygon(self):
         from shapely.geometry import Point, LineString, Polygon
         GEOM_MAPPING = {
@@ -527,6 +446,7 @@ class Viewer(QWidget):
             logger.error(f"ERROR: {type(e).__name__}: {e}", exc_info=True)
 
     def save_polygon(self):
+        import geopandas as gpd
         try:
             gdf = gpd.GeoDataFrame({'id':range(len(self.list_poly))}, crs=self.temp_shp_crs, geometry=self.list_poly)
             gdf.to_file(self.temp_shp_path, driver="ESRI Shapefile")

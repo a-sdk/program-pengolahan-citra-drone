@@ -13,6 +13,7 @@ from gui.input_dialog import InputDialog
 from gui.new_shp_dialog import CreateShapefileDialog
 from gui.worker import Worker
 from gui.raster_processor import RasterHandler
+from gui.vector_processor import VectorHandler
 from gui.layer_manager import LayerManager
 from app.disease_controller import DiseaseAnalysis
 from app.water_controller import WaterAnalysis
@@ -68,6 +69,7 @@ class MainWindow(QMainWindow):
         self.progress_bar.setMaximum(100)
         self.progress_bar.setVisible(False)
         self.raster_handler = RasterHandler(layer_manager=self.layer_manager)
+        self.vector_handler = VectorHandler(layer_manager=self.layer_manager)
         self.disease_ctrl = DiseaseAnalysis()
         self.water_ctrl = WaterAnalysis()
         self.nutrient_ctrl = NutrientAnalysis()
@@ -192,6 +194,8 @@ class MainWindow(QMainWindow):
         self.raster_handler.crsDetected.connect(self.update_crs_label)
         self.raster_handler.originUpdated.connect(self.viewer.set_scene_origin)
         self.raster_handler.rasterUpdated.connect(self.viewer.render_geotiff)
+        self.vector_handler.crsDetected.connect(self.update_crs_label)
+        self.vector_handler.originUpdated.connect(self.viewer.set_scene_origin)
         self.layer_panel.layerUpdated.connect(self.viewer.update_list_ids)
         self.layer_panel.layerRemoveRequested.connect(self.remove_layer)
         self.layer_panel.layerSelected.connect(self.update_legend_from_layer)
@@ -250,17 +254,19 @@ class MainWindow(QMainWindow):
                 if lyr != "app_layer_metadata":
                     self._layer_id += 1
                     layer_id = self._layer_id
-                    layer = self.viewer.add_gpkg_layer(file_name, layer_id, path, lyr)
+                    layer = self.vector_handler.add_gpkg_layer(file_name, layer_id, path, lyr)
                     new_name = f"{file_name} | {lyr}"
                     self.layer_manager.add_layer(layer)
                     self.layer_panel.add_layer_item(layer.sid, new_name)
+                    self.viewer._render_vector(layer.sid)
             return     
         elif path.lower().endswith((".shp")):
             self._layer_id += 1
             layer_id = self._layer_id
-            layer = self.viewer.add_shapefile(file_name, layer_id, path)
+            layer = self.vector_handler.add_shapefile(file_name, layer_id, path)
             self.layer_manager.add_layer(layer)
             self.layer_panel.add_layer_item(layer.sid, layer.name)
+            self.viewer._render_vector(layer.sid)
 
     def open_img_file(self):
         logger.info("Action: open_img ditekan")
@@ -305,7 +311,10 @@ class MainWindow(QMainWindow):
         self.delete_temp_folder(layer.name)
         self.viewer.remove_item(layer_id)
         self.layer_panel.remove_layer_item(layer_id)
-        self.raster_handler.remove_raster(layer_id)
+        if layer.layer_type == "raster":
+            self.raster_handler.remove_raster(layer_id)
+        if layer.layer_type == "vector":
+            self.vector_handler.remove_vector(layer_id)
         if self.layer_manager.is_empty:
             self.update_crs_label("Unknown")
 
@@ -374,10 +383,10 @@ class MainWindow(QMainWindow):
 
         legend = None
         stats = None
-        if info.get("type") == "GeoPackage Layer":
-            legend, stats = self.viewer.read_gpkg_metadata(
+        if info.get("Type") == "gpkg":
+            legend, stats = self.vector_handler.read_gpkg_metadata(
                 info["Source"],
-                info["Layer Name"]
+                info["Layer_name"]
             )
         else:
             legend = info.get("Legend")

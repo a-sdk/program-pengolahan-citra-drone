@@ -3,8 +3,8 @@ import json
 import logging
 import psutil
 import os
-from PyQt5.QtGui import QImage, QTransform, QPixmap
-from PyQt5.QtCore import Qt, pyqtSignal, QObject, QTimer
+from PyQt5.QtGui import QTransform
+from PyQt5.QtCore import pyqtSignal, QObject, QTimer
 from gui.worker import WorkerHelper
 from gui.layer_manager import Layer
 from path_config import AppPaths
@@ -189,8 +189,8 @@ class RasterHandler(QObject):
                     self.OVERVIEW_FACTORS.pop(0)
                 if helper.cancelled(): return None
                 arr = np.load(str(temp_dir/f"f{display_factor}.npz"))
-                bands = arr["bands"]
-                mask = arr["mask"]
+                bands = arr.get("bands")
+                mask = arr.get("mask")
                 # Transform overview
                 out_h = bands.shape[1]
                 out_w = bands.shape[2]
@@ -244,6 +244,7 @@ class RasterHandler(QObject):
             sid=layer_id,
             name=name,
             item=img,
+            layer_type="raster",
             metadata=info,
             crs=crs,
             qtransform=qt_transform
@@ -292,7 +293,7 @@ class RasterHandler(QObject):
         import rasterio as rio
         from rasterio.windows import Window
         logger.info("Melakukan window_reading...")
-        with rio.open(info["Source"]) as src:
+        with rio.open(info.get("Source")) as src:
             row0, col0 = src.index(world_left, world_top)
             row1, col1 = src.index(world_right, world_bot)
             x = min(col0, col1)
@@ -316,10 +317,10 @@ class RasterHandler(QObject):
         img = self.prepare_raster(
             bands,
             mask,
-            info["Dtype"],
-            info["Count"],
-            info["Nodata"],
-            info["is_prediction"]
+            info.get("Dtype"),
+            info.get("Count"),
+            info.get("Nodata"),
+            info.get("is_prediction")
         )
         final_transform = QTransform(
             window_transform.a, window_transform.b, 
@@ -342,31 +343,31 @@ class RasterHandler(QObject):
         from pathlib import Path
         layer = self.layer_manager.get_layer(layer_id)
         info = layer.metadata
-        raster_height = info["height"]
-        raster_width = info["width"]
+        raster_height = info.get("height")
+        raster_width = info.get("width")
         
         if factor == 1 and raster_width > 10000 and raster_height > 10000:
             self.update_viewport_raster(layer_id)
             logger.info(f"Reload layer {layer_id} -> f{factor} -> window_reading")
-        elif factor != info["current_factor"]:
-            cache_dir = Path(info["cache_dir"])
+        elif factor != info.get("current_factor"):
+            cache_dir = Path(info.get("cache_dir"))
             arr = np.load(str(cache_dir/f"f{factor}.npz"))
-            bands = arr["bands"]
-            mask = arr["mask"]
+            bands = arr.get("bands")
+            mask = arr.get("mask")
 
             img = self.prepare_raster(
                 bands,
                 mask,
-                info["Dtype"],
-                info["Count"],
-                info["Nodata"],
-                info["is_prediction"]
+                info.get("Dtype"),
+                info.get("Count"),
+                info.get("Nodata"),
+                info.get("is_prediction")
             )
             
             img_transform = self.update_transform(
-                info["transform"], 
-                info["width"], 
-                info["height"], 
+                info.get("transform"), 
+                info.get("width"), 
+                info.get("height"), 
                 bands.shape[2],
                 bands.shape[1]
             )
@@ -378,14 +379,14 @@ class RasterHandler(QObject):
                 False
             )
             logger.info(f"Reload layer {layer_id} -> f{factor} {bands.shape}")
-        info["current_factor"] = factor     
+        info.get("current_factor") = factor     
 
     def update_overview_level(self):
         zoom_ratio = self.viewport_zoom_ratio
         logger.info("UPDATE OVERVIEW LEVEL!")  
         for layer_id, info in self.raster_info.items():
             logger.info(f"==== INFO LAYER {layer_id} ====")
-            base_factor = info["base_factor"]
+            base_factor = info.get("base_factor")
             current_factor = self.choose_factor(base_factor, zoom_ratio)
             logger.info(f"layer={layer_id}, factor={current_factor}")
             self.reload_overview(layer_id, current_factor)

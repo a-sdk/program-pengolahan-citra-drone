@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 class Layer:
     sid: int
     name: str  
-    item: object = None       
+    item: object = None 
+    layer_type: str = None      
     metadata: dict = None
     crs: str = None
     qtransform: QTransform = None
