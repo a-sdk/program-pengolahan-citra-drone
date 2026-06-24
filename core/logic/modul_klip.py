@@ -29,14 +29,14 @@ def potong_raster(input_folder, shp_path, output_folder, output_filename="clip_r
     # Pastikan folder output ada, jika tidak, buat folder baru
     os.makedirs(output_folder, exist_ok=True)
     # Baca Shapefile Menggunakan GeoPandas
-    print("\nMemuat shapefile...")
+    # print("\nMemuat shapefile...")
     mask_gdf = gpd.read_file(shp_path)
-    print("Memuat citra...")
+    # print("Memuat citra...")
     with rio.open(input_folder) as src:
         profile = src.profile
         geometries = mask_gdf.geometry
         # Melakukan masking
-        print("Memotong raster berdasarkan shapefile...")
+        # print("Memotong raster berdasarkan shapefile...")
         out_image, out_transform = mask(
             src,
             geometries, 
@@ -55,10 +55,10 @@ def potong_raster(input_folder, shp_path, output_folder, output_filename="clip_r
         nodata=nilai_nodata,
         driver="GTiff"
     )
-    print("Menyimpan hasil clipping...")
+    # print("Menyimpan hasil clipping...")
     with rio.open(output_path, "w", **profile) as dest:
         dest.write(out_image)
-    print(f"File {output_filename} berhasil disimpan di {output_folder}")
+    # print(f"File {output_filename} berhasil disimpan di {output_folder}")
     return output_path
     
     

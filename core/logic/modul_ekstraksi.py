@@ -406,7 +406,7 @@ def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename
         ]
 
     nf = os.path.splitext(os.path.basename(input_folder))[0]
-    print(f"\nMemuat hasil masking: {nf}")
+    # print(f"\nMemuat hasil masking: {nf}")
     with rio.open(input_folder) as src:
         for i, name in enumerate(nama_bands):
             band_data = src.read(i + 1)
@@ -428,11 +428,11 @@ def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename
     nan_rows = df_lengkap[df_lengkap.isna().any(axis=1)]
     
     if not nan_rows.empty:
-        print(f"\nPERHATIAN: Ditemukan {len(nan_rows)} poligon dengan nilai piksel tidak valid (NaN).")
-        print(f"Poligon yang bermasalah: {nan_rows['Nama'].tolist()}")
+        logger.info(f"\nPERHATIAN: Ditemukan {len(nan_rows)} poligon dengan nilai piksel tidak valid (NaN).")
+        logger.info(f"Poligon yang bermasalah: {nan_rows['Nama'].tolist()}")
     # ------------------------
     # Pembersihan dan pengurutan data
-    print(f"Membersihkan hasil ekstraksi...")
+    # print(f"Membersihkan hasil ekstraksi...")
     df = pd.DataFrame(hasil_ekstraksi).dropna()
     df_urut = df.sort_values(by=["id", "no_urut"], ascending=True)
     df_urut = df_urut.drop(columns=["id"])
@@ -443,9 +443,9 @@ def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename
     output_path = os.path.join(output_folder, output_filename)
     df_urut.to_csv(output_path, index=False)
     
-    print(f"Ekstraksi selesai...")
-    print(f"Total baris yang diekstrak: {df_urut.shape[0]}")
-    print(rf"File {output_filename} berhasil disimpan di {output_folder}")    
+    # print(f"Ekstraksi selesai...")
+    # print(f"Total baris yang diekstrak: {df_urut.shape[0]}")
+    # print(rf"File {output_filename} berhasil disimpan di {output_folder}")    
     return output_path 
 
 

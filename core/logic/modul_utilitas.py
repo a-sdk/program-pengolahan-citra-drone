@@ -69,12 +69,12 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
         str: Output path.
     """
 
-    print("\nMembuat multipoligon...")
+    # print("\nMembuat multipoligon...")
     
     output_folder = f"{output_folder}/multipoligon"
     os.makedirs(output_folder, exist_ok=True)
     filename = os.path.splitext(os.path.basename(shp_path))[0]
-    print(f"Memproses file: {filename}.shp")
+    # print(f"Memproses file: {filename}.shp")
     
     # ========================================
     # Tahap 1: Membaca & Konversi CRS
@@ -90,9 +90,9 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
         centroid = polygons.unary_union.centroid
         epsg_code = lonlat_to_utm_epsg(centroid.x, centroid.y)
         polygons = polygons.to_crs(epsg=epsg_code)
-        print(f"CRS diubah dari {crs_asal} ke UTM (EPSG:{epsg_code})")
+        logger.info(f"CRS diubah dari {crs_asal} ke UTM (EPSG:{epsg_code})")
     else:
-        print(f"CRS sudah proyeksi: ({str(polygons.crs).upper()})")
+        logger.info(f"CRS sudah proyeksi: ({str(polygons.crs).upper()})")
 
     # Menentukan jumlah komponen poligon berdasarkan luas 
     with fiona.open(shp_path) as shp:
@@ -101,8 +101,8 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
     subpoly_area = 0.5 #m2
     jml_komponen = (poly_area/subpoly_area).astype(int)
     jml_cluster = jml_poligon * jml_komponen
-    print(f"Terdapat {jml_poligon} poligon, total luasan: {poly_area:.2f} m2")
-    print(f"Jumlah komponen: {jml_komponen}")
+    logger.info(f"Terdapat {jml_poligon} poligon, total luasan: {poly_area:.2f} m2")
+    logger.info(f"Jumlah komponen: {jml_komponen}")
     output_intersection = os.path.join(output_folder, f"{filename}_{jml_cluster}_part.shp")
     # ========================================
     # Tahap 2: Generate Random Points
@@ -127,7 +127,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
         all_points.extend(pts)
 
     gdf_points = gpd.GeoDataFrame(geometry=all_points, crs=polygons.crs)
-    print(f"{len(gdf_points)} titik acak dihasilkan")
+    # print(f"{len(gdf_points)} titik acak dihasilkan")
 
     # ========================================
     # Tahap 3: K-Means Clustering
@@ -137,7 +137,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
     coords = [(p.x, p.y) for p in gdf_points.geometry]
     kmeans = KMeans(n_clusters=jml_cluster, random_state=42, n_init=20)
     gdf_points["CLUSTER_ID"] = kmeans.fit_predict(coords)
-    print("K-Means clustering selesai")
+    # print("K-Means clustering selesai")
 
     # ========================================
     # Tahap 4: Aggregate per Cluster
@@ -145,7 +145,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
     if on_progress:
         on_progress(14, f"Generating aggregates...")
     agg = gdf_points.dissolve(by="CLUSTER_ID", aggfunc="first").reset_index()
-    print("Aggregate selesai")
+    # print("Aggregate selesai")
 
     # ========================================
     # Tahap 5: Hitung Centroid
@@ -154,7 +154,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
         on_progress(15, f"Calculating centroids...")
     agg["geometry"] = agg.geometry.centroid
     centroids = agg.copy()
-    print(f"{len(centroids)} centroid dihasilkan")
+    # print(f"{len(centroids)} centroid dihasilkan")
 
     # ========================================
     # Tahap 6: Voronoi Polygon
@@ -173,7 +173,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
         gdf_voronoi, centroids, how="left", distance_col="dist"
     )
 
-    print("Voronoi polygons selesai")
+    # print("Voronoi polygons selesai")
 
     # ========================================
     # Tahap 7: Intersection
@@ -182,7 +182,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
         on_progress(19, f"Performing intersection...")
     if polygons.crs != gdf_voronoi.crs:
         gdf_voronoi = gdf_voronoi.to_crs(polygons.crs)
-        print("CRS berbeda, disamakan dulu.")
+        # print("CRS berbeda, disamakan dulu.")
 
     gdf_inter = gpd.overlay(polygons, gdf_voronoi, how="intersection")
     gdf_inter = gdf_inter[
@@ -194,7 +194,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
     # === Simpan langsung ke folder utama tanpa subfolder ===
     gdf_inter.to_file(output_intersection, driver="ESRI Shapefile")
 
-    print(f"Intersection selesai")
+    # print(f"Intersection selesai")
 
     return output_intersection
 
@@ -229,7 +229,7 @@ def simpan_raster(input_raster, profile, output_folder, output_filename, nilai_n
     with rio.open(output_path, 'w', **profile) as dest:
         dest.write(input_raster, 1)
 
-    print(f"File {output_filename} berhasil disimpan di {output_folder}")
+    # print(f"File {output_filename} berhasil disimpan di {output_folder}")
     return output_path
 
 # Fungsi untuk menentukan threshold secara otomatis
@@ -484,7 +484,7 @@ def hitung_sebaran_petak(gpkg_path, legend_dict):
     try:
         layers = fiona.listlayers(gpkg_path)
     except Exception as e:
-        print(f"ERROR: {e}")
+        logger.info(f"ERROR: {e}")
         return None
     # Siapkan tabel database gpkg
     conn = sqlite3.connect(gpkg_path)
@@ -500,7 +500,7 @@ def hitung_sebaran_petak(gpkg_path, legend_dict):
     
     # Hitung sebaran per nama layer
     for layer_name in layers:
-        print(f"\n=== Menganalisis Layer: {layer_name} ===")
+        # print(f"\n=== Menganalisis Layer: {layer_name} ===")
         # Membaca layer spesifik
         gdf = gpd.read_file(gpkg_path, layer=layer_name)
         

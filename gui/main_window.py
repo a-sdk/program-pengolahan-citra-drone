@@ -196,7 +196,7 @@ class MainWindow(QMainWindow):
         self.raster_handler.rasterUpdated.connect(self.viewer.render_geotiff)
         self.vector_handler.crsDetected.connect(self.update_crs_label)
         self.vector_handler.originUpdated.connect(self.viewer.set_scene_origin)
-        self.layer_panel.layerUpdated.connect(self.viewer.update_list_ids)
+        self.layer_panel.layerUpdated.connect(self.viewer.update_z_order)
         self.layer_panel.layerRemoveRequested.connect(self.remove_layer)
         self.layer_panel.layerSelected.connect(self.update_legend_from_layer)
         self.layer_panel.infoMsg.connect(self._status_bar_info)
@@ -308,10 +308,10 @@ class MainWindow(QMainWindow):
         layer = self.layer_manager.remove_layer(layer_id)
         if not layer:
             return
-        self.delete_temp_folder(layer.name)
         self.viewer.remove_item(layer_id)
         self.layer_panel.remove_layer_item(layer_id)
         if layer.layer_type == "raster":
+            self.delete_temp_folder(layer.name)
             self.raster_handler.remove_raster(layer_id)
         if layer.layer_type == "vector":
             self.vector_handler.remove_vector(layer_id)
@@ -354,17 +354,18 @@ class MainWindow(QMainWindow):
             if path:
                 self.load_vector_layer(path)
 
-    def get_pathname_layers(self):
+    def get_layers_list(self):
         logger.info("Update list layer combo box")
         layer_dict = {}
         if self.layer_panel.layer_ids:
             for lid in self.layer_panel.layer_ids:
-                info = self.viewer.get_metadata(lid)
-                name = info.get("Filename", None)
-                path = info.get("Source", None)
+                layer = self.layer_manager.get_layer(lid)
+                info = layer.metadata
+                name = info.get("Name")
+                path = info.get("Source")
                 layer_dict.update({
                     lid: {
-                        "Filename": name, 
+                        "Name": name, 
                         "Source": path
                     }
                 })
@@ -476,7 +477,7 @@ class MainWindow(QMainWindow):
 
     def run_disease_prediction(self):
         logger.info("action_disease_predict ditekan")
-        metadata = self.get_pathname_layers()
+        metadata = self.get_layers_list()
         dialog = InputDialog(self, title="Disease Detection", icon=self.icon_disease, metadata=metadata)
         if dialog.exec_():
             tif, shp, out = dialog.get_values()
@@ -484,7 +485,7 @@ class MainWindow(QMainWindow):
 
     def run_water_prediction(self):
         logger.info("action_water_predict ditekan")
-        metadata = self.get_pathname_layers()
+        metadata = self.get_layers_list()
         dialog = InputDialog(self, title="Water Availability", icon=self.icon_water, metadata=metadata)
         if dialog.exec_():
             tif, shp, out = dialog.get_values()
@@ -492,7 +493,7 @@ class MainWindow(QMainWindow):
 
     def run_nutrient_prediction(self):
         logger.info("action_disease_predict ditekan")
-        metadata = self.get_pathname_layers()
+        metadata = self.get_layers_list()
         dialog = InputDialog(self, title="Nutrient Availability", icon=self.icon_mineral, metadata=metadata)
         if dialog.exec_():
             tif, shp, out = dialog.get_values()

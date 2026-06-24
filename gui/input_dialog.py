@@ -38,7 +38,7 @@ class InputDialog(QDialog):
             return
 
         for lid, info in self.temp_metadata.items():
-            name = info["Filename"]
+            name = info.get("Name")
             if name.lower().endswith(".tif"):
                 self.tifcomboBox.addItem(name, lid)
             if name.lower().endswith(".shp"):

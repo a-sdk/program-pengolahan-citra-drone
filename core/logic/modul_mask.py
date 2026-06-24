@@ -31,13 +31,13 @@ def mask_band_terpisah(input_folder, mask_path, output_folder, logika=lambda x: 
     mask_valid = logika(mask_data)
     # Mengecualikan nilai nodata
     mask_valid[np.isnan(mask_data)] = False
-    print(f"Mask boolean berhasil dibuat. Total piksel valid: {np.sum(mask_valid)}")
+    logger.info(f"Mask boolean berhasil dibuat. Total piksel valid: {np.sum(mask_valid)}")
     # Menerapkan mask pada semua file dalam input folder
     lst_file = glob.glob(os.path.join(input_folder, "*.tif"))
-    if not lst_file:
-        print(f"Tidak ada file .tif di {input_folder}")
+    # if not lst_file:
+    #     print(f"Tidak ada file .tif di {input_folder}")
     os.makedirs(output_folder, exist_ok=True)
-    print(f"Menerapkan mask ke {len(lst_file)} band")
+    # print(f"Menerapkan mask ke {len(lst_file)} band")
     for file in lst_file:
         nf = os.path.basename(file)
         output_path = os.path.join(output_folder, nf)
@@ -76,8 +76,8 @@ def mask_tumpukan_fitur(input_folder, mask_path, output_folder, logika=lambda x:
     mask_valid = logika(mask_data)
     # Mengecualikan nilai nodata
     mask_valid[mask_data == nilai_nodata] = False           
-    print(f"Mask boolean berhasil dibuat. Total piksel valid: {np.sum(mask_valid)}")
-    print(f"Membuka tumpukan fitur...")
+    logger.info(f"Mask boolean berhasil dibuat. Total piksel valid: {np.sum(mask_valid)}")
+    # print(f"Membuka tumpukan fitur...")
     nf = os.path.splitext(os.path.basename(input_folder))[0]
     os.makedirs(output_folder, exist_ok=True)
     output_path = os.path.join(output_folder, f"{nf}_masked.tif")
@@ -85,7 +85,7 @@ def mask_tumpukan_fitur(input_folder, mask_path, output_folder, logika=lambda x:
         # Membaca fitur sekaligus
         data_stack = src_data.read()
         profile = src_data.profile
-        print("Menerapkan mask ke semua fitur...")
+        # print("Menerapkan mask ke semua fitur...")
         data_stack[:, ~mask_valid] = nilai_nodata
         
         # Perbarui profile untuk file output agar konsisten
@@ -94,8 +94,8 @@ def mask_tumpukan_fitur(input_folder, mask_path, output_folder, logika=lambda x:
             count=data_stack.shape[0], 
             nodata=nilai_nodata
         )
-        print("Menyimpan hasil masking...")
+        # print("Menyimpan hasil masking...")
         with rio.open(output_path, "w", **profile) as dest:
             dest.write(data_stack)
-    print(f"File {nf}_masked.tif berhasil disimpan di {output_folder}")
+    # print(f"File {nf}_masked.tif berhasil disimpan di {output_folder}")
     return output_path

@@ -24,15 +24,15 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, check
     import joblib
     output_path = os.path.join(output_folder, output_filename)
     os.makedirs(output_folder, exist_ok=True)
-    print(f"Memuat model...")
+    # print(f"Memuat model...")
     try:
         with joblib.parallel_backend('threading'):
             model = joblib.load(model_path)
     except FileNotFoundError:
-        print(f"ERROR: File model tidak ditemukan. Silahkan dicek dulu.")
+        # print(f"ERROR: File model tidak ditemukan. Silahkan dicek dulu.")
         return
 
-    print(f"Membuka tumpukan fitur...")
+    # print(f"Membuka tumpukan fitur...")
     with rio.open(stack_path) as src:
         # Dapatkan metadata untuk file output
         profile = src.profile
@@ -43,7 +43,7 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, check
             nodata=0           
         )
         
-        print(f"Memisahkan padi dengan gulma...")
+        # print(f"Memisahkan padi dengan gulma...")
         with rio.open(output_path, "w", **profile) as dest:
             # Proses citra dalam "potongan" (chunks/tiles) untuk menghemat RAM
             total_blocks = len(list(src.block_windows(1)))
@@ -89,7 +89,7 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, check
                 isThreshold = json.dumps(True)
                 dest.update_tags(THRESHOLD=isThreshold)
                 
-    print(f"Pemisahan selesai! Peta segmentasi disimpan di: {output_folder}")
+    # print(f"Pemisahan selesai! Peta segmentasi disimpan di: {output_folder}")
     return output_path
 
 def deteksi_penyakit_rumpun(scaler, model, input_folder, output_folder, check_cancel, on_progress):

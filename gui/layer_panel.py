@@ -58,7 +58,7 @@ class LayerPanel(QWidget):
 
     # Update z-order
     def update_z_order(self):
-        logger.info("Sinyal terdeteksi, perbarui z-order")
+        logger.info("Sinyal terdeteksi, perbarui z-order layer panel")
         ids = []
         iterator = QTreeWidgetItemIterator(self.tree)
         while iterator.value():

@@ -379,7 +379,7 @@ class RasterHandler(QObject):
                 False
             )
             logger.info(f"Reload layer {layer_id} -> f{factor} {bands.shape}")
-        info.get("current_factor") = factor     
+        info["current_factor"] = factor     
 
     def update_overview_level(self):
         zoom_ratio = self.viewport_zoom_ratio

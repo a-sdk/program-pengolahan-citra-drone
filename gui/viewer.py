@@ -57,14 +57,27 @@ class Viewer(QWidget):
         self._zoom = 0
 
     def set_scene_origin(self, x, y):
-        self.scene_origin_x = x
-        self.scene_origin_y = y
-        logger.info(
-            f"SET origin: x={round(x, 2)}, y={round(y,2)}"
-        )
+        if self.scene_origin_x is None:
+            self.scene_origin_x = x
+            self.scene_origin_y = y
+            logger.info(
+                f"SET origin: x={round(x, 2)}, y={round(y,2)}"
+            )
 
-    def update_list_ids(self, ids):
+    def set_z_order(self, ordered_ids):
+        for i, lid in enumerate(ordered_ids):
+            if lid in self.layer_items:
+                z = len(ordered_ids) - i
+                self.layer_items[lid].setZValue(z)
+                logger.info(
+                    f"Mengatur z-order: "
+                    f"id={lid} -> z-order={z}"
+                    )
+        self.viewer.viewport().update()
+
+    def update_z_order(self, ids):
         self.list_ids = ids
+        self.set_z_order(self.list_ids)
 
     def get_viewport_state(self):
         logger.info(
@@ -92,8 +105,8 @@ class Viewer(QWidget):
         info = layer.metadata
         img = layer.item
         transform = layer.qtransform
-        w = info["width"]
-        h = info["height"]
+        w = info.get("width")
+        h = info.get("height")
         # Map top left 0, 0
         top_left = transform.map(QPointF(0, 0))
         bot_right = transform.map(QPointF(w, h))
@@ -137,7 +150,7 @@ class Viewer(QWidget):
         item.setTransform(transform)
         item.setTransformationMode(Qt.FastTransformation)
         item.setAcceptHoverEvents(False)
-        self.set_z_order(self.list_ids)
+        self.update_z_order(self.list_ids)
 
         if init_view and h > 10000 and w > 10000:
             self.fit_to_view()
@@ -203,6 +216,7 @@ class Viewer(QWidget):
             color = (255, 255, 116, 80)
             if legend_dict and class_col:
                 val = feature[class_col]
+                str_val = str(val)
                 try:
                     num_val = float(val)
                     is_num = True
@@ -215,9 +229,9 @@ class Viewer(QWidget):
                             color = data["color"] # Warna berdasarkan rentang nilai
                             # logger.info(f"Value: {val} | Label: {data['label']} | Color: {color}")
                             break
-                elif str(val) in legend_dict:
-                    color = legend_dict[val]["color"]
-                    label = legend_dict[val]["label"]
+                elif str_val in legend_dict:
+                    color = legend_dict[str_val]["color"]
+                    label = legend_dict[str_val]["label"]
                     # logger.info(f"Value: {val} | Label: {label} | Color: {color}")
 
             if geom is None or geom.is_empty:
@@ -231,21 +245,10 @@ class Viewer(QWidget):
                 self._draw_line_feature(geom.coords, group, color)
             elif geom.geom_type == "Point":
                 self._draw_point_feature(geom.x, geom.y, group, color)
-        self.set_z_order(self.list_ids)
+            self.update_z_order(self.list_ids)
         
     def set_visible(self, layer_id, visible):
         self.layer_items[layer_id].setVisible(visible)
-
-    def set_z_order(self, ordered_ids):
-        for i, lid in enumerate(ordered_ids):
-            if lid in self.layer_items:
-                z = len(ordered_ids) - i
-                self.layer_items[lid].setZValue(z)
-                logger.info(
-                    f"Mengatur z-order: "
-                    f"id={lid} -> z-order={z}"
-                    )
-        self.viewer.viewport().update()
 
     def remove_item(self, layer_id):
         item = self.layer_items.pop(layer_id, None)
@@ -333,17 +336,30 @@ class Viewer(QWidget):
         return super().eventFilter(source, event)
 
     def mousePressEvent(self, event): 
+        # logger.info(
+        #     f"mousePressEvent masuk, "
+        #     f"self= {type(self)}, "
+        #     f"button={event.button()}, "
+        #     f"isDrawing={self.isDrawing}"
+        #     )
+
         if self.isDrawing and event.button() == Qt.MouseButton.LeftButton:
-            # logger.info("Mode gambar: klik kiri")
+            logger.info("Mode gambar: klik kiri terdeteksi")
             # Tambah titik sudut
             pixel_pos = event.pos()
             scene_pos = self.viewer.mapToScene(pixel_pos)
+            # logger.info(
+            #     f"click_pos-{pixel_pos}, "
+            #     f"scene_pos={scene_pos}"
+            # )
             self.temp_shp_points.append(scene_pos)
+            # logger.info(f"temp_points={self.temp_shp_points}")
             if self.scene_origin_x is not None and self.scene_origin_y is not None:
                 world_x = scene_pos.x() + self.scene_origin_x
                 world_y = scene_pos.y() + self.scene_origin_y
             coords = (world_x, world_y)
             self.geo_coords.append(coords)
+            # logger.info(f"geo_coord_points={self.geo_coords}")
             if self.temp_shp_type == "Point":
                 self.finalize_polygon()
             else:
@@ -391,6 +407,7 @@ class Viewer(QWidget):
         self.viewer.viewport().update() 
 
     def update_draw_polygon(self):
+        logger.info("UPDATE DRAW POLYGON")
         if not self.temp_shp_points:
             return
         
@@ -405,6 +422,8 @@ class Viewer(QWidget):
         self.active_poly_item.setPen(pen)
         self.active_poly_item.setBrush(QColor(255, 0, 0, 50))
         self.scene.addItem(self.active_poly_item)
+        self.active_poly_item.setZValue(100)
+        self.viewer.viewport().update()
 
     def finalize_polygon(self):
         from shapely.geometry import Point, LineString, Polygon
@@ -435,6 +454,8 @@ class Viewer(QWidget):
             final_poly_item.setBrush(QColor(153, 245, 39, 50))
             self.commit_poly_item.append(final_poly_item)
             self.scene.addItem(final_poly_item)
+            final_poly_item.setZValue(100)
+            self.viewer.viewport().update()
 
             if self.active_poly_item:
                 self.scene.removeItem(self.active_poly_item)

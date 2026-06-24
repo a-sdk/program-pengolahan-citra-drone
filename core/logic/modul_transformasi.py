@@ -192,7 +192,7 @@ def persiapan_segmentasi(input_folder, output_folder, nilai_nodata=0):
         nir = src.read(7)
         profile = src.profile
 
-    print("\nMenghitung transformasi indeks vegetasi...")
+    # print("\nMenghitung transformasi indeks vegetasi...")
     profile.update(
         dtype="float32",
         count=1
@@ -256,7 +256,7 @@ def proses_segmentasi(input_folder, ndvi_path, output_folder, check_cancel, on_p
     # Membuat peta segmentasi gulma dan padi
     model_gulma = str(AppPaths.assets("defaults/models/model_deteksi_gulma_v1.joblib"))
     peta_segmentasi_gulma = pisahkan_gulma(model_gulma, input_folder, output_folder, "segmentasi_gulma.tif", check_cancel, on_progress)
-    print("Memuat file hasil transformasi...")
+    # print("Memuat file hasil transformasi...")
     with (
         rio.open(ndvi_path) as src_ndvi,
         rio.open(peta_segmentasi_gulma) as src_gulma
@@ -281,7 +281,7 @@ def proses_segmentasi(input_folder, ndvi_path, output_folder, check_cancel, on_p
     # Thresholding
     mask_ndvi = ndvi > t_ndvi
     mask_final = mask_ndvi & mask_padi
-    print(f"Menghitung ambang NDVI dengan batas {t_ndvi}...")
+    # print(f"Menghitung ambang NDVI dengan batas {t_ndvi}...")
     hasil_threshold = mask_final.astype(float)
 
     # Menyimpan hasil threshold
