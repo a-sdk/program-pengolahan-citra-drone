@@ -1,10 +1,17 @@
 # Changelogs
 
 ## Beta version changelogs
+### Versi 0.0.7 - 25 Juni 2026
+* **Pembaruan Fitur & Perbaikan Bug**:
+    * Menghapus temp folder sesuai layer.
+    * Memisahkan pemuatan raster dari thread utama.
+    * Mengatasi masalah overview akibat zoom.
+    * Menambah fitur window reading untuk zoom detail.
+    * Modifikasi fit to view sesuai layer visible.
 ### Versi 0.0.6 - 11 Juni 2026
 * **Pembaruan Fitur & Perbaikan Bug**:
     * Menambah fitur overview raster.
-    * Mengoptasi penggunaan memori saat menampilkan raster.
+    * Mengoptimasi penggunaan memori saat menampilkan raster.
     * Memperbaiki bug scene-world coordinate.
 ### Versi 0.0.5 - 7 Juni 2026
 * **Pembaruan Fitur & Perbaikan Bug**:
