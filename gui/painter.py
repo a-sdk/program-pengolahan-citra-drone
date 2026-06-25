@@ -41,13 +41,13 @@ class PolygonDrawingTool(QObject):
         if self.is_drawing:
             if button == Qt.MouseButton.LeftButton:
                 # logger.info("Mode gambar: klik kiri")
-                logger.info(f"scene pos={pos}")
+                # logger.info(f"scene pos={pos}")
                 self.temp_shp_points.append(pos)
                 if self.origin_x and self.origin_y:
                     world_x = pos.x() + self.origin_x
                     world_y = pos.y() + self.origin_y
                     coords = (world_x, world_y)
-                    logger.info(f"utm={coords}")
+                    # logger.info(f"utm={coords}")
                     self.geo_coords.append(coords)
                 if self.temp_shp_type == "Point":
                     self.finalize_polygon()
@@ -80,29 +80,30 @@ class PolygonDrawingTool(QObject):
         if self.active_poly_item:
             self.renderer.scene.removeItem(self.active_poly_item)
             self.active_poly_item = None
-        if self.commit_poly_item:
-            for item in self.commit_poly_item:
-                self.renderer.scene.removeItem(item)
         self.temp_shp_points.clear()
         self.geo_coords.clear()
-        self.list_poly.clear()
-        self.commit_poly_item.clear()
+        logger.info("Drawing cancelled")
         self.drawInfoMsg.emit("Drawing cancelled")
 
     def stop_drawing(self):
         self.renderer.viewer.setCursor(Qt.ArrowCursor)
         self.renderer.viewer.viewport().setCursor(Qt.ArrowCursor)
         self.renderer.viewer.setFocus(False)
+        logger.info("Drawing mode disabled")
         self.drawInfoMsg.emit("Drawing mode disabled")
         self.is_drawing = False
         self.cancel_drawing()
+        if self.commit_poly_item:
+            for item in self.commit_poly_item:
+                self.renderer.scene.removeItem(item)
+        self.commit_poly_item.clear()
+        self.list_poly.clear()
         self.temp_shp_crs = None
         self.temp_shp_path = None
         self.temp_shp_type = None
         self.renderer.viewer.viewport().update() 
 
     def update_draw_polygon(self):
-        logger.info("UPDATE DRAW POLYGON")
         if not self.temp_shp_points:
             return
         
@@ -148,6 +149,7 @@ class PolygonDrawingTool(QObject):
             final_poly_item.setPen(pen)
             final_poly_item.setBrush(QColor(153, 245, 39, 50))
             self.commit_poly_item.append(final_poly_item)
+            # logger.info(f"commit_poly_item={len(self.commit_poly_item)}")
             self.renderer.scene.addItem(final_poly_item)
             final_poly_item.setZValue(100)
             self.renderer.viewer.viewport().update()
