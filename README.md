@@ -6,7 +6,7 @@ Proyek ini adalah program untuk mengolah citra udara dari drone sehingga menghas
 
 ## Fitur Utama
 
-1. Memuat citra raster GeoTiff dan gambar biasa (.png/.jpg/.jpeg).
+1. Memuat citra raster GeoTiff.
 2. Memuat vektor seperti shapefile dan geopackage.
 3. Membuat dan menggambar poligon.
 4. Memproses raster GeoTiff menggunakan model machine learning.
@@ -20,7 +20,7 @@ Ikuti langkah-langkah berikut untuk menjalankan proyek di komputer lokal Anda.
 
 ### Persyaratan
 
-Pastikan Anda telah mengunduh aplikasi (.exe) dan folder internalnya yang dimuat dalam zip.
+Pastikan Anda telah mengunduh file zip yang memuat aplikasi (.exe) dan folder internalnya.
 
 ### Instalasi
 
