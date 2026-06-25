@@ -12,6 +12,7 @@ from gui.legend_panel import LegendPanel
 from gui.input_dialog import InputDialog
 from gui.new_shp_dialog import CreateShapefileDialog
 from gui.worker import Worker
+from gui.painter import PolygonDrawingTool
 from gui.raster_processor import RasterHandler
 from gui.vector_processor import VectorHandler
 from gui.layer_manager import LayerManager
@@ -68,6 +69,8 @@ class MainWindow(QMainWindow):
         self.progress_bar = QProgressBar()
         self.progress_bar.setMaximum(100)
         self.progress_bar.setVisible(False)
+        self.polygon_tool = PolygonDrawingTool(self.viewer)
+        self.viewer.active_tool = self.polygon_tool
         self.raster_handler = RasterHandler(layer_manager=self.layer_manager)
         self.vector_handler = VectorHandler(layer_manager=self.layer_manager)
         self.disease_ctrl = DiseaseAnalysis()
@@ -200,9 +203,9 @@ class MainWindow(QMainWindow):
         self.layer_panel.layerRemoveRequested.connect(self.remove_layer)
         self.layer_panel.layerSelected.connect(self.update_legend_from_layer)
         self.layer_panel.infoMsg.connect(self._status_bar_info)
-        self.viewer.infoMsg.connect(self._status_bar_info)
+        self.polygon_tool.drawInfoMsg.connect(self._status_bar_info)
+        self.polygon_tool.drawFinished.connect(self.draw_shp_finished)
         self.viewer.viewportChanged.connect(self.on_viewport_changed)
-        self.viewer.drawFinished.connect(self.draw_shp_finished)
         self.action_open_shp.triggered.connect(self.open_vector_file)
         self.action_open_img.triggered.connect(self.open_img_file)
         self.action_add_raster_layer.triggered.connect(self.open_img_file)
@@ -339,20 +342,13 @@ class MainWindow(QMainWindow):
             logger.info(f"Tipe geometri: {dtype}, CRS: {crs}")
             
             if path:
-                self.viewer.temp_shp_path = path
-                self.viewer.temp_shp_type = dtype
-                self.viewer.temp_shp_crs = crs
-                self.viewer.isDrawing = True
-                self.viewer.setFocus(True)
-                self.viewer.setCursor(Qt.CrossCursor)
-                self.viewer.viewer.viewport().setCursor(Qt.CrossCursor)
-                self.statusBar().showMessage("Draw polygon mode enabled. Left click to add points, right click to finish. Press enter/return to save, esc to cancel", 20000)
+                self.polygon_tool.start_drawing(path, dtype, crs)
+                self.statusBar().showMessage("Drawing mode enabled. Left click to add points, right click to finish. Press enter/return to save, esc to cancel", 20000)
     
-    def draw_shp_finished(self, conds, path):
-        if conds:
-            self.viewer.del_drawing()
-            if path:
-                self.load_vector_layer(path)
+    def draw_shp_finished(self, path):
+        self.polygon_tool.stop_drawing()
+        if path:
+            self.load_vector_layer(path)
 
     def get_layers_list(self):
         logger.info("Update list layer combo box")
