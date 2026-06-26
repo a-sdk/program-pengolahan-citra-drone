@@ -48,10 +48,6 @@ class Viewer(QWidget):
         if self.scene_origin_x is None:
             self.scene_origin_x = x
             self.scene_origin_y = y
-            self.active_tool.set_draw_origin(x, y)
-            logger.info(
-                f"SET origin: x={round(x, 2)}, y={round(y,2)}"
-            )
 
     def set_z_order(self, ordered_ids):
         for i, lid in enumerate(ordered_ids):
