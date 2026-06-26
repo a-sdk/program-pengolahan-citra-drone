@@ -369,6 +369,7 @@ def deteksi_nutrisi_petak(scaler_n, scaler_p, scaler_k, model_n, model_p, model_
     gdf.to_file(output_shp, driver="ESRI Shapefile")
     
     return output_gpkg
+
 if __name__ == "__main__":
     from modul_utilitas import PlantDiseaseAnalyzer
     import glob

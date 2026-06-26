@@ -270,14 +270,6 @@ def proses_segmentasi(input_folder, ndvi_path, output_folder, check_cancel, on_p
     t_ndvi = otsu_threshold(ndvi, jumlah_bin=256, rentang_nilai=(-1, 1))
     # t_savi = otsu_threshold(savi, jumlah_bin=256, rentang_nilai=(-1, 1))
 
-    # Menampilkan histogram (opsional)
-    # ndre_1d = ndre.ravel()    
-    # ndvi_1d = ndvi.ravel()    
-    # savi_1d = savi.ravel() 
-    # tampilkan_histogram("NDRE", ndre_1d, t_ndre)
-    # tampilkan_histogram("NDVI", ndre_1d, t_ndvi)
-    # tampilkan_histogram("SAVI", savi_1d, t_savi)
-
     # Thresholding
     mask_ndvi = ndvi > t_ndvi
     mask_final = mask_ndvi & mask_padi

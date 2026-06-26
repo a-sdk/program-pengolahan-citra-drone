@@ -61,8 +61,6 @@ def potong_raster(input_folder, shp_path, output_folder, output_filename="clip_r
     # print(f"File {output_filename} berhasil disimpan di {output_folder}")
     return output_path
     
-    
-    
 if __name__ == "__main__":
     path_hasil = r"C:\Users\acer_\Documents\Orthomosaic\tes program skripsi\klip"
     path_tif = r"C:\Users\acer_\Documents\Orthomosaic\tes program skripsi\HST 29 36_PAGI_30.tif"

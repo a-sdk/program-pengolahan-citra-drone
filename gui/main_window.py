@@ -2,19 +2,19 @@ from PyQt5 import uic
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QSize, Qt, QTimer
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QLabel, QVBoxLayout, 
+    QMainWindow, QLabel, QVBoxLayout, 
     QFileDialog, QMessageBox, QProgressBar,
     QProgressDialog
 )
-from gui.viewer import Viewer
-from gui.layer_panel import LayerPanel
-from gui.legend_panel import LegendPanel
-from gui.input_dialog import InputDialog
-from gui.new_shp_dialog import CreateShapefileDialog
+from gui.widgets.viewer import Viewer
+from gui.widgets.layer_panel import LayerPanel
+from gui.widgets.legend_panel import LegendPanel
+from gui.widgets.input_dialog import InputDialog
+from gui.widgets.new_shp_dialog import CreateShapefileDialog
+from gui.tools.painter import PolygonDrawingTool
+from gui.tools.raster_processor import RasterHandler
+from gui.tools.vector_processor import VectorHandler
 from gui.worker import Worker
-from gui.painter import PolygonDrawingTool
-from gui.raster_processor import RasterHandler
-from gui.vector_processor import VectorHandler
 from gui.layer_manager import LayerManager
 from app.disease_controller import DiseaseAnalysis
 from app.water_controller import WaterAnalysis

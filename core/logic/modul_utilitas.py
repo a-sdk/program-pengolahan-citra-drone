@@ -1,25 +1,22 @@
-'''
+"""
 Modul berisi fungsi-fungsi pembantu
 yang digunakan pada program utama
-'''
+"""
+
 import os
 import json
 import sqlite3
-import glob
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 import rasterio as rio
 import geopandas as gpd
 import fiona
-from shapely.geometry import Point, MultiPoint, Polygon
+from shapely.geometry import Point, MultiPoint
 from pyproj import database
 from pyproj.aoi import AreaOfInterest
-from rasterio.features import rasterize
 import shapely.ops as ops
 from sklearn.cluster import KMeans
-import matplotlib.colors as mcolor
-import matplotlib.patches as mpatch
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -414,59 +411,7 @@ def hitung_sebaran_rumpun(input_folder, legend_dict):
             LEGEND=legend_json,
             STATS=stats_json
             )
-    return stats   
-        
-# Fungsi menampilkan hasil prediksi model per petak 
-def tampilkan_penyakit_petak(gpkg_path, penyakit, output_folder):
-    """
-    Menampilkan peta sebaran pada grafik.
-    
-    Parameters:
-        gpkg_path (str): Lokasi shapefile hasil prediksi model.
-        penyakit (str): Nama penyakit.
-        output_folder (str): Nama folder tempat file akan disimpan.
-
-    Returns:
-        str: Output path.
-    """
-
-    print(f"\nMenampilkan peta sebaran penyakit {penyakit.title()}...")
-    output_folder = f"{output_folder}/Hasil_Prediksi/Sebaran_Rumpun"
-    output_path = f"{output_folder}/peta_sebaran_{penyakit}.png"
-    os.makedirs(output_folder, exist_ok=True)
-    alpha = "#00000000"
-    hg = "#008000ff"
-    ht = "#90ee90ff"
-    kuning = "#ffff74ff"
-    merah = "#d7191cff"
-    warna = [alpha, hg, ht, kuning, merah]
-    cmaps = mcolor.ListedColormap(warna)
-
-    bounds = np.arange(-0.5, 5, 1)
-    norms = mcolor.BoundaryNorm(bounds, 5)
-
-    gdf = gpd.read_file(gpkg_path)
-    # fig, ax = plt.subplots(1, 1, figsize=(10, 8))
-
-    # gdf.plot(
-    #     column=penyakit,  
-    #     cmap=cmaps, 
-    #     norm=norms,
-    #     ax=ax,
-    #     edgecolor='black', 
-    #     linewidth=0.3
-    #     )
-    
-    patches = [
-        mpatch.Patch(color=hg, label="Sehat", ec="black"),
-        mpatch.Patch(color=ht, label="Ringan", ec="black"),
-        mpatch.Patch(color=kuning, label="Sedang", ec="black"),
-        mpatch.Patch(color=merah, label="Parah", ec="black")
-    ]
-    # ax.legend(handles=patches, loc="lower right", bbox_to_anchor=(1, 1), title="Tingkat Kerusakan")
-    plt.title(f"Hasil Deteksi Serangan Penyakit {penyakit.title()}", fontsize=14)
-    # plt.show()
-    plt.savefig(output_path)
+    return stats
        
 # Fungsi untuk menghitung sebaran per petak
 def hitung_sebaran_petak(gpkg_path, legend_dict):

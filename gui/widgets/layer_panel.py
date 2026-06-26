@@ -118,7 +118,7 @@ class LayerPanel(QWidget):
         if layer:
             metadata = layer.metadata
             name = layer.name
-            from gui.property_dialog import PropertyDialog 
+            from gui.widgets.property_dialog import PropertyDialog 
             dialog = PropertyDialog(name, metadata, self)
             dialog.exec_()
 
