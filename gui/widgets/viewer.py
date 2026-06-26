@@ -230,7 +230,7 @@ class Viewer(QWidget):
                 self._draw_line_feature(geom.coords, group, color)
             elif geom.geom_type == "Point":
                 self._draw_point_feature(geom.x, geom.y, group, color)
-            self.update_z_order(self.list_ids)
+        self.update_z_order(self.list_ids)
         
     def set_visible(self, layer_id, visible):
         self.layer_items[layer_id].setVisible(visible)
