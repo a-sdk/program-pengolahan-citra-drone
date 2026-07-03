@@ -36,6 +36,8 @@ class MainWindow(QMainWindow):
         self._layer_id = 0
         self.elapsed_sec = 0
         self.active_thread = []
+        self.origin_x = None
+        self.origin_y = None
         self.queue_files = None
         self.time_str = str(0)
         self.current_crs = "Unknown"

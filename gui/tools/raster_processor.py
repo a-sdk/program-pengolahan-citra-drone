@@ -32,6 +32,7 @@ class RasterHandler(QObject):
         self.debounce_delay = 350 #ms
 
     def get_raster_origin(self, xmin, ymax):
+        if self.scene_origin_x is None:
             self.scene_origin_x = xmin
             self.scene_origin_y = ymax
             self.originUpdated.emit(xmin, ymax)

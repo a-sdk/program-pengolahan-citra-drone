@@ -96,7 +96,7 @@ def hitung_gndvi(nir, m_green):
     gndvi = np.clip(gndvi, -1.0, 1.0)
     return gndvi
 
-def hitung_ndre(nir, red_edge):
+def hitung_ndrei(nir, red_edge):
     """
     Mentranformasi citra menggunakan Normalized Difference Red Edge Index.
     
@@ -224,7 +224,7 @@ def proses_transformasi(input_folder, output_folder):
     data_trimmed["CIVE"]  = hitung_cive(data_trimmed["RED"], data_trimmed["GREEN"], data_trimmed["BLUE"])
     data_trimmed["EVI"]   = hitung_evi(data_trimmed["NIR"], data_trimmed["M_RED"], data_trimmed["BLUE"])
     data_trimmed["GNDVI"] = hitung_gndvi(data_trimmed["NIR"], data_trimmed["GREEN"])
-    data_trimmed["NDRE"]  = hitung_ndre(data_trimmed["NIR"], data_trimmed["RED_EDGE"])
+    data_trimmed["NDRE"]  = hitung_ndrei(data_trimmed["NIR"], data_trimmed["RED_EDGE"])
     data_trimmed["NDVI"]  = hitung_ndvi(data_trimmed["NIR"], data_trimmed["RED"]) # 
     data_trimmed["VIDVI"] = hitung_vidvi(data_trimmed["RED"], data_trimmed["GREEN"], data_trimmed["BLUE"])
 

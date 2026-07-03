@@ -43,7 +43,7 @@ def mask_tumpukan_fitur(input_folder, mask_path, output_folder, logika=lambda x:
         
         # Perbarui profile untuk file output agar konsisten
         profile.update(
-            dtype="uint16",
+            dtype="float32",
             count=data_stack.shape[0], 
             nodata=nilai_nodata
         )

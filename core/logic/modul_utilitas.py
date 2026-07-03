@@ -54,7 +54,7 @@ def generate_grid_points(polygon, target_count):
     return points
         
 # Fungsi untuk membuat multipoligon (shahiban)
-def buat_multipoligon(shp_path, output_folder, on_progress):
+def buat_multipoligon(shp_path, output_folder, on_progress, subpoly_area=0.5):
     """
     Membuat multipoligon dari shapefile poligon.
 
@@ -94,37 +94,38 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
     # Menentukan jumlah komponen poligon berdasarkan luas 
     with fiona.open(shp_path) as shp:
         jml_poligon = len(shp)
-    poly_area = polygons.geometry.area.sum()
-    subpoly_area = 0.5 #m2
-    jml_komponen = (poly_area/subpoly_area).astype(int)
-    jml_cluster = jml_poligon * jml_komponen
-    logger.info(f"Terdapat {jml_poligon} poligon, total luasan: {poly_area:.2f} m2")
-    logger.info(f"Jumlah komponen: {jml_komponen}")
+    polygons["area"] = polygons.area
+    # Minimal satu komponen setiap poligon
+    polygons["n_comp"] = np.maximum(
+        1,
+        np.ceil(polygons["area"] / subpoly_area).astype(int)
+    )
+
+    polygons["n_point"] = polygons["n_comp"] * 3
+    jml_cluster = polygons["n_comp"].sum()
+    poly_area = polygons["area"].sum()
+    logger.info(f"Terdapat {jml_poligon} poligon")
+    logger.info(f"Total luas: {poly_area:.2f} m2")
+    logger.info(f"Jumlah cluster: {jml_cluster}")
+    logger.info(
+    "\n%s",
+    polygons[["id", "area", "n_comp", "n_point"]]
+    )
     output_intersection = os.path.join(output_folder, f"{filename}_{jml_cluster}_part.shp")
     # ========================================
     # Tahap 2: Generate Random Points
     # ========================================
     if on_progress:
         on_progress(12, f"Generating random points...")
-    point_count = jml_cluster * 3
-    areas = polygons.area
-    total_area = areas.sum()
-    proportions = (areas / total_area) * point_count
-
-    int_parts = proportions.astype(int)
-    residuals = proportions - int_parts
-    remaining = point_count - int_parts.sum()
-    extra_idx = residuals.nlargest(remaining).index
-
-    int_parts.loc[extra_idx] += 1
-
     all_points = []
-    for idx, row in polygons.iterrows():
-        pts = generate_grid_points(row.geometry, int_parts[idx])
+    for _, row in polygons.iterrows():
+        pts = generate_grid_points(
+            row.geometry,
+            row.n_point
+        )
         all_points.extend(pts)
-
     gdf_points = gpd.GeoDataFrame(geometry=all_points, crs=polygons.crs)
-    # print(f"{len(gdf_points)} titik acak dihasilkan")
+    logger.info(f"{len(gdf_points)} titik acak dihasilkan")
 
     # ========================================
     # Tahap 3: K-Means Clustering
@@ -134,7 +135,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
     coords = [(p.x, p.y) for p in gdf_points.geometry]
     kmeans = KMeans(n_clusters=jml_cluster, random_state=42, n_init=20)
     gdf_points["CLUSTER_ID"] = kmeans.fit_predict(coords)
-    # print("K-Means clustering selesai")
+    logger.info("K-Means clustering selesai")
 
     # ========================================
     # Tahap 4: Aggregate per Cluster
@@ -142,7 +143,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
     if on_progress:
         on_progress(14, f"Generating aggregates...")
     agg = gdf_points.dissolve(by="CLUSTER_ID", aggfunc="first").reset_index()
-    # print("Aggregate selesai")
+    logger.info("Aggregate selesai")
 
     # ========================================
     # Tahap 5: Hitung Centroid
@@ -151,7 +152,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
         on_progress(15, f"Calculating centroids...")
     agg["geometry"] = agg.geometry.centroid
     centroids = agg.copy()
-    # print(f"{len(centroids)} centroid dihasilkan")
+    logger.info(f"{len(centroids)} centroid dihasilkan")
 
     # ========================================
     # Tahap 6: Voronoi Polygon
@@ -170,7 +171,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
         gdf_voronoi, centroids, how="left", distance_col="dist"
     )
 
-    # print("Voronoi polygons selesai")
+    # logger.info("Voronoi polygons selesai")
 
     # ========================================
     # Tahap 7: Intersection
@@ -179,7 +180,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
         on_progress(19, f"Performing intersection...")
     if polygons.crs != gdf_voronoi.crs:
         gdf_voronoi = gdf_voronoi.to_crs(polygons.crs)
-        # print("CRS berbeda, disamakan dulu.")
+        # logger.info("CRS berbeda, disamakan dulu.")
 
     gdf_inter = gpd.overlay(polygons, gdf_voronoi, how="intersection")
     gdf_inter = gdf_inter[
@@ -191,7 +192,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress):
     # === Simpan langsung ke folder utama tanpa subfolder ===
     gdf_inter.to_file(output_intersection, driver="ESRI Shapefile")
 
-    # print(f"Intersection selesai")
+    logger.info(f"Intersection selesai")
 
     return output_intersection
 
@@ -333,7 +334,7 @@ def tumpuk_fitur(lst_fitur, output_folder, output_filename, nilai_nodata=0):
                     nodata=nilai_nodata
                 ) 
             # Baca semua band dari file ini
-            feature_stack.append(src.read().astype("float32"))
+            feature_stack.append(src.read())
 
     # Gabungkan semua data menjadi satu array NumPy besar
     full_stack_array = np.vstack(feature_stack)
@@ -346,7 +347,7 @@ def tumpuk_fitur(lst_fitur, output_folder, output_filename, nilai_nodata=0):
     with rio.open(output_path, 'w', **profile) as dst:
         dst.write(full_stack_array)
 
-    print(f"Tumpukan fitur berhasil disimpan di: {output_folder}")
+    logger.info(f"Tumpukan fitur berhasil disimpan")
     return output_path
 
 # Fungsi untuk menghitung sebaran penyakit per rumpun

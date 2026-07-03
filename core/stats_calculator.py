@@ -22,7 +22,7 @@ class StatsCalculator:
     def _do_calculation(self, *args, **kwargs):
         raise NotImplementedError("Child class harus mengimplementasikan method _do_prediction")
         
-class PlantCalculator(StatsCalculator):
+class PlantDiseaseCalculator(StatsCalculator):
     """
     Kelas untuk menghitung sebaran per rumpun.
     """ 
@@ -31,8 +31,8 @@ class PlantCalculator(StatsCalculator):
         self.legend = {
             1: {"label": "Healthy", "color": (0,128,0)},
             2: {"label": "Low",     "color": (144,238,144)},
-            3: {"label": "Mild",    "color": (255,255,116)},
-            4: {"label": "Severe",  "color": (215,25,28)}
+            3: {"label": "Mild",    "color": (237,237,39)},
+            4: {"label": "Severe",  "color": (186,18,18)}
         }
 
     def _do_calculation(self, input_folder):

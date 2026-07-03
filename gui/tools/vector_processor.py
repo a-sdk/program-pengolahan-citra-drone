@@ -20,6 +20,7 @@ class VectorHandler(QObject):
         self.scene_origin_y = None
 
     def get_vector_origin(self, xmin, ymax):
+        if self.scene_origin_x is None:
             self.scene_origin_x = xmin
             self.scene_origin_y = ymax
             self.originUpdated.emit(xmin, ymax)

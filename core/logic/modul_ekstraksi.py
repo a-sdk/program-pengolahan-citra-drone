@@ -42,19 +42,19 @@ def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename
     with rio.open(input_folder) as info:
         count = info.count
     
-    if count > 7:
-        nama_bands = [
-            "RED", "GREEN", "BLUE", "M_GREEN", "M_RED", 
-            "RED_EDGE", "NIR", "GNDVI", "NDREI", "NDVI", "SAVI"
-        ]
-    else:
-        nama_bands = [
-            "RED", "GREEN", "BLUE", "M_GREEN", "M_RED", 
-            "RED_EDGE", "NIR"
-        ]
 
-    # print(f"\nMemuat hasil masking: {nf}")
     with rio.open(input_folder) as src:
+        count = src.count
+        if count > 7:
+            nama_bands = [
+                "RED", "GREEN", "BLUE", "M_GREEN", "M_RED", 
+                "RED_EDGE", "NIR", "GNDVI", "NDREI", "NDVI", "SAVI"
+            ]
+        else:
+            nama_bands = [
+                "RED", "GREEN", "BLUE", "M_GREEN", "M_RED", 
+                "RED_EDGE", "NIR"
+            ]
         for i, name in enumerate(nama_bands):
             band_data = src.read(i + 1)
             
@@ -75,8 +75,8 @@ def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename
     nan_rows = df_lengkap[df_lengkap.isna().any(axis=1)]
     
     if not nan_rows.empty:
-        logger.info(f"\nPERHATIAN: Ditemukan {len(nan_rows)} poligon dengan nilai piksel tidak valid (NaN).")
-        logger.info(f"Poligon yang bermasalah: {nan_rows['Nama'].tolist()}")
+        logger.info(f"PERHATIAN: Ditemukan {len(nan_rows)} komponen poligon dengan nilai NaN.")
+        # logger.info(f"Poligon yang bermasalah: {nan_rows['Nama'].tolist()}")
     # ------------------------
     # Pembersihan dan pengurutan data
     # print(f"Membersihkan hasil ekstraksi...")
