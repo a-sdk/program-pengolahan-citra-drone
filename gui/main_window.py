@@ -14,7 +14,7 @@ from gui.widgets.new_shp_dialog import CreateShapefileDialog
 from gui.tools.painter import PolygonDrawingTool
 from gui.tools.raster_processor import RasterHandler
 from gui.tools.vector_processor import VectorHandler
-from gui.worker import Worker
+from app.worker import Worker
 from gui.layer_manager import LayerManager
 from app.controller import NutrientController, WaterController, DiseaseController
 from app.result_model import AnalysisResult

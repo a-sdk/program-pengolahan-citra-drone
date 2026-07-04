@@ -1,5 +1,5 @@
 from app.result_model import AnalysisResult
-from gui.worker import WorkerHelper
+from app.worker import WorkerHelper
 from core.logic.modul_utilitas import buat_multipoligon
 from core.logic.modul_klip import potong_raster
 from core.logic.modul_transformasi import (

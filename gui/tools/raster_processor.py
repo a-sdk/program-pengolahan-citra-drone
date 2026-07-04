@@ -5,7 +5,7 @@ import psutil
 import os
 from PyQt5.QtGui import QTransform
 from PyQt5.QtCore import pyqtSignal, QObject, QTimer
-from gui.worker import WorkerHelper
+from app.worker import WorkerHelper
 from gui.layer_manager import Layer
 from path_config import AppPaths
 
