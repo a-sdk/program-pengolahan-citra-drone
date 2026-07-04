@@ -16,9 +16,7 @@ from gui.tools.raster_processor import RasterHandler
 from gui.tools.vector_processor import VectorHandler
 from gui.worker import Worker
 from gui.layer_manager import LayerManager
-from app.disease_controller import DiseaseAnalysis
-from app.water_controller import WaterAnalysis
-from app.nutrient_controller import NutrientAnalysis
+from app.controller import NutrientController, WaterController, DiseaseController
 from app.result_model import AnalysisResult
 from path_config import AppPaths
 import os
@@ -75,9 +73,9 @@ class MainWindow(QMainWindow):
         self.viewer.active_tool = self.polygon_tool
         self.raster_handler = RasterHandler(layer_manager=self.layer_manager)
         self.vector_handler = VectorHandler(layer_manager=self.layer_manager)
-        self.disease_ctrl = DiseaseAnalysis()
-        self.water_ctrl = WaterAnalysis()
-        self.nutrient_ctrl = NutrientAnalysis()
+        self.disease_ctrl = DiseaseController()
+        self.water_ctrl = WaterController()
+        self.nutrient_ctrl = NutrientController()
         self._setup_icons()
         self._setup_statusbar()
         self.statusBar().showMessage("Ready")
@@ -150,6 +148,10 @@ class MainWindow(QMainWindow):
         self.timer.timeout.connect(self._update_timer_label)
         self.timer.start(1000) # ms
 
+    def setup_origin(self, x0, y0):
+        self.viewer.set_scene_origin(x0, y0)
+        self.polygon_tool.set_draw_origin(x0, y0)
+
     def handle_progress_dialog(self, val, msg):
         self.current_msg = msg
         self.pd.setValue(val)
@@ -197,12 +199,10 @@ class MainWindow(QMainWindow):
     def _connect_signals(self):
         logger.info("Sinyal Action terhubung")
         self.raster_handler.crsDetected.connect(self.update_crs_label)
-        self.raster_handler.originUpdated.connect(self.viewer.set_scene_origin)
-        self.raster_handler.originUpdated.connect(self.polygon_tool.set_draw_origin)
+        self.raster_handler.originUpdated.connect(self.setup_origin)
         self.raster_handler.rasterUpdated.connect(self.viewer.render_geotiff)
         self.vector_handler.crsDetected.connect(self.update_crs_label)
-        self.vector_handler.originUpdated.connect(self.viewer.set_scene_origin)
-        self.vector_handler.originUpdated.connect(self.polygon_tool.set_draw_origin)
+        self.vector_handler.originUpdated.connect(self.setup_origin)
         self.layer_panel.layerUpdated.connect(self.viewer.update_z_order)
         self.layer_panel.layerRemoveRequested.connect(self.remove_layer)
         self.layer_panel.layerSelected.connect(self.update_legend_from_layer)
@@ -467,7 +467,7 @@ class MainWindow(QMainWindow):
             self.progress_bar.setVisible(False) 
         msg = QMessageBox(self)
         msg.setIcon(QMessageBox.Icon.Critical)
-        msg.setWindowTitle("ERROR")
+        msg.setWindowTitle("Error")
         msg.setText("An error occured")
         msg.setInformativeText(str(error_msg)) 
         msg.setStandardButtons(QMessageBox.Ok)

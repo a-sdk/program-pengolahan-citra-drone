@@ -89,7 +89,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress, subpoly_area=0.5):
         polygons = polygons.to_crs(epsg=epsg_code)
         logger.info(f"CRS diubah dari {crs_asal} ke UTM (EPSG:{epsg_code})")
     else:
-        logger.info(f"CRS sudah proyeksi: ({str(polygons.crs).upper()})")
+        logger.info(f"CRS sudah proyeksi ({str(polygons.crs).upper()})")
 
     # Menentukan jumlah komponen poligon berdasarkan luas 
     with fiona.open(shp_path) as shp:
@@ -105,8 +105,8 @@ def buat_multipoligon(shp_path, output_folder, on_progress, subpoly_area=0.5):
     jml_cluster = polygons["n_comp"].sum()
     poly_area = polygons["area"].sum()
     logger.info(f"Terdapat {jml_poligon} poligon")
-    logger.info(f"Total luas: {poly_area:.2f} m2")
-    logger.info(f"Jumlah cluster: {jml_cluster}")
+    logger.info(f"Total luas {poly_area:.2f} m2")
+    logger.info(f"Jumlah cluster {jml_cluster}")
     logger.info(
     "\n%s",
     polygons[["id", "area", "n_comp", "n_point"]]
@@ -356,77 +356,77 @@ def hitung_sebaran_rumpun(input_folder, legend_dict):
     Menghitung sebaran penyakit.
     
     Parameters:
-        input_folder (str): Lokasi file GeoTIFF hasil prediksi model.
-        penyakit (str): Nama penyakit.
+        input_folder (list): Lokasi file GeoTIFF hasil prediksi model.
+        legend (dict): Informasi legenda.
 
     Returns:
         None.
     """
     from path_config import InfoRegistry
-    nf = os.path.splitext(os.path.basename(input_folder))[0]
-    penyakit = nf.split("_")[-1]
-    print(f"\nMenghitung sebaran penyakit {penyakit.title()}...")
-    with rio.open(input_folder) as src:
-        data = src.read(1)
-        nodata = src.nodata
-    # Mengecualikan nodata
-    mask_valid = (data != nodata)
-    valid_data = data[mask_valid]
-    # Menghitung total piksel valid
-    jml_data_valid = valid_data.size
-    # Mengambil semua nilai unik
-    counts = {k: v for k, v in zip(*np.unique(data, return_counts=True))}
-    labels = [info["label"] for info in legend_dict.values()]
-    # Menghitung persentase
-    stats = {k: round((counts.get(i+1, 0) / jml_data_valid) * 100, 2) for i, k in enumerate(labels)}
+    for file in input_folder:
+        nf = os.path.splitext(os.path.basename(file))[0]
+        penyakit = nf.split("_")[-1]
+        print(f"\nMenghitung sebaran penyakit {penyakit.title()}...")
+        with rio.open(file) as src:
+            data = src.read(1)
+            nodata = src.nodata
+        # Mengecualikan nodata
+        mask_valid = (data != nodata)
+        valid_data = data[mask_valid]
+        # Menghitung total piksel valid
+        jml_data_valid = valid_data.size
+        # Mengambil semua nilai unik
+        counts = {k: v for k, v in zip(*np.unique(data, return_counts=True))}
+        labels = [info["label"] for info in legend_dict.values()]
+        # Menghitung persentase
+        stats = {k: round((counts.get(i+1, 0) / jml_data_valid) * 100, 2) for i, k in enumerate(labels)}
 
-    # Mengambil nilai untuk logika
-    val_1 = stats.get(labels[0], 0)
-    val_2 = stats.get(labels[1], 0)
-    val_3 = stats.get(labels[2], 0)
-    val_4 = stats.get(labels[3], 0)
-    val_ = val_3 + val_4 
-    # Logika Rekomendasi
-    print("-" * 30)
-    if val_ > val_1 and val_ > val_2:
-        # recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
-        recom = InfoRegistry.get_info("disease", "severe")
-        # print(f"Rekomendasi: {recom}")
-    elif val_2 > val_1 and val_2 > val_ :  
-        # recom = "Lakukan pemantauan rutin dan tindakan pencegahan." 
-        recom = InfoRegistry.get_info("disease", "low")
-        # print(f"Rekomendasi: {recom}")
-    else:
-        # recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
-        recom = InfoRegistry.get_info("disease", "healthy")
-        # print(f"{recom}")
+        # Mengambil nilai untuk logika
+        val_1 = stats.get(labels[0], 0)
+        val_2 = stats.get(labels[1], 0)
+        val_3 = stats.get(labels[2], 0)
+        val_4 = stats.get(labels[3], 0)
+        val_ = val_3 + val_4 
+        # Logika Rekomendasi
+        print("-" * 30)
+        if val_ > val_1 and val_ > val_2:
+            # recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
+            recom = InfoRegistry.get_info("disease", "severe")
+            # print(f"Rekomendasi: {recom}")
+        elif val_2 > val_1 and val_2 > val_ :  
+            # recom = "Lakukan pemantauan rutin dan tindakan pencegahan." 
+            recom = InfoRegistry.get_info("disease", "low")
+            # print(f"Rekomendasi: {recom}")
+        else:
+            # recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
+            recom = InfoRegistry.get_info("disease", "healthy")
+            # print(f"{recom}")
 
-    stats["rekomendasi"] = recom
+        stats["rekomendasi"] = recom
 
-    legend_json = json.dumps(legend_dict)
-    stats_json = json.dumps(stats)
+        legend_json = json.dumps(legend_dict)
+        stats_json = json.dumps(stats)
 
-    # Menyimpan legenda dan stats sebagai metadata
-    with rio.open(input_folder, "r+") as dest:
-        dest.update_tags(
-            LEGEND=legend_json,
-            STATS=stats_json
-            )
-    return stats
+        # Menyimpan legenda dan stats sebagai metadata
+        with rio.open(file, "r+") as dest:
+            dest.update_tags(
+                LEGEND=legend_json,
+                STATS=stats_json
+                )
        
 # Fungsi untuk menghitung sebaran per petak
 def hitung_sebaran_petak(gpkg_path, legend_dict):
-    from path_config import InfoRegistry
     """
     Menghitung sebaran penyakit.
     
     Parameters:
         gpkg_path (str): Lokasi shapefile hasil prediksi model.
-        penyakit (str): Nama penyakit.
+        legend (dict): Informasi legenda.
 
     Returns:
-        dict: Hasil analisis.
+        None.
     """
+    from path_config import InfoRegistry
     try:
         layers = fiona.listlayers(gpkg_path)
     except Exception as e:
@@ -533,12 +533,10 @@ def hitung_sebaran_petak(gpkg_path, legend_dict):
             json.dumps(legend),
             json.dumps(stats)
         ))
-        hasil[layer_name] = stats
 
     # Menutup database
     conn.commit()
     conn.close()
-    return hasil
     
 
 if __name__ == "__main__":

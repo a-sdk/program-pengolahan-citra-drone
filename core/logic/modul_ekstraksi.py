@@ -82,8 +82,8 @@ def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename
     # print(f"Membersihkan hasil ekstraksi...")
     df = pd.DataFrame(hasil_ekstraksi).dropna()
     df_urut = df.sort_values(by=["id", "no_urut"], ascending=True)
-    df_urut = df_urut.drop(columns=["id"])
-    df_urut.rename(columns={"no_urut": "id"}, inplace=True)
+    df_urut = df_urut.drop(columns=["no_urut"])
+    # df_urut.rename(columns={"no_urut": "id"}, inplace=True)
     
     # Simpan file
     os.makedirs(output_folder, exist_ok=True)

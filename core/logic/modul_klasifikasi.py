@@ -287,7 +287,7 @@ def deteksi_air_petak(polynom, scaler, model_reg, input_folder, shp_path, output
             
         # Perbarui progres internal 
         if on_progress:
-            relative_prog = 80 + int(((i+1)/5) * 10)
+            relative_prog = 70 + int(((i+1)/5) * 20)
             on_progress(relative_prog, f"Generating prediction ({i+1}/5)...")
         # Masukkan ke dataframe
         df[f"prediksi_air_regresi "] = reg_raw_preds

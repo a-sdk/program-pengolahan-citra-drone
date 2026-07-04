@@ -29,7 +29,6 @@ class Worker(QThread):
 
 
 class WorkerHelper:
-
     def __init__(self, hooks=None):
         self.hooks = hooks or {}
 

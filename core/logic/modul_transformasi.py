@@ -202,7 +202,7 @@ def persiapan_segmentasi(input_folder, output_folder, nilai_nodata=0):
     ndvi_file_path = simpan_raster(transform_ndvi, profile, output_folder, "NDVI.tif", nilai_nodata)
     return ndvi_file_path 
 
-def proses_transformasi(input_folder, output_folder):
+def hitung_indeks_vegetasi(input_folder, output_folder):
     """
     Melakukan proses transformasi indeks vegetasi.
 
@@ -214,7 +214,7 @@ def proses_transformasi(input_folder, output_folder):
         str: Output path.
     """
     os.makedirs(output_folder, exist_ok=True)
-    output_path = f"{output_folder}/hasil_ekstrak_piksel.csv"
+    output_path = f"{output_folder}/pixel_val.csv"
     df = pd.read_csv(input_folder)
     bands = ["RED", "GREEN", "BLUE", "M_GREEN", "M_RED", "RED_EDGE", "NIR"]
     data_trimmed = trim_norm_df(df[bands].copy())

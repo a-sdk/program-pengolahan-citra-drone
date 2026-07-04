@@ -36,8 +36,7 @@ class PlantDiseaseCalculator(StatsCalculator):
         }
 
     def _do_calculation(self, input_folder):
-        stats = hitung_sebaran_rumpun(input_folder, legend_dict=self.legend)
-        return stats
+        hitung_sebaran_rumpun(input_folder, legend_dict=self.legend)
         
 class DiseasePlotCalculator(StatsCalculator):
     """
@@ -53,8 +52,7 @@ class DiseasePlotCalculator(StatsCalculator):
         }
 
     def _do_calculation(self, input_folder):
-        stats = hitung_sebaran_petak(input_folder, legend_dict=self.legend)
-        return stats
+        hitung_sebaran_petak(input_folder, legend_dict=self.legend)
     
 class NutrientPlotCalculator(StatsCalculator):
     """
@@ -69,8 +67,7 @@ class NutrientPlotCalculator(StatsCalculator):
         }
 
     def _do_calculation(self, input_folder):
-        stats = hitung_sebaran_petak(input_folder, legend_dict=self.legend)
-        return stats
+        hitung_sebaran_petak(input_folder, legend_dict=self.legend)
 
 class WaterPlotCalculator(StatsCalculator):
     """
@@ -89,5 +86,4 @@ class WaterPlotCalculator(StatsCalculator):
         }
 
     def _do_calculation(self, input_folder):
-        stats = hitung_sebaran_petak(input_folder, legend_dict=self.legend)
-        return stats
+        hitung_sebaran_petak(input_folder, legend_dict=self.legend)
