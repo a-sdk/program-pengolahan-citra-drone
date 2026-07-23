@@ -29,7 +29,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi(str(AppPaths.ui("main_window.ui")), self)
-        self.setWindowTitle("mY App")
+        self.setWindowTitle("RiceGIS")
         self.setWindowIcon(QIcon(str(AppPaths.assets("defaults/textures/icon/ricefield.png"))))
         self._layer_id = 0
         self.elapsed_sec = 0
