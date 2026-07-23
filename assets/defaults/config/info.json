@@ -55,8 +55,8 @@
       "disease": {
           "1": {"label": "Healthy", "color": [0,128,0]},
           "2": {"label": "Low",     "color": [144,238,144]},
-          "3": {"label": "Mild",    "color": [237,237,39]},
-          "4": {"label": "Severe",  "color": [186,18,18]}
+          "3": {"label": "Mild",    "color": [198,198,102]},
+          "4": {"label": "Severe",  "color": [203,20,20]}
       }
   }
 }
