@@ -52,8 +52,9 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, check
                 current_block += 1
                 # Memeriksa interupsi
                 if check_cancel and check_cancel():
+                    from app.controller import OperationCancelledError
                     logger.warning("Segmenter dihentikan")
-                    return None
+                    raise OperationCancelledError("User cancelled")
                 
                 # Perbarui progres internal 
                 if on_progress and current_block % 10 == 0:
@@ -108,7 +109,7 @@ def deteksi_penyakit_rumpun(scaler, model, input_folder, output_folder, check_ca
     path_hasil = []
     import json
     isPrediction = json.dumps(True)
-    print(f"Memprediksi citra...")
+    # print(f"Memprediksi citra...")
     with rio.open(input_folder) as src:
         base_profile = src.profile
         base_profile.update(
@@ -134,8 +135,9 @@ def deteksi_penyakit_rumpun(scaler, model, input_folder, output_folder, check_ca
             current_block += 1
             # Memeriksa interupsi
             if check_cancel and check_cancel():
+                from app.controller import OperationCancelledError
                 logger.warning("Classifier dihentikan")
-                return None
+                raise OperationCancelledError("User cancelled")
             
             # Perbarui progres internal 
             if on_progress and current_block % 10 == 0:
@@ -184,7 +186,7 @@ def deteksi_penyakit_rumpun(scaler, model, input_folder, output_folder, check_ca
         for dest in output_dests.values():
             dest.close()
                 
-    print(f"\nDeteksi selesai! 4 peta disimpan di folder: {output_folder}")
+    # print(f"\nDeteksi selesai! 4 peta disimpan di folder: {output_folder}")
     return path_hasil
 
 def deteksi_penyakit_petak(scaler, model, input_folder, shp_path, output_folder, check_cancel, on_progress):
@@ -203,7 +205,7 @@ def deteksi_penyakit_petak(scaler, model, input_folder, shp_path, output_folder,
     df = pd.read_csv(input_folder)
     gdf = gpd.read_file(shp_path)
  
-    fitur = ["RED", "GREEN", "BLUE", "M_GREEN", "M_RED", "RED_EDGE", "NIR"] 
+    fitur = ["RED", "GREEN", "BLUE", "M_GREEN", "M_RED", "RED_EDGE", "NIR", "NDREI"] 
 
     X_inf = df[fitur]
     X_inf_array = X_inf.values
@@ -224,8 +226,9 @@ def deteksi_penyakit_petak(scaler, model, input_folder, shp_path, output_folder,
         count += 1
         # Memeriksa interupsi
         if check_cancel and check_cancel():
+            from app.controller import OperationCancelledError
             logger.warning("Classifier dihentikan")
-            return None
+            raise OperationCancelledError("User cancelled")
             
         # Perbarui progres internal 
         if on_progress:
@@ -282,8 +285,9 @@ def deteksi_air_petak(polynom, scaler, model_reg, input_folder, shp_path, output
     for i in range(5):
         # Memeriksa interupsi
         if check_cancel and check_cancel():
+            from app.controller import OperationCancelledError
             logger.warning("Classifier dihentikan")
-            return None
+            raise OperationCancelledError("User cancelled")
             
         # Perbarui progres internal 
         if on_progress:
@@ -347,8 +351,9 @@ def deteksi_nutrisi_petak(scaler_n, scaler_p, scaler_k, model_n, model_p, model_
     for i, name in enumerate(nutrient):
         # Memeriksa interupsi
         if check_cancel and check_cancel():
+            from app.controller import OperationCancelledError
             logger.warning("Classifier dihentikan")
-            return None
+            raise OperationCancelledError("User cancelled")
             
         # Perbarui progres internal 
         if on_progress:

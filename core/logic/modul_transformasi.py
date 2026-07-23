@@ -48,7 +48,6 @@ def hitung_savi(nir, m_red, L):
         np.ndarray: Array NumPy SAVI.
     """
 
-    # Hindari pembagian dengan nol
     nir_f = nir.astype(np.float32)
     m_red_f = m_red.astype(np.float32)
     num = nir_f - m_red_f 
@@ -105,7 +104,7 @@ def hitung_ndrei(nir, red_edge):
         red_edge (np.ndarray): Array NumPy berisi kanal Red Edge.
     
     Returns:
-        np.ndarray: Array NumPy NDRE.
+        np.ndarray: Array NumPy NDREI.
     """
     nir_f = nir.astype(np.float32)
     re_f = red_edge.astype(np.float32)
@@ -189,6 +188,7 @@ def persiapan_segmentasi(input_folder, output_folder, nilai_nodata=0):
     # Memuat band
     with rio.open(input_folder) as src:
         m_red = src.read(5)
+        red_edge = src.read(6)
         nir = src.read(7)
         profile = src.profile
 
@@ -199,8 +199,10 @@ def persiapan_segmentasi(input_folder, output_folder, nilai_nodata=0):
     )
     # Mentransformasi citra
     transform_ndvi = hitung_ndvi(nir, m_red)
+    transform_ndrei = hitung_ndvi(nir, red_edge)
     ndvi_file_path = simpan_raster(transform_ndvi, profile, output_folder, "NDVI.tif", nilai_nodata)
-    return ndvi_file_path 
+    ndrei_file_path = simpan_raster(transform_ndrei, profile, output_folder, "NDREI.tif", nilai_nodata)
+    return ndrei_file_path, ndvi_file_path 
 
 def hitung_indeks_vegetasi(input_folder, output_folder):
     """
@@ -214,7 +216,7 @@ def hitung_indeks_vegetasi(input_folder, output_folder):
         str: Output path.
     """
     os.makedirs(output_folder, exist_ok=True)
-    output_path = f"{output_folder}/pixel_val.csv"
+    output_path = f"{output_folder}/vegetation_indices.csv"
     df = pd.read_csv(input_folder)
     bands = ["RED", "GREEN", "BLUE", "M_GREEN", "M_RED", "RED_EDGE", "NIR"]
     data_trimmed = trim_norm_df(df[bands].copy())
@@ -235,11 +237,10 @@ def hitung_indeks_vegetasi(input_folder, output_folder):
     urutan_final = cols_identitas + bands + cols_indeks
     data_final = data_trimmed[urutan_final]
     data_final.to_csv(output_path, index=False)
-    os.remove(input_folder)
     return output_path
 
 # Fungsi untuk melakukan proses segmentasi
-def proses_segmentasi(input_folder, ndvi_path, output_folder, check_cancel, on_progress, nilai_nodata=0):
+def proses_segmentasi(input_folder, ndvi_path, output_folder, check_cancel=None, on_progress=None, nilai_nodata=0):
     """
     Melakukan proses segmentasi untuk memisahkan tanaman padi.
 
@@ -252,7 +253,7 @@ def proses_segmentasi(input_folder, ndvi_path, output_folder, check_cancel, on_p
     Returns:
         str: threshold_file_path.
     """
-
+    os.makedirs(output_folder, exist_ok=True)
     # Membuat peta segmentasi gulma dan padi
     model_gulma = str(AppPaths.assets("defaults/models/model_deteksi_gulma_v1.joblib"))
     peta_segmentasi_gulma = pisahkan_gulma(model_gulma, input_folder, output_folder, "segmentasi_gulma.tif", check_cancel, on_progress)

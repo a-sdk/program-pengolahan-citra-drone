@@ -134,11 +134,23 @@ class InfoRegistry:
         
     @staticmethod
     def get_info(name, key):
+        config = InfoRegistry.load_config()
+
+        info = (
+            config["info"]
+            [name]
+            [key]
+        )
+
+        return info
+    
+    @staticmethod
+    def get_recom(name, key):
 
         config = InfoRegistry.load_config()
 
         recom = (
-            config["info"]
+            config["recom"]
             [name]
             [key]
         )

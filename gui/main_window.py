@@ -30,7 +30,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         uic.loadUi(str(AppPaths.ui("main_window.ui")), self)
         self.setWindowTitle("mY App")
-        self.setWindowIcon(QIcon(str(AppPaths.assets("defaults/textures/icon/edit-image.png"))))
+        self.setWindowIcon(QIcon(str(AppPaths.assets("defaults/textures/icon/ricefield.png"))))
         self._layer_id = 0
         self.elapsed_sec = 0
         self.active_thread = []
@@ -107,7 +107,7 @@ class MainWindow(QMainWindow):
         icon_exit = QIcon(str(AppPaths.assets("defaults/textures/icon/exit.png")))
         icon_model = QIcon(str(AppPaths.assets("defaults/textures/icon/deep-learning.png")))
         self.icon_disease = QIcon(str(AppPaths.assets("defaults/textures/icon/virus.png")))
-        self.icon_mineral = QIcon(str(AppPaths.assets("defaults/textures/icon/nutrients.png")))
+        self.icon_mineral = QIcon(str(AppPaths.assets("defaults/textures/icon/fertilizer.png")))
         self.icon_water = QIcon(str(AppPaths.assets("defaults/textures/icon/drop.png")))
         icon_hand = QIcon(str(AppPaths.assets("defaults/textures/icon/hand.png")))
         icon_zoom_in = QIcon(str(AppPaths.assets("defaults/textures/icon/zoom-in.png")))
@@ -429,6 +429,8 @@ class MainWindow(QMainWindow):
         self.pd.close()
         # Muncul dialog selesai
         self.show_finished()
+        if not result:
+            return
         # Membuka file hasil prediksi
         if isinstance(result.prediction_path, list):
             if not os.path.exists(result.prediction_path[0]):
@@ -442,7 +444,8 @@ class MainWindow(QMainWindow):
                     self.show_error_msg(f"{str(e)}")
         else:
             try:
-                self.load_vector_layer(result.prediction_path)
+                if result.prediction_path:
+                    self.load_vector_layer(result.prediction_path)
             except Exception as e:
                 self.show_error_msg(f"{str(e)}")
 

@@ -11,7 +11,7 @@ pyinstaller ^
 --hidden-import="sklearn" ^
 --hidden-import="sklearn.ensemble._forest" ^
 --icon=app_icon.ico ^
---name mYApp ^
+--name RiceGIS ^
 --add-data "assets;assets" ^
 --add-data "ui;ui" ^
 --collect-all tensorflow ^

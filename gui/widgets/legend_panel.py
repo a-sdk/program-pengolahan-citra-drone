@@ -51,16 +51,16 @@ class LegendPanel(QWidget):
         self.legend_list.clear()
         for value, item in legend_dict.items():
             label = item["label"]
-            color = item["color"]
+            raw_color = item["color"]
+            color = tuple(raw_color)
             self.add_legend_item(label, color)
 
     def set_info(self, info_dict):
         self.info_list.clear()
+        recom = info_dict.get("recom", "-")
+        info = info_dict.get("info", "-")
         self._add_rich_info_item("Information:", is_header=True)
-        for key, value in info_dict.items():
-            if key.lower() != "rekomendasi":
-                self._add_rich_info_item(f"{key}: {value:.2f} %")
+        self._add_rich_info_item(info)
         self._add_rich_info_item("Recommendation:", is_header=True)
-        recom = info_dict.get("rekomendasi", "-")
-        self._add_rich_info_item(recom, is_highlight=True)
+        self._add_rich_info_item(recom)
 

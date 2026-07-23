@@ -1,6 +1,6 @@
 from app.result_model import AnalysisResult
 from app.worker import WorkerHelper
-from core.logic.modul_utilitas import buat_multipoligon
+from core.logic.modul_utilitas import buat_multipoligon, tumpuk_fitur
 from core.logic.modul_klip import potong_raster
 from core.logic.modul_transformasi import (
     persiapan_segmentasi, proses_segmentasi, hitung_indeks_vegetasi
@@ -15,8 +15,10 @@ from core.classifier import (
 )
 
 import logging
-
 logger = logging.getLogger(__name__)
+class OperationCancelledError(Exception):
+    """Thrown ketika user menekan tombol cancel."""
+    pass
 
 class BaseController:
     def __init__(self):
@@ -33,18 +35,23 @@ class BaseController:
 
     def run(self, tif, shp, out, hooks=None):
         try:
-            self.result.original_path = tif
             self.helper = WorkerHelper(hooks)
-            if self.helper.cancelled(): return None
+            self.helper.progress(5, "Checking raster...")
+            import rasterio as rio
+            with rio.open(tif) as src:
+                if src.count < 7:
+                    raise IndexError(f"Raster requires a minimum of 7 bands (found {src.count}).")
+            self.result.original_path = tif
+            if self.helper.cancelled(): raise OperationCancelledError("User cancelled")
             if shp:
                 self.helper.progress(10, "Generating multi polygon...")
                 multipolygon_path = buat_multipoligon(
                     shp, 
                     out, 
                     on_progress=self.helper.progress,
-                    subpoly_area=0.5
+                    subpoly_area=1
                     )
-            if self.helper.cancelled(): return None
+            if self.helper.cancelled(): raise OperationCancelledError("User cancelled")
             self.helper.progress(20, "Loading raster file...")
             if shp:
                 clipped_path = potong_raster(
@@ -54,10 +61,15 @@ class BaseController:
                     )
             else:
                 clipped_path = tif
-            if self.helper.cancelled(): return None
+            if self.helper.cancelled(): raise OperationCancelledError("User cancelled")
             self.helper.progress(30, "Transforming with NDVI...")
-            ndvi_path = persiapan_segmentasi(clipped_path, out)
-            if self.helper.cancelled(): return None
+            ndrei_path, ndvi_path = persiapan_segmentasi(clipped_path, out)
+            stack_path = tumpuk_fitur(
+                lst_fitur=[clipped_path, ndrei_path],
+                output_folder=out,
+                output_filename="stack result.tif"
+            )
+            if self.helper.cancelled(): raise OperationCancelledError("User cancelled")
             self.helper.progress(40, "Separating vegetation...")
             segmented_path = proses_segmentasi(
                 clipped_path, 
@@ -66,25 +78,29 @@ class BaseController:
                 check_cancel=self.helper.cancelled,
                 on_progress=self.helper.progress
                 )
-            if self.helper.cancelled(): return None
+            if self.helper.cancelled(): raise OperationCancelledError("User cancelled")
             self.helper.progress(50, "Masking raster...")
+            if self.task == "disease":
+                mask_input = stack_path
+            else:
+                mask_input = clipped_path
             masked_path = mask_tumpukan_fitur(
-                clipped_path, 
+                mask_input, 
                 segmented_path, 
                 out
                 )
-            if self.helper.cancelled(): return None
+            if self.helper.cancelled(): raise OperationCancelledError("User cancelled")
             self.helper.progress(60, "Extracting pixel...")
             extracted_path = ekstrak_rerata_piksel(
                 multipolygon_path, 
                 masked_path, 
                 out
                 )
-            if self.helper.cancelled(): return None
+            if self.helper.cancelled(): raise OperationCancelledError("User cancelled")
             vi_path = self.calculate_vi(extracted_path, out)
-            if self.task == "diseases":
+            if self.task == "disease":
                 input_data = masked_path
-            elif self.task == "water availability" and vi_path is not None:
+            elif self.task == "water" and vi_path is not None:
                 input_data = vi_path
             else:
                 input_data = extracted_path
@@ -96,9 +112,9 @@ class BaseController:
                 check_cancel=self.helper.cancelled, 
                 on_progress=self.helper.progress
                 )    
-            if self.helper.cancelled(): return None
+            if self.helper.cancelled(): raise OperationCancelledError("User cancelled")
             self.helper.progress(90, "Calculating stats...")
-            if self.helper.cancelled(): return None
+            if self.helper.cancelled(): raise OperationCancelledError("User cancelled")
             self.stats_calc.run(classified_path)
             self.helper.progress(95, "Saving results...")
             self.result.clip_path = clipped_path
@@ -107,28 +123,31 @@ class BaseController:
             self.result.mask_path = masked_path
             self.result.extraction_path = extracted_path
             self.result.prediction_path = classified_path
+            self.helper.progress(100, "Done")
+            logger.info("Semua proses selesai")
             return self.result
-        
+
+        except OperationCancelledError:
+            logger.error("Proses dihentikan pengguna")
+            self.helper.progress(0, "Cancelled")
+            return None
+
         except Exception as e:
             self.helper.error(str(e))
             logger.error(f"Terjadi kesalahan: {str(e)}")
             return None
-        
-        finally:
-            self.helper.progress(100, "Done")
-            logger.info("Semua proses selesai!")
 
 class NutrientController(BaseController):
     def __init__(self):
         super().__init__()
-        self.task = "nutrient availability"
+        self.task = "nutrient"
         self.classifier = NutrientPlotClassifier()
         self.stats_calc = NutrientPlotCalculator()
 
 class WaterController(BaseController):
     def __init__(self):
         super().__init__()
-        self.task = "water availability"
+        self.task = "water"
         self.classifier = WaterPlotClassifier()
         self.stats_calc = WaterPlotCalculator()
     
@@ -139,7 +158,7 @@ class WaterController(BaseController):
 class DiseaseController(BaseController):
     def __init__(self):
         super().__init__()
-        self.task = "diseases"
+        self.task = "disease"
         self.classifier = PlantDiseaseClassifier()
         self.stats_calc = PlantDiseaseCalculator()
     

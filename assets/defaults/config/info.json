@@ -1,6 +1,24 @@
 {
   "info": {
     "water": {
+      "manage": "Maintain a shallow water depth of 2-5 cm during early vegetative and panicle initiation stages, then implement periodic drying (Alternate Wetting and Drying) to improve root aeration."
+    },
+
+    "nutrient": {
+        "nitrogen": "The recommended Urea fertilizer dosage for rice crops ranges from 150 to 250 kg/ha per planting season, depending on the local soil nutrient status.",
+        "phospor": "For phosphate enrichment, the suggested SP-36 fertilizer application generally ranges between 50 and 100 kg/ha.",
+        "kalium": "To enhance crop resistance and grain quality, the recommended KCl fertilizer dosage is typically 50 to 100 kg/ha."
+    },
+
+    "disease": {
+        "healthy": "mainly in healthy condition, vegetation is overall safe.",
+        "low": "mainly in low category, routine monitoring recommended.",
+        "severe": "mainly in mild/severe category, immediate control measures required."
+    }
+  },
+
+  "recom": {
+    "water": {
       "adequate": "Irrigation should be applied only as needed to maintain soil moisture near field capacity and to avoid unnecessary water application.",
       "dry": "Immediate irrigation is critically required to restore soil moisture above the permanent wilting threshold. Larger irrigation volumes should be applied promptly to re-establish soil moisture toward field capacity and to prevent irreversible crop stress and yield loss.",
       "mid": "More frequent irrigation with appropriate water volumes is recommended to restore soil moisture toward field capacity."
@@ -17,5 +35,28 @@
         "low": "Perform routine monitoring and take preventive action!",
         "severe": "High severity level, immediate action required!"
     }
+  },
+  
+    "legend": {
+      "water": {  
+          "1": {"label": "0.6 - 1", "color": [0,128,0], "range": [0.6, 1]},
+          "2": {"label": "0.4 - 0.6", "color": [144,238,144], "range": [0.4, 0.6]},
+          "3": {"label": "0.3 - 0.4", "color": [255,255,116], "range": [0.3, 0.4]},
+          "4": {"label": "0.1 - 0.3", "color": [255,179,34], "range": [0.1, 0.3]},
+          "5": {"label": "-0.2 - 0.1", "color": [215,25,28], "range": [-0.2, 0.1]}
+      },
+
+      "nutrient": {
+          "1": {"label": "Deficit",  "color": [255,255,116]},
+          "2": {"label": "Adequate","color": [144,238,144]},
+          "3": {"label": "Excess", "color": [0,128,0]}
+      },
+
+      "disease": {
+          "1": {"label": "Healthy", "color": [0,128,0]},
+          "2": {"label": "Low",     "color": [144,238,144]},
+          "3": {"label": "Mild",    "color": [237,237,39]},
+          "4": {"label": "Severe",  "color": [186,18,18]}
+      }
   }
 }

@@ -48,6 +48,8 @@ class Viewer(QWidget):
         if self.scene_origin_x is None:
             self.scene_origin_x = x
             self.scene_origin_y = y
+            logger.info(f"scene origin x={self.scene_origin_x}")
+            logger.info(f"scene origin y={self.scene_origin_y}")
 
     def set_z_order(self, ordered_ids):
         for i, lid in enumerate(ordered_ids):
@@ -92,6 +94,7 @@ class Viewer(QWidget):
         transform = layer.qtransform
         w = info.get("width")
         h = info.get("height")
+        dtype = info.get("Dtype")
         # Map top left 0, 0
         top_left = transform.map(QPointF(0, 0))
         bot_right = transform.map(QPointF(w, h))
@@ -126,7 +129,7 @@ class Viewer(QWidget):
                     bot_right.x() - top_left.x(),
                     bot_right.y() - top_left.y()
                 )
-                logger.info(f"SceneRect sesuai origin: {self.scene.sceneRect()}")
+                # logger.info(f"SceneRect sesuai origin: {self.scene.sceneRect()}")
             item = self.scene.addPixmap(pixmap)
             logger.info(f"Menambah pixmap ke scene...")
             self.layer_items[layer_id] = item
@@ -137,7 +140,7 @@ class Viewer(QWidget):
         item.setAcceptHoverEvents(False)
         self.update_z_order(self.list_ids)
 
-        if init_view and h > 10000 and w > 10000:
+        if init_view and dtype == 'uint16':
             self.fit_to_view()
 
     def _draw_poly_feature(self, coords, group, color):

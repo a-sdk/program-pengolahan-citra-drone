@@ -10,7 +10,7 @@ if __name__ == "__main__":
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
     import ctypes
     # Windows App ID
-    myappid = 'unpad.img_processing.ms_img.beta-0.0.1'
+    myappid = 'unpad.ricegis.beta-0.0.1'
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     import multiprocessing
     multiprocessing.freeze_support()

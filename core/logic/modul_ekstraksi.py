@@ -26,6 +26,7 @@ def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename
     Returns:
         str: Output path.
     """
+    logger.info("Memulai ekstraksi")
     gdf = gpd.read_file(shp_path)
 
     # Menyiapkan kolom identitas
@@ -37,25 +38,24 @@ def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename
     gdf["Y"] = gdf.geometry.centroid.y
 
     # Menyiapkan DataFrame hasil dengan kolom koordinat awal
-    hasil_ekstraksi = gdf[["id", "no_urut", "Nama", "X", "Y"]].copy()
-    
-    with rio.open(input_folder) as info:
-        count = info.count
-    
+    hasil_ekstraksi = gdf[["id", "no_urut", "Nama", "X", "Y"]].copy() 
 
     with rio.open(input_folder) as src:
         count = src.count
         if count > 7:
+            logger.info("Raster punya > 7 band")
             nama_bands = [
                 "RED", "GREEN", "BLUE", "M_GREEN", "M_RED", 
-                "RED_EDGE", "NIR", "GNDVI", "NDREI", "NDVI", "SAVI"
+                "RED_EDGE", "NIR", "NDREI" #"GNDVI", "NDREI", "NDVI", "SAVI"
             ]
         else:
+            logger.info("Raster biasa")
             nama_bands = [
                 "RED", "GREEN", "BLUE", "M_GREEN", "M_RED", 
                 "RED_EDGE", "NIR"
             ]
         for i, name in enumerate(nama_bands):
+            logger.info(f"Mengekstrak band {name}")
             band_data = src.read(i + 1)
             
             stats = zonal_stats(
@@ -72,6 +72,7 @@ def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename
 
     # Cek baris yang mengandung NaN sebelum dihapus
     df_lengkap = pd.DataFrame(hasil_ekstraksi)
+    # logger.info(df_lengkap.head)
     nan_rows = df_lengkap[df_lengkap.isna().any(axis=1)]
     
     if not nan_rows.empty:
@@ -89,7 +90,7 @@ def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename
     os.makedirs(output_folder, exist_ok=True)
     output_path = os.path.join(output_folder, output_filename)
     df_urut.to_csv(output_path, index=False)
-    
+    logger.info("Menyimpan hasil ekstraksi")
     # print(f"Ekstraksi selesai...")
     # print(f"Total baris yang diekstrak: {df_urut.shape[0]}")
     # print(rf"File {output_filename} berhasil disimpan di {output_folder}")    

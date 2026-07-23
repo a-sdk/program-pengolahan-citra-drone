@@ -54,7 +54,7 @@ def generate_grid_points(polygon, target_count):
     return points
         
 # Fungsi untuk membuat multipoligon (shahiban)
-def buat_multipoligon(shp_path, output_folder, on_progress, subpoly_area=0.5):
+def buat_multipoligon(shp_path, output_folder, on_progress=None, subpoly_area=0.5):
     """
     Membuat multipoligon dari shapefile poligon.
 
@@ -100,8 +100,11 @@ def buat_multipoligon(shp_path, output_folder, on_progress, subpoly_area=0.5):
         1,
         np.ceil(polygons["area"] / subpoly_area).astype(int)
     )
-
-    polygons["n_point"] = polygons["n_comp"] * 3
+    polygons["n_point"] = np.clip(
+        polygons["n_comp"] * 50,
+        400,
+        8000
+    ).astype(int)
     jml_cluster = polygons["n_comp"].sum()
     poly_area = polygons["area"].sum()
     logger.info(f"Terdapat {jml_poligon} poligon")
@@ -113,10 +116,10 @@ def buat_multipoligon(shp_path, output_folder, on_progress, subpoly_area=0.5):
     )
     output_intersection = os.path.join(output_folder, f"{filename}_{jml_cluster}_part.shp")
     # ========================================
-    # Tahap 2: Generate Random Points
+    # Tahap 2: Generate Points
     # ========================================
     if on_progress:
-        on_progress(12, f"Generating random points...")
+        on_progress(12, f"Generating points...")
     all_points = []
     for _, row in polygons.iterrows():
         pts = generate_grid_points(
@@ -133,29 +136,26 @@ def buat_multipoligon(shp_path, output_folder, on_progress, subpoly_area=0.5):
     if on_progress:
         on_progress(13, f"Clustering points...")
     coords = [(p.x, p.y) for p in gdf_points.geometry]
+    if len(gdf_points) < jml_cluster:
+        raise ValueError(f"Points count must be greater than cluster count.")
     kmeans = KMeans(n_clusters=jml_cluster, random_state=42, n_init=20)
     gdf_points["CLUSTER_ID"] = kmeans.fit_predict(coords)
+    centers = kmeans.cluster_centers_
     logger.info("K-Means clustering selesai")
 
     # ========================================
-    # Tahap 4: Aggregate per Cluster
-    # ========================================
-    if on_progress:
-        on_progress(14, f"Generating aggregates...")
-    agg = gdf_points.dissolve(by="CLUSTER_ID", aggfunc="first").reset_index()
-    logger.info("Aggregate selesai")
-
-    # ========================================
-    # Tahap 5: Hitung Centroid
+    # Tahap 4: Hitung Centroid
     # ========================================
     if on_progress:
         on_progress(15, f"Calculating centroids...")
-    agg["geometry"] = agg.geometry.centroid
-    centroids = agg.copy()
+    centroids = gpd.GeoDataFrame(
+        geometry=[Point(x, y) for x, y in centers],
+        crs=polygons.crs
+    )
     logger.info(f"{len(centroids)} centroid dihasilkan")
 
     # ========================================
-    # Tahap 6: Voronoi Polygon
+    # Tahap 5: Voronoi Polygon
     # ========================================
     if on_progress:
         on_progress(16, f"Generating voronoi polygons...")
@@ -174,7 +174,7 @@ def buat_multipoligon(shp_path, output_folder, on_progress, subpoly_area=0.5):
     # logger.info("Voronoi polygons selesai")
 
     # ========================================
-    # Tahap 7: Intersection
+    # Tahap 6: Intersection
     # ========================================
     if on_progress:
         on_progress(19, f"Performing intersection...")
@@ -362,11 +362,19 @@ def hitung_sebaran_rumpun(input_folder, legend_dict):
     Returns:
         None.
     """
+    
     from path_config import InfoRegistry
     for file in input_folder:
+        legend = {k: v.copy() for k, v in legend_dict.items()}
         nf = os.path.splitext(os.path.basename(file))[0]
-        penyakit = nf.split("_")[-1]
-        print(f"\nMenghitung sebaran penyakit {penyakit.title()}...")
+        nf_penyakit = nf.split("_")[0]
+        DISEASE_MAP = {
+            "blas": "Leaf blast disease",
+            "blb":  "Bacterial leaf blight disease",
+            "bs":   "Brown spot disease",
+            "nbs":  "Narrow brown spot disease"
+        }
+        penyakit = DISEASE_MAP.get(nf_penyakit, "Rice disease")
         with rio.open(file) as src:
             data = src.read(1)
             nodata = src.nodata
@@ -376,37 +384,37 @@ def hitung_sebaran_rumpun(input_folder, legend_dict):
         # Menghitung total piksel valid
         jml_data_valid = valid_data.size
         # Mengambil semua nilai unik
-        counts = {k: v for k, v in zip(*np.unique(data, return_counts=True))}
-        labels = [info["label"] for info in legend_dict.values()]
-        # Menghitung persentase
-        stats = {k: round((counts.get(i+1, 0) / jml_data_valid) * 100, 2) for i, k in enumerate(labels)}
+        counts = dict(zip(*np.unique(data, return_counts=True)))
+        for key, item in legend.items():
+            pct = round((counts.get(key, 0) / jml_data_valid) * 100, 2)
+            item["pct"] = pct  
+            item["label"] = f"{item['label']} ({pct}%)"
 
         # Mengambil nilai untuk logika
-        val_1 = stats.get(labels[0], 0)
-        val_2 = stats.get(labels[1], 0)
-        val_3 = stats.get(labels[2], 0)
-        val_4 = stats.get(labels[3], 0)
-        val_ = val_3 + val_4 
+        p_sehat = legend[1]["pct"]
+        p_ringan = legend[2]["pct"]
+        p_sedang = legend[3]["pct"]
+        p_parah = legend[4]["pct"]
+        val_kacau = p_sedang + p_parah 
         # Logika Rekomendasi
-        print("-" * 30)
-        if val_ > val_1 and val_ > val_2:
-            # recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
-            recom = InfoRegistry.get_info("disease", "severe")
-            # print(f"Rekomendasi: {recom}")
-        elif val_2 > val_1 and val_2 > val_ :  
-            # recom = "Lakukan pemantauan rutin dan tindakan pencegahan." 
-            recom = InfoRegistry.get_info("disease", "low")
-            # print(f"Rekomendasi: {recom}")
+        # print("-" * 30)
+        if val_kacau > p_sehat and val_kacau > p_ringan:
+            status_desc = InfoRegistry.get_info("disease", "severe")
+            recom = InfoRegistry.get_recom("disease", "severe")
+        elif p_ringan > p_sehat and p_ringan > val_kacau :  
+            status_desc = InfoRegistry.get_info("disease", "low")
+            recom = InfoRegistry.get_recom("disease", "low")
         else:
-            # recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
-            recom = InfoRegistry.get_info("disease", "healthy")
-            # print(f"{recom}")
+            status_desc = InfoRegistry.get_info("disease", "healthy")
+            recom = InfoRegistry.get_recom("disease", "healthy")
+        msg = f"{penyakit} is {status_desc}"
+        info_dict = {
+            "info": msg,
+            "recom": recom
+        }
 
-        stats["rekomendasi"] = recom
-
-        legend_json = json.dumps(legend_dict)
-        stats_json = json.dumps(stats)
-
+        legend_json = json.dumps(legend)
+        stats_json = json.dumps(info_dict)
         # Menyimpan legenda dan stats sebagai metadata
         with rio.open(file, "r+") as dest:
             dest.update_tags(
@@ -426,6 +434,7 @@ def hitung_sebaran_petak(gpkg_path, legend_dict):
     Returns:
         None.
     """
+    
     from path_config import InfoRegistry
     try:
         layers = fiona.listlayers(gpkg_path)
@@ -442,86 +451,106 @@ def hitung_sebaran_petak(gpkg_path, legend_dict):
         stats_json TEXT
     )
     """)
-    hasil = {}
     
     # Hitung sebaran per nama layer
     for layer_name in layers:
+        legend = {k: v.copy() for k, v in legend_dict.items()}
         # print(f"\n=== Menganalisis Layer: {layer_name} ===")
         # Membaca layer spesifik
         gdf = gpd.read_file(gpkg_path, layer=layer_name)
         
         if "preds" not in gdf.columns:
-            print(f"Kolom 'preds' tidak ditemukan di layer {layer_name}")
+            logger.info(f"Kolom 'preds' tidak ditemukan di layer {layer_name}")
             continue
 
         data = gdf["preds"]
         jml_data = len(data)
         
         if jml_data == 0:
-            print(f"Tidak ada data pada layer {layer_name}")
+            logger.info(f"Tidak ada data pada layer {layer_name}")
             continue
 
-        stats = {}
         if layer_name == "water":
             # LOGIKA REGRESI
-            for i, info in legend_dict.items():
-                low, high = info["range"]
+            for key, item in legend.items():
+                low, high = item["range"]
                 # Menghitung berapa banyak nilai yang masuk dalam rentang ini
                 count = data[(data >= low) & (data < high)].count()
-                hasil_persen = round((count / jml_data) * 100, 2)
-                stats[info["label"]] = hasil_persen
+                pct = round((count / jml_data) * 100, 2)
+                item["pct"] = pct  
+                item["label"] = f"{item['label']} ({pct}%)"
+
         else:
             # LOGIKA KLASIFIKASI
             counts = data.value_counts()
-            for i, info in legend_dict.items():
-                jumlah_spesifik = counts.get(i, 0)
-                hasil_persen = round((jumlah_spesifik / jml_data) * 100, 2)
-                stats[info["label"]] = hasil_persen
+            for key, item in legend.items():
+                pct = round((counts.get(key, 0) / jml_data) * 100, 2)
+                item["pct"] = pct  
+                item["label"] = f"{item['label']} ({pct}%)"
 
-        labels = [info["label"] for info in legend_dict.values()]
         # Logika Rekomendasi
-        val_1 = stats.get(labels[0], 0)
-        val_2 = stats.get(labels[1], 0)
+        val_1 = legend[1]["pct"]
+        val_2 = legend[2]["pct"]
+        val_3 = legend[3]["pct"]
+        if 4 in legend:
+            val_4 = legend[4]["pct"]
+            val_5 = legend[5]["pct"]
 
-        if len(labels) == 3: # Nutrisi (kurang, cukup, berlebih)
-            val_3 = stats.get(labels[2], 0)
+        if len(legend) == 3: # Nutrisi (kurang, cukup, berlebih)
+            if layer_name == "nitrogen":
+                status_desc = InfoRegistry.get_info("nutrient", "nitrogen")
+            elif layer_name == "phospor":
+                status_desc = InfoRegistry.get_info("nutrient", "phospor")
+            elif layer_name == "kalium":
+                status_desc = InfoRegistry.get_info("nutrient", "kalium")
+            msg = status_desc
             val_ = val_2 + val_3 # gabungan cukup + berlebih
             if val_1 > val_2 and val_1 > val_3:
-                recom = InfoRegistry.get_info("nutrient", "deficit")
+                recom = InfoRegistry.get_recom("nutrient", "deficit")
             elif val_2 > val_1 and val_2 > val_3:
-                recom = InfoRegistry.get_info("nutrient", "adequate")
+                recom = InfoRegistry.get_recom("nutrient", "adequate")
             else:
-                recom = InfoRegistry.get_info("nutrient", "excess")
+                recom = InfoRegistry.get_recom("nutrient", "excess")
         
-        elif len(labels) == 4: # Penyakit (sehat, ringan, sedang, parah)
-            val_3 = stats.get(labels[2], 0)
-            val_4 = stats.get(labels[3], 0) # kelas parah
+        elif len(legend) == 4: # Penyakit (sehat, ringan, sedang, parah)
+            DISEASE_MAP = {
+                "blas": "Leaf blast disease",
+                "blb":  "Bacterial leaf blight disease",
+                "bs":   "Brown spot disease",
+                "nbs":  "Narrow brown spot disease"
+            }
+            penyakit = DISEASE_MAP.get(layer_name, "Rice disease")
             val_ = val_3 + val_4 # gabungan sedang + parah
 
             if val_ > val_1 and val_ > val_2:
-                recom = InfoRegistry.get_info("disease", "severe")
-                # recom = "Tingkat keparahan tinggi, segera lakukan tindakan pengendalian!"
+                status_desc = InfoRegistry.get_info("disease", "severe")
+                recom = InfoRegistry.get_recom("disease", "severe")
+                
             elif val_2 > val_1 and val_2 > val_: 
-                recom =  InfoRegistry.get_info("disease", "low")
-                # recom = "Lakukan pemantauan rutin dan tindakan pencegahan."  
+                status_desc = InfoRegistry.get_info("disease", "low")
+                recom =  InfoRegistry.get_recom("disease", "low")
+                 
             else:
-                recom = InfoRegistry.get_info("disease","healthy")
-                # recom = "Kondisi Aman: Vegetasi mayoritas dalam keadaan sehat."
+                status_desc = InfoRegistry.get_info("disease", "healty")
+                recom = InfoRegistry.get_recom("disease","healthy")
+            msg = f"{penyakit.title()} is {status_desc}"
+                
  
-        elif len(labels) == 5: # Air (rentang)
-            val_3 = stats.get(labels[2], 0)
-            val_4 = stats.get(labels[3], 0) 
-            val_5 = stats.get(labels[4], 0) 
+        elif len(legend) == 5: # Air (rentang)
             val_ = val_4 + val_5 
             if val_1 > val_2 + val_3 and val_1 > val_:
-                recom = InfoRegistry.get_info("water", "adequate")
+                recom = InfoRegistry.get_recom("water", "adequate")
             elif val_2 + val_3 > val_ and val_2 + val_3 > val_1:
-                recom = InfoRegistry.get_info("water", "mid")
+                recom = InfoRegistry.get_recom("water", "mid")
             elif val_ > val_2 + val_3 and val_ > val_1:
-                recom = InfoRegistry.get_info("water", "dry")
+                recom = InfoRegistry.get_recom("water", "dry")
+            status_desc = InfoRegistry.get_info("water", "manage")
+            msg = status_desc
         # Simpan hasil per layer ke dictionary utama
-        stats["rekomendasi"] = recom
-        legend = legend_dict
+        info_dict = {
+            "info": msg,
+            "recom": recom
+        }
         
         # Masukkan ke database
         cur.execute("""
@@ -531,7 +560,7 @@ def hitung_sebaran_petak(gpkg_path, legend_dict):
         """, (
             layer_name,
             json.dumps(legend),
-            json.dumps(stats)
+            json.dumps(info_dict)
         ))
 
     # Menutup database
@@ -540,7 +569,7 @@ def hitung_sebaran_petak(gpkg_path, legend_dict):
     
 
 if __name__ == "__main__":
-    geotiff_file = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\Klip\Lahan Uji_clip.tif"
-    koords_verteks = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\Koordinat Vertek"
-    hasil_prediksi = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\Deteksi\Hasil_Prediksi.xlsx"
-    folder_hasil = r"C:\Users\acer_\Documents\laporan skrpsi\Pengujian\Hasil\Lahan Uji_Files\Deteksi" 
+    buat_multipoligon(
+        shp_path=r"C:\Users\acer_\Documents\Shapefiles\cileunyi\petak rel.shp",
+        output_folder=r"C:\Users\acer_\Documents\Shapefiles\cileunyi"
+    )

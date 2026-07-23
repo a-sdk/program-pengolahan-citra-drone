@@ -31,9 +31,8 @@ def mask_tumpukan_fitur(input_folder, mask_path, output_folder, logika=lambda x:
     mask_valid[mask_data == nilai_nodata] = False           
     logger.info(f"Mask boolean berhasil dibuat. Total piksel valid: {np.sum(mask_valid)}")
     # print(f"Membuka tumpukan fitur...")
-    nf = os.path.splitext(os.path.basename(input_folder))[0]
     os.makedirs(output_folder, exist_ok=True)
-    output_path = os.path.join(output_folder, f"{nf}_masked.tif")
+    output_path = os.path.join(output_folder, "mask result.tif")
     with rio.open(input_folder) as src_data:
         # Membaca fitur sekaligus
         data_stack = src_data.read()

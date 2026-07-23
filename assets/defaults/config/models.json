@@ -17,7 +17,7 @@
     },
 
     "disease_detection": {
-      "path": "disease_classification_model.h5"
+      "path": "disease_model_v1.h5"
     }
   },
 
@@ -31,7 +31,7 @@
     },
 
     "nitrogen_scaler": {
-        "path": "disease_classification_scaler.joblib"
+        "path": "nutrient_scaler.joblib"
     },
 
     "disease_scaler": {
