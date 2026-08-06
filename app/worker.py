@@ -1,9 +1,14 @@
 from PyQt5.QtCore import QThread, pyqtSignal
 
+class OperationCancelledError(Exception):
+    """Thrown ketika user menekan tombol cancel."""
+    pass
+
 class Worker(QThread):
     progress_signal = pyqtSignal(int, str)
     finished_signal = pyqtSignal(object)
     error_signal = pyqtSignal(str)
+    cancel_signal = pyqtSignal()
 
     def __init__(self, func, *args, **kwargs):
         super().__init__()
@@ -12,21 +17,25 @@ class Worker(QThread):
         self.kwargs = kwargs
 
     def run(self):
-        try:
-            hooks = {
-                "on_progress": lambda val, msg: self.progress_signal.emit(val, msg),
-                "on_error": lambda err: self.error_signal.emit(err), 
-                "check_interruption": lambda: self.isInterruptionRequested()
+        hooks = {
+            "on_progress": lambda val, msg: self.progress_signal.emit(val, msg),
+            "check_interruption": lambda: self.isInterruptionRequested()
             }
+        try:
             result = self.func(
                 *self.args,
                 hooks=hooks,
                 **self.kwargs
-            )
-            self.finished_signal.emit(result)
+                )
+
+        except OperationCancelledError:
+            self.cancel_signal.emit()
+
         except  Exception as e:
             self.error_signal.emit(str(e))
 
+        else:
+            self.finished_signal.emit(result)
 
 class WorkerHelper:
     def __init__(self, hooks=None):
@@ -37,15 +46,13 @@ class WorkerHelper:
         if cb:
             cb(val, msg)
 
-    def error(self, msg):
-        cb = self.hooks.get("on_error")
-        if cb:
-            cb(msg)
-
     def cancelled(self):
         cb = self.hooks.get("check_interruption")
         return cb() if cb else False
     
+    def check_cancel(self):
+        if self.cancelled():
+            raise OperationCancelledError("User cancelled")
 
 
         

@@ -144,7 +144,7 @@ class RasterHandler(QObject):
     
     def add_raster(self, name, layer_id, path, hooks=None):
         import rasterio as rio
-        from app.controller import OperationCancelledError
+        from app.worker import OperationCancelledError
         helper = WorkerHelper(hooks)
         filename = name.split(".")[0]
         temp_dir = AppPaths.TEMP / filename

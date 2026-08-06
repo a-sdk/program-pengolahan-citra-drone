@@ -189,7 +189,12 @@ class MainWindow(QMainWindow):
         self.pd.canceled.connect(
             worker.requestInterruption
         )
-        worker.finished.connect(lambda: self.remove_worker(worker))
+        worker.cancel_signal.connect(
+            self.show_cancelled
+        )
+        worker.finished.connect(
+            lambda: self.remove_worker(worker)
+        )
         worker.start()
 
     def remove_worker(self, worker):
@@ -313,6 +318,7 @@ class MainWindow(QMainWindow):
 
     def remove_layer(self, layer_id):
         layer = self.layer_manager.remove_layer(layer_id)
+        self.dockLegend.hide()
         if not layer:
             return
         self.viewer.remove_item(layer_id)
@@ -425,6 +431,19 @@ class MainWindow(QMainWindow):
         self.progress_bar.setValue(0)
         self.statusBar().showMessage("Ready")
 
+    def cleanup_after_worker(self):
+        self.timer.stop()
+        self.pd.close()
+
+        if hasattr(self, "progress_bar"):
+            self.progress_bar.setVisible(False)
+        self.statusBar().clearMessage()
+
+    def reset_elapsed(self):
+        self.time_str = 0
+        self.mins = 0
+        self.secs = 0
+
     def on_analysis_finished(self, result: AnalysisResult):
         # Menutup timer dan dialog progress
         self.timer.stop()
@@ -433,6 +452,7 @@ class MainWindow(QMainWindow):
         self.show_finished()
         if not result:
             return
+                
         # Membuka file hasil prediksi
         if isinstance(result.prediction_path, list):
             if not os.path.exists(result.prediction_path[0]):
@@ -452,36 +472,32 @@ class MainWindow(QMainWindow):
                 self.show_error_msg(f"{str(e)}")
 
     def show_finished(self):
-        self.timer.stop()
-        self.pd.close()
-        if hasattr(self, 'progress_bar'):
-            self.progress_bar.setVisible(False)
-        msg = QMessageBox(self)
-        msg.setIcon(QMessageBox.Icon.Information)
-        msg.setWindowTitle("Finished")
-        msg.setText("All process finished.")
-        msg.setInformativeText(f"Duration: {self.time_str}") 
-        msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec_()
-        self.time_str = str(0)
-        self.mins = 0
-        self.secs = 0
+        self.cleanup_after_worker()
+        QMessageBox.information(
+            self,
+            "Done",
+            f"All process finished.\nDuration: {self.time_str}"
+            )
+        self.reset_elapsed()
+
+    def show_cancelled(self):
+        self.cleanup_after_worker()
+        QMessageBox.warning(
+            self,
+            "Cancelled",
+            f"User aborted.\nDuration: {self.time_str}"
+            )
+        self.reset_elapsed()
 
     def show_error_msg(self, error_msg):
-        self.timer.stop()
-        self.pd.close()
-        if hasattr(self, 'progress_bar'):
-            self.progress_bar.setVisible(False) 
-        msg = QMessageBox(self)
-        msg.setIcon(QMessageBox.Icon.Critical)
-        msg.setWindowTitle("Error")
-        msg.setText("An error occured")
-        msg.setInformativeText(str(error_msg)) 
-        msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec_()
-        self.time_str = str(0)
-        self.statusBar().clearMessage()
-
+        self.cleanup_after_worker()
+        QMessageBox.critical(
+            self,
+            "Error",
+            str(error_msg)
+            )
+        self.reset_elapsed()
+        
     def run_disease_prediction(self):
         logger.info("action_disease_predict ditekan")
         metadata = self.get_layers_list()
