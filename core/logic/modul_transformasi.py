@@ -54,7 +54,7 @@ def hitung_savi(nir, m_red, L):
     denom = nir_f + m_red_f + L
     res = safe_div(num, denom)
     savi = res * (1.0 + L)
-    savi = np.clip(savi, -1.0, 1.0)
+    savi = np.clip(savi, -1.0, 2)
     return savi
 
 def hitung_ndvi(nir, m_red):
@@ -269,6 +269,7 @@ def proses_segmentasi(input_folder, ndvi_path, output_folder, check_cancel=None,
     # Menghitung threshold indeks vegetasi
     # t_ndre = otsu_threshold(ndre, jumlah_bin=256, rentang_nilai=(-1, 1))
     t_ndvi = otsu_threshold(ndvi, jumlah_bin=256, rentang_nilai=(-1, 1))
+    logger.info(f"Ditetapkan batas (threshold) otomatis: {t_ndvi}")
     # t_savi = otsu_threshold(savi, jumlah_bin=256, rentang_nilai=(-1, 1))
 
     # Thresholding

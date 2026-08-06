@@ -14,6 +14,7 @@ class Layer:
     metadata: dict = None
     crs: str = None
     qtransform: QTransform = None
+    is_visible: bool = None
 
 class LayerManager(QObject):
     def __init__(self):
@@ -39,6 +40,8 @@ class LayerManager(QObject):
             return layer
 
     def get_layer(self, layer_id):
+        if not layer_id:
+            return 
         return self.layers.get(layer_id)
 
     def has_layer(self, layer_id):

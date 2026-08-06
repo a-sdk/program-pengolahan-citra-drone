@@ -1,6 +1,8 @@
 from app.result_model import AnalysisResult
 from app.worker import WorkerHelper
-from core.logic.modul_utilitas import buat_multipoligon, tumpuk_fitur
+from core.logic.modul_utilitas import (
+    buat_multipoligon, tumpuk_fitur, create_constant_raster
+)
 from core.logic.modul_klip import potong_raster
 from core.logic.modul_transformasi import (
     persiapan_segmentasi, proses_segmentasi, hitung_indeks_vegetasi
@@ -61,6 +63,13 @@ class BaseController:
                     )
             else:
                 clipped_path = tif
+            if self.helper.cancelled(): raise OperationCancelledError("User cancelled")
+            # hst_band = create_constant_raster(
+            #     tif=clipped_path, 
+            #     value=42, 
+            #     output_folder=out, 
+            #     output_filename="hst.tif"
+            #     )
             if self.helper.cancelled(): raise OperationCancelledError("User cancelled")
             self.helper.progress(30, "Transforming with NDVI...")
             ndrei_path, ndvi_path = persiapan_segmentasi(clipped_path, out)

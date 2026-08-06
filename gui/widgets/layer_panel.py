@@ -44,6 +44,9 @@ class LayerPanel(QWidget):
         item = QTreeWidgetItem([name])
         item.setData(0, Qt.UserRole, layer_id)
         item.setCheckState(0, Qt.Checked)
+        layer = self.layer_manager.get_layer(layer_id)
+        if not layer: return 
+        layer.is_visible = item.checkState(0) == Qt.Checked
         self.tree.insertTopLevelItem(0, item)
         self.infoMsg.emit(f"{name} loaded.")
         self.tree_items[layer_id] = item
@@ -52,9 +55,11 @@ class LayerPanel(QWidget):
     # Toggle visibility (checkbox)
     def on_item_changed(self, item):
         layer_id = item.data(0, Qt.UserRole)
+        layer = self.layer_manager.get_layer(layer_id)
+        if not layer: return
+        layer.is_visible = item.checkState(0) == Qt.Checked
         logger.info(f"Mengubah visibilitas layer {layer_id}")
-        is_visible = item.checkState(0) == Qt.Checked
-        self.viewer.set_visible(layer_id, is_visible)
+        self.viewer.set_visible(layer_id)
 
     # Update z-order
     def update_z_order(self):
@@ -93,7 +98,7 @@ class LayerPanel(QWidget):
         if action == prop_action:
             self._show_properties(item)
 
-    def on_item_clicked(self, item, col):
+    def on_item_clicked(self, item):
         layer_id = item.data(0, Qt.UserRole)
         self.layerSelected.emit(layer_id)
         logger.info(f"Layer {layer_id} diklik")

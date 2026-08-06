@@ -181,11 +181,15 @@ class Viewer(QWidget):
         group.addToGroup(line_item)
 
     def _draw_point_feature(self, x, y, group, color):
-        r = 0.2
+        r = 0.1
         sx = x - self.scene_origin_x
         sy = y - self.scene_origin_y
+        color = (0, 0, 0, 200)
         point_item = self.scene.addEllipse(sx-r, sy-r, r*2, r*2)
-        point_item.setPen(QPen(Qt.black, 0))
+        pen = QPen(QColor(0, 0, 0, 150))
+        pen.setWidth(1)
+        pen.setCosmetic(True)
+        point_item.setPen(pen)
         point_item.setBrush(QColor(*color))
         group.addToGroup(point_item)
 
@@ -235,8 +239,10 @@ class Viewer(QWidget):
                 self._draw_point_feature(geom.x, geom.y, group, color)
         self.update_z_order(self.list_ids)
         
-    def set_visible(self, layer_id, visible):
-        self.layer_items[layer_id].setVisible(visible)
+    def set_visible(self, layer_id):
+        layer = self.layer_manager.get_layer(layer_id)
+        if not layer: return
+        self.layer_items[layer_id].setVisible(layer.is_visible)
 
     def remove_item(self, layer_id):
         item = self.layer_items.pop(layer_id, None)

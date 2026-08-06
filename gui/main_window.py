@@ -324,6 +324,9 @@ class MainWindow(QMainWindow):
             self.vector_handler.remove_vector(layer_id)
         if self.layer_manager.is_empty:
             self.update_crs_label("Unknown")
+            self.legend_panel.clear()
+            self.dockLegend.hide()
+            return
 
     def delete_temp_folder(self, layer_name):
         name = layer_name.split(".")[0]
@@ -373,7 +376,6 @@ class MainWindow(QMainWindow):
         return layer_dict 
 
     def update_legend_from_layer(self, layer_id):
-        logger.info("Legenda diperbarui!")
         layer = self.layer_manager.get_layer(layer_id)
         if not layer:
             return
@@ -392,19 +394,19 @@ class MainWindow(QMainWindow):
         else:
             legend = info.get("Legend")
             stats = info.get("Stats")
-
-        if not legend and not stats:
+        if not layer.is_visible:
             self.legend_panel.clear()
             self.dockLegend.hide()
             return
-
-        if legend:
+        elif not legend and not stats:
+            self.legend_panel.clear()
+            self.dockLegend.hide()
+            return
+        else:
             self.legend_panel.set_legend(legend)
-
-        if stats:
             self.legend_panel.set_info(stats)
-
-        self.dockLegend.show()
+            logger.info("Legenda diperbarui!")
+            self.dockLegend.show()
 
     def update_progress_bar(self, value, msg):
         if hasattr(self, 'progress_bar'):
@@ -462,6 +464,8 @@ class MainWindow(QMainWindow):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
         self.time_str = str(0)
+        self.mins = 0
+        self.secs = 0
 
     def show_error_msg(self, error_msg):
         self.timer.stop()

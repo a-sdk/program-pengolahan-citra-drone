@@ -21,6 +21,37 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Fungsi bantu membuat raster konstan
+def create_constant_raster(tif, value, output_folder, output_filename):
+    """
+    Membuat array baru dengan ukuran sama seperti raster sumber.
+    Semua piksel non-NoData diisi dengan `value`.
+    """
+    os.makedirs(output_folder, exist_ok=True)
+    output_path = os.path.join(output_folder, output_filename)
+
+    with rio.open(tif) as src:
+        mask = src.read_masks(1) > 0
+        profile = src.profile.copy()
+
+    output = np.zeros((src.height, src.width), dtype=np.uint8)
+
+    # Isi piksel valid
+    output[mask] = value
+
+    profile.update(
+        count=1, 
+        dtype=rio.uint8, 
+        nodata=0
+        ) 
+
+    # Tulis ke file stack baru
+    with rio.open(output_path, 'w', **profile) as dest:
+        dest.write(output, 1)
+
+    logger.info(f"Band hst berhasil dibuat")
+    return output_path
+
 # Fungsi bantu pembuatan multipoligon 
 def lonlat_to_utm_epsg(lon, lat):
     utm_crs_list = database.query_utm_crs_info(
@@ -386,7 +417,7 @@ def hitung_sebaran_rumpun(input_folder, legend_dict):
         # Mengambil semua nilai unik
         counts = dict(zip(*np.unique(data, return_counts=True)))
         for key, item in legend.items():
-            pct = round((counts.get(key, 0) / jml_data_valid) * 100, 2)
+            pct = round((counts.get(key, 0) / jml_data_valid) * 100, 1)
             item["pct"] = pct  
             item["label"] = f"{item['label']} ({pct}%)"
 
@@ -476,7 +507,7 @@ def hitung_sebaran_petak(gpkg_path, legend_dict):
                 low, high = item["range"]
                 # Menghitung berapa banyak nilai yang masuk dalam rentang ini
                 count = data[(data >= low) & (data < high)].count()
-                pct = round((count / jml_data) * 100, 2)
+                pct = round((count / jml_data) * 100, 1)
                 item["pct"] = pct  
                 item["label"] = f"{item['label']} ({pct}%)"
 
@@ -484,7 +515,7 @@ def hitung_sebaran_petak(gpkg_path, legend_dict):
             # LOGIKA KLASIFIKASI
             counts = data.value_counts()
             for key, item in legend.items():
-                pct = round((counts.get(key, 0) / jml_data) * 100, 2)
+                pct = round((counts.get(key, 0) / jml_data) * 100, 1)
                 item["pct"] = pct  
                 item["label"] = f"{item['label']} ({pct}%)"
 

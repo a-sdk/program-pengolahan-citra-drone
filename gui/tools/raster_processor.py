@@ -358,12 +358,11 @@ class RasterHandler(QObject):
         layer = self.layer_manager.get_layer(layer_id)
         info = layer.metadata
         prediction = info.get("is_prediction")
-        raster_height = info.get("height")
-        raster_width = info.get("width")
         count = info.get("Count")
         nodata = info.get("Nodata")
+        dtype = info.get("Dtype")
         
-        if factor == 1 and raster_width > 10000 and raster_height > 10000:
+        if factor == 1 and dtype == 'uint16':
             self.update_viewport_raster(layer_id)
             logger.info(f"Reload layer {layer_id} -> f{factor} -> window_reading")
         elif factor != info.get("current_factor"):
