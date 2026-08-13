@@ -34,8 +34,7 @@ class MainWindow(QMainWindow):
         self._layer_id = 0
         self.elapsed_sec = 0
         self.active_thread = []
-        self.origin_x = None
-        self.origin_y = None
+        self.scene_extent = ()
         self.queue_files = None
         self.time_str = str(0)
         self.current_crs = "Unknown"
@@ -148,9 +147,37 @@ class MainWindow(QMainWindow):
         self.timer.timeout.connect(self._update_timer_label)
         self.timer.start(1000) # ms
 
-    def setup_origin(self, x0, y0):
-        self.viewer.set_scene_origin(x0, y0)
-        self.polygon_tool.set_draw_origin(x0, y0)
+    def update_scene_extent(self):
+        logger.info("Memperbarui extent...")
+        extents = []
+        
+        for layer_id in self.layer_manager.list_ids():
+            layer = self.layer_manager.get_layer(layer_id)
+
+            if layer is None or layer.extent is None:
+                continue
+
+            extents.append(layer.extent)
+
+        if not extents:
+            return
+
+        xmin = min(e[0] for e in extents)
+        ymin = min(e[1] for e in extents)
+        xmax = max(e[2] for e in extents)
+        ymax = max(e[3] for e in extents)
+        self.scene_extent = (xmin, ymin, xmax, ymax)
+        logger.info(f"Global extent, x={xmin}, y={ymax}")
+        self.update_scene_origin(xmin, ymax)
+
+    def update_scene_origin(self, xmin, ymax):
+        logger.info("Memperbarui origin...")
+        logger.info(f"scene origin x={xmin}")
+        logger.info(f"scene origin y={ymax}")
+        self.viewer.update_origin(xmin, ymax)
+        self.raster_handler.update_origin(xmin, ymax)
+        self.vector_handler.refresh_vector()
+        self.polygon_tool.update_draw_origin(xmin, ymax)
 
     def handle_progress_dialog(self, val, msg):
         self.current_msg = msg
@@ -204,10 +231,9 @@ class MainWindow(QMainWindow):
     def _connect_signals(self):
         logger.info("Sinyal Action terhubung")
         self.raster_handler.crsDetected.connect(self.update_crs_label)
-        self.raster_handler.originUpdated.connect(self.setup_origin)
         self.raster_handler.rasterUpdated.connect(self.viewer.render_geotiff)
         self.vector_handler.crsDetected.connect(self.update_crs_label)
-        self.vector_handler.originUpdated.connect(self.setup_origin)
+        self.vector_handler.vectorUpdated.connect(self.viewer._render_vector)
         self.layer_panel.layerUpdated.connect(self.viewer.update_z_order)
         self.layer_panel.layerRemoveRequested.connect(self.remove_layer)
         self.layer_panel.layerSelected.connect(self.update_legend_from_layer)
@@ -270,6 +296,7 @@ class MainWindow(QMainWindow):
                     new_name = f"{file_name} | {lyr}"
                     self.layer_manager.add_layer(layer)
                     self.layer_panel.add_layer_item(layer.sid, new_name)
+                    self.update_scene_extent()
                     self.viewer._render_vector(layer.sid)
             return     
         elif path.lower().endswith((".shp")):
@@ -278,6 +305,7 @@ class MainWindow(QMainWindow):
             layer = self.vector_handler.add_shapefile(file_name, layer_id, path)
             self.layer_manager.add_layer(layer)
             self.layer_panel.add_layer_item(layer.sid, layer.name)
+            self.update_scene_extent()
             self.viewer._render_vector(layer.sid)
 
     def open_img_file(self):
@@ -304,6 +332,7 @@ class MainWindow(QMainWindow):
         else:
             self.layer_manager.add_layer(result)
             self.layer_panel.add_layer_item(result.sid, result.name)
+            self.update_scene_extent()
             self.viewer.render_geotiff(
                 result.sid,
                 init_view=True)
@@ -323,6 +352,7 @@ class MainWindow(QMainWindow):
             return
         self.viewer.remove_item(layer_id)
         self.layer_panel.remove_layer_item(layer_id)
+        self.update_scene_extent()
         if layer.layer_type == "raster":
             self.delete_temp_folder(layer.name)
             self.raster_handler.remove_raster(layer_id)

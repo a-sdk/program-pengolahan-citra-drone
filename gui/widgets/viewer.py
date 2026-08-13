@@ -44,12 +44,9 @@ class Viewer(QWidget):
         self._zoom = 0
         self.active_tool = None
 
-    def set_scene_origin(self, x, y):
-        if self.scene_origin_x is None:
-            self.scene_origin_x = x
-            self.scene_origin_y = y
-            logger.info(f"scene origin x={self.scene_origin_x}")
-            logger.info(f"scene origin y={self.scene_origin_y}")
+    def update_origin(self, x, y):
+        self.scene_origin_x = x
+        self.scene_origin_y = y
 
     def set_z_order(self, ordered_ids):
         for i, lid in enumerate(ordered_ids):
@@ -94,7 +91,7 @@ class Viewer(QWidget):
         transform = layer.qtransform
         w = info.get("width")
         h = info.get("height")
-        dtype = info.get("Dtype")
+        dtype = info.get("dtype")
         # Map top left 0, 0
         top_left = transform.map(QPointF(0, 0))
         bot_right = transform.map(QPointF(w, h))
@@ -194,6 +191,10 @@ class Viewer(QWidget):
         group.addToGroup(point_item)
 
     def _render_vector(self, layer_id):
+        old_group = self.layer_items.get(layer_id)
+        if old_group is not None:
+            self.scene.removeItem(old_group)
+
         group = QGraphicsItemGroup()
         self.scene.addItem(group)
         self.layer_items[layer_id] = group
@@ -243,7 +244,7 @@ class Viewer(QWidget):
         layer = self.layer_manager.get_layer(layer_id)
         if not layer: return
         self.layer_items[layer_id].setVisible(layer.is_visible)
-
+        
     def remove_item(self, layer_id):
         item = self.layer_items.pop(layer_id, None)
         self.base_raster_size.pop(layer_id, None)

@@ -23,10 +23,9 @@ class PolygonDrawingTool(QObject):
         self.origin_x = None
         self.origin_y = None
 
-    def set_draw_origin(self, x, y):
-        if self.origin_x is None:
-            self.origin_x = x
-            self.origin_y = y
+    def update_draw_origin(self, x, y):
+        self.origin_x = x
+        self.origin_y = y
 
     def start_drawing(self, path, dtype, crs):
         self.is_drawing = True

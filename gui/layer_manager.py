@@ -12,7 +12,7 @@ class Layer:
     item: object = None 
     layer_type: str = None      
     metadata: dict = None
-    crs: str = None
+    extent: tuple = None
     qtransform: QTransform = None
     is_visible: bool = None
 
@@ -49,7 +49,13 @@ class LayerManager(QObject):
 
     def count(self):
         return len(self.layers)
-
+    
+    def list_ids(self):
+        ids = []
+        for sid in self.layers:
+            ids.append(sid)
+        return ids
+    
     def clear(self):
         self.layers.clear()
 

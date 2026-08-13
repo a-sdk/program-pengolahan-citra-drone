@@ -15,7 +15,7 @@ process = psutil.Process(os.getpid())
 class RasterHandler(QObject):
     crsDetected = pyqtSignal(str)
     rasterUpdated = pyqtSignal(int, bool)
-    originUpdated = pyqtSignal(float, float)
+
     def __init__(self, layer_manager):
         super().__init__()
         self.OVERVIEW_FACTORS = [2,4,8,16,32]
@@ -31,11 +31,34 @@ class RasterHandler(QObject):
         self.debounce_delay = 350 #ms
         self.raster_legend = None
 
-    def get_raster_origin(self, xmin, ymax):
-        if self.scene_origin_x is None:
-            self.scene_origin_x = xmin
-            self.scene_origin_y = ymax
-            self.originUpdated.emit(xmin, ymax)
+    def get_raster_extent(self, transform, width, height):
+        xmin = transform.c
+        ymax = transform.f
+        xmax = xmin + width * transform.a
+        ymin = ymax + height * transform.e
+        logger.info(f"Raster extent x={xmin}, y={ymax}")
+        return xmin, ymin, xmax, ymax
+    
+    def update_origin(self, xmin, ymax):
+        logger.info("Memperbarui origin raster...")
+        self.scene_origin_x = xmin
+        self.scene_origin_y = ymax
+        
+        for lid in self.raster_info:
+            layer = self.layer_manager.get_layer(lid)
+            if not layer or layer.item is None:
+                continue
+            info = layer.metadata
+            layer.qtransform = self.build_qtransform(
+                info.get("display_transform"),
+                info.get("display_width"),
+                info.get("display_height"),
+                layer.item.shape[1],
+                layer.item.shape[0],
+                self.scene_origin_x,
+                self.scene_origin_y
+            )
+            self.rasterUpdated.emit(lid, False)
 
     def choose_display_factor(self, width):
         if width >= 10000:
@@ -48,7 +71,7 @@ class RasterHandler(QObject):
             factor = 4
         return factor
     
-    def update_transform(self, transform, w, h, out_w, out_h):
+    def build_qtransform(self, transform, w, h, out_w, out_h, origin_x, origin_y):
         from rasterio.transform import Affine
         t1 = transform * Affine.scale(
             w / out_w,
@@ -57,7 +80,7 @@ class RasterHandler(QObject):
         final_transform = QTransform(
             t1.a, t1.b, 
             t1.d, t1.e, 
-            t1.c - self.scene_origin_x, t1.f - self.scene_origin_y
+            t1.c - origin_x, t1.f - origin_y
         )
         return final_transform
 
@@ -172,9 +195,11 @@ class RasterHandler(QObject):
                 tag = src.tags()
                 h, w = src.shape
                 t = src.transform
-                if self.scene_origin_x is None and self.scene_origin_y is None:
-                    self.get_raster_origin(t.c, t.f)
                 pixel_width = abs(t.a) 
+                xmin, ymin, xmax, ymax = self.get_raster_extent(t, w, h)
+                if self.scene_origin_x and self.scene_origin_y is None:
+                    self.scene_origin_x = xmin
+                    self.scene_origin_y = ymax
                 display_factor = self.choose_display_factor(w)
                 logger.info(f"Display factor: {display_factor}")
                 if display_factor < 8:
@@ -206,8 +231,14 @@ class RasterHandler(QObject):
                 # Transform overview
                 out_h = bands.shape[1]
                 out_w = bands.shape[2]
-                qt_transform = self.update_transform(
-                    t, w, h, out_w, out_h
+                qt_transform = self.build_qtransform(
+                    t, 
+                    w, 
+                    h, 
+                    out_w, 
+                    out_h, 
+                    self.scene_origin_x, 
+                    self.scene_origin_y
                 )
 
             # Cek jenis citra
@@ -242,6 +273,9 @@ class RasterHandler(QObject):
                     "transform": t,
                     "height": h,
                     "width": w,
+                    "display_transform": t,
+                    "display_width": w,
+                    "display_height": h,
                     "Res": f"{pixel_width:.4f} m ({pixel_width*100:.1f} cm/px)",
                     "current_factor": display_factor,
                     "base_factor": display_factor,
@@ -258,7 +292,7 @@ class RasterHandler(QObject):
             item=img,
             layer_type="raster",
             metadata=info,
-            crs=crs,
+            extent=(xmin, ymin, xmax, ymax),
             qtransform=qt_transform
             )
         return layer
@@ -322,6 +356,11 @@ class RasterHandler(QObject):
                 bands = src.read(window=window)
             mask = src.read_masks(1, window=window)
             window_transform = rio.windows.transform(window, src.transform)
+            
+            info["display_transform"] = window_transform
+            info["display_width"] = w
+            info["display_height"] = h
+
             logger.info(f"Window x={x}, y={y}, w={w}, h={h}")
             logger.info(f"Pixel size={round(window_transform.a,2)}")
 
@@ -336,10 +375,14 @@ class RasterHandler(QObject):
             nodata,
             prediction
         )
-        final_transform = QTransform(
-            window_transform.a, window_transform.b, 
-            window_transform.d, window_transform.e, 
-            window_transform.c - self.scene_origin_x, window_transform.f - self.scene_origin_y
+        final_transform = self.build_qtransform(
+            window_transform,
+            w,
+            h,
+            bands.shape[2],
+            bands.shape[1],
+            self.scene_origin_x,
+            self.scene_origin_y
         )
         logger.info(f"img shape={img.shape if hasattr(img,'shape') else 'unknown'}")
         # logger.info(f"Window transform={window_transform}")
@@ -361,7 +404,12 @@ class RasterHandler(QObject):
         count = info.get("Count")
         nodata = info.get("Nodata")
         dtype = info.get("Dtype")
-        
+        current_transform = info.get("transform")
+        current_w = info.get("width")
+        current_h = info.get("height")
+        info["display_transform"] = current_transform
+        info["display_width"] = current_w
+        info["display_height"] = current_h
         if factor == 1 and dtype == 'uint16':
             self.update_viewport_raster(layer_id)
             logger.info(f"Reload layer {layer_id} -> f{factor} -> window_reading")
@@ -378,14 +426,17 @@ class RasterHandler(QObject):
                 nodata,
                 prediction
             )
-            
-            img_transform = self.update_transform(
-                info.get("transform"), 
-                info.get("width"), 
-                info.get("height"), 
+
+            img_transform = self.build_qtransform(
+                current_transform,
+                current_w,
+                current_h,
                 bands.shape[2],
-                bands.shape[1]
+                bands.shape[1],
+                self.scene_origin_x,
+                self.scene_origin_y
             )
+                
             # Update layer img + transform 
             layer.item = img
             layer.qtransform = img_transform

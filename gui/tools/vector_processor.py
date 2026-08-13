@@ -11,28 +11,25 @@ process = psutil.Process(os.getpid())
 
 class VectorHandler(QObject):
     crsDetected = pyqtSignal(str)
-    originUpdated = pyqtSignal(float, float)
+    vectorUpdated = pyqtSignal(int)
+
     def __init__(self, layer_manager):
         super().__init__()
         self.layer_manager = layer_manager
         self.vector_info = {}
-        self.scene_origin_x = None
-        self.scene_origin_y = None
 
-    def get_vector_origin(self, xmin, ymax):
-        if self.scene_origin_x is None:
-            self.scene_origin_x = xmin
-            self.scene_origin_y = ymax
-            self.originUpdated.emit(xmin, ymax)
+    def refresh_vector(self):
+        logger.info("Memperbarui origin vector...")
+        for lid in self.vector_info:
+            self.vectorUpdated.emit(lid)
 
     def add_shapefile(self, name, layer_id, path):
-        logger.info(F"==== TAMBAH VEKTOR {name} DI LAYER: {layer_id} ====")
+        logger.info(f"==== TAMBAH VEKTOR {name} DI LAYER: {layer_id} ====")
         logger.info("Membuka shapefile")
         gdf = gpd.read_file(path)
         bounds = gdf.total_bounds
         xmin, ymin, xmax, ymax = bounds
-        if self.scene_origin_x is None:
-            self.get_vector_origin(xmin, ymax)
+        logger.info(f"Vector extent x={xmin}, y={ymax}")
         # logger.info(f"{self.layer_items}")
         info = {
             "Name": name,
@@ -53,20 +50,17 @@ class VectorHandler(QObject):
             item=gdf,
             layer_type="vector",
             metadata=info,
-            crs=info["CRS"],
+            extent=(xmin, ymin, xmax, ymax),
             qtransform=None
         )
         return layer
 
-    
     def add_gpkg_layer(self, name, layer_id, path, layer_name):
         logger.info(F"==== TAMBAH VEKTOR {layer_name} DI LAYER: {layer_id} ====")
         logger.info("Membuka GPKG...")
         gdf = gpd.read_file(path, layer=layer_name)
         bounds = gdf.total_bounds
         xmin, ymin, xmax, ymax = bounds
-        if self.scene_origin_x is None:
-            self.get_vector_origin(xmin, ymax)
         legend, stats = self.read_gpkg_metadata(path, layer_name)
         # logger.info(f"{self.layer_items}")
         info = {
@@ -89,7 +83,7 @@ class VectorHandler(QObject):
             item=gdf,
             layer_type="vector",
             metadata=info,
-            crs=info["CRS"],
+            extent=(xmin, ymin, xmax, ymax),
             qtransform=None
         )
         return layer
@@ -112,9 +106,6 @@ class VectorHandler(QObject):
             return json.loads(row[0]), json.loads(row[1])
 
         return None, None
-    
+
     def remove_vector(self, layer_id):
         self.vector_info.pop(layer_id, None)
-        if not self.vector_info:
-            self.scene_origin_x = None
-            self.scene_origin_y = None
