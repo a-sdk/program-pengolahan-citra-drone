@@ -58,7 +58,7 @@ class RasterHandler(QObject):
                 self.scene_origin_x,
                 self.scene_origin_y
             )
-            self.rasterUpdated.emit(lid, False)
+            self.rasterUpdated.emit(lid, True)
 
     def choose_display_factor(self, width):
         if width >= 10000:
@@ -197,7 +197,7 @@ class RasterHandler(QObject):
                 t = src.transform
                 pixel_width = abs(t.a) 
                 xmin, ymin, xmax, ymax = self.get_raster_extent(t, w, h)
-                if self.scene_origin_x and self.scene_origin_y is None:
+                if not self.scene_origin_x:
                     self.scene_origin_x = xmin
                     self.scene_origin_y = ymax
                 display_factor = self.choose_display_factor(w)

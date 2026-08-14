@@ -239,6 +239,7 @@ class Viewer(QWidget):
             elif geom.geom_type == "Point":
                 self._draw_point_feature(geom.x, geom.y, group, color)
         self.update_z_order(self.list_ids)
+        self.fit_to_view()
         
     def set_visible(self, layer_id):
         layer = self.layer_manager.get_layer(layer_id)
@@ -273,20 +274,28 @@ class Viewer(QWidget):
     def fit_to_view(self):
         logger.info("Fit to view diklik.")
         combined_rect = QRectF()
-        all_items = self.scene.items()
         has_visible_item = False
-        for item in all_items:
-            if item.isVisible() and hasattr(item, 'pixmap'):
+
+        for item in self.scene.items():
+            if item.isVisible():
+                rect = item.sceneBoundingRect()
+
+                if rect.isEmpty():
+                    continue
+
                 if not has_visible_item:
-                    combined_rect = item.sceneBoundingRect()
+                    combined_rect = rect
                     has_visible_item = True
                 else:
-                    combined_rect = combined_rect.united(item.sceneBoundingRect())
+                    combined_rect = combined_rect.united(rect)
+
         if has_visible_item and not combined_rect.isEmpty():
-            self.viewer.fitInView(combined_rect, Qt.KeepAspectRatio)
+            self.viewer.fitInView(
+                combined_rect,
+                Qt.KeepAspectRatio
+            )
         else:
-            rect = self.scene.itemsBoundingRect()
-            self.viewer.fitInView(rect, Qt.KeepAspectRatio)
+            logger.warning("Tidak ada item visible untuk fit to view.")
         self.apply_view_transform()
 
     def set_pan_mode(self, enabled: bool):
