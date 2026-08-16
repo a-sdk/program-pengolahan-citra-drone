@@ -91,7 +91,7 @@ class Viewer(QWidget):
         transform = layer.qtransform
         w = info.get("width")
         h = info.get("height")
-        dtype = info.get("dtype")
+        dtype = info.get("Dtype")
         # Map top left 0, 0
         top_left = transform.map(QPointF(0, 0))
         bot_right = transform.map(QPointF(w, h))
@@ -199,6 +199,8 @@ class Viewer(QWidget):
         self.scene.addItem(group)
         self.layer_items[layer_id] = group
         layer = self.layer_manager.get_layer(layer_id)
+        if not layer or layer.item is None:
+            return
         gdf = layer.item
         info = layer.metadata
         legend_dict = info.get("Legend")
