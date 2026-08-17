@@ -46,7 +46,7 @@ def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename
             logger.info("Raster punya > 7 band")
             nama_bands = [
                 "RED", "GREEN", "BLUE", "M_GREEN", "M_RED", 
-                "RED_EDGE", "NIR", "GNDVI", "NDREI", "NDVI", "SAVI"
+                "RED_EDGE", "NIR", "NDREI"
             ]
         else:
             logger.info("Raster biasa")

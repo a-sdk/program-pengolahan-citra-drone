@@ -17,7 +17,7 @@
     },
 
     "disease_detection": {
-      "path": "disease_model_v1.h5"
+      "path": "disease_model_v2.h5"
     }
   },
 
