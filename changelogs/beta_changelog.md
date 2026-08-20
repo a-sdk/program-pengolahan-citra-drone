@@ -1,9 +1,10 @@
 # Changelogs
 
 ## Beta version changelogs
-### Versi 0.0.8 - 19 Agustus 2026
+### Versi 0.0.8 - 20 Agustus 2026
 * **Pembaruan Fitur & Perbaikan Bug**:
     * Menambah kustomisasi warna, keterangan, dan informasi legenda.
+    * Mengoptimasi model ke format onnx.
     * Memperbaiki bug z-order layer.
     * Memperbaiki bug extent tidak diperbarui.
     * Memperbaiki bug fit to view.
