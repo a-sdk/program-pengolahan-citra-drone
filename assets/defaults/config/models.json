@@ -1,23 +1,23 @@
 {
   "models": {
     "water_availability": {
-      "path": "water_regression_model.h5"
+      "path": "water_regression_model.onnx"
     },
 
     "nitrogen_availability": {
-      "path": "nitrogen_classification_model.h5"
+      "path": "nitrogen_model.onnx"
     },
 
     "phospor_availability": {
-      "path": "nitrogen_classification_model.h5"
+      "path": "nitrogen_model.onnx"
     },
 
     "kalium_availability": {
-      "path": "nitrogen_classification_model.h5"
+      "path": "nitrogen_model.onnx"
     },
 
     "disease_detection": {
-      "path": "disease_model_v1.h5"
+      "path": "disease_model_v1.onnx"
     }
   },
 

@@ -8,6 +8,8 @@ if __name__ == "__main__":
     import os
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
+    os.environ["QT_SCALE_FACTOR_ROUNDING_POLICY"] = "PassThrough"
     import ctypes
     # Windows App ID
     myappid = 'unpad.ricegis.beta-0.0.1'
@@ -16,6 +18,8 @@ if __name__ == "__main__":
     multiprocessing.freeze_support()
     # Start app 
     from path_config import AppPaths
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
     app = QApplication(sys.argv)
     pixmap = QPixmap(str(AppPaths.assets("defaults/textures/splash_loading.png")))
     splash = QSplashScreen(pixmap, Qt.WindowStaysOnTopHint)

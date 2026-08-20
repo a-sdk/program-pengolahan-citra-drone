@@ -1,6 +1,7 @@
 # Folder
 # Venv
 .venv_stable/
+.venv_ricegis/
 # IDE
 .vscode
 # Python

@@ -1,6 +1,7 @@
 import rasterio as rio
 import os
 import numpy as np
+import onnxruntime as ort
 import logging
 import geopandas as gpd
 import pandas as pd
@@ -104,7 +105,9 @@ def deteksi_penyakit_rumpun(scaler, model, input_folder, output_folder, check_ca
     Returns:
         str: Output path.
     """
-
+    session = ort.InferenceSession(model, providers=["CPUExecutionProvider"])
+    input_name = session.get_inputs()[0].name
+    onnx_output_names = [output.name for output in session.get_outputs()]
     output_names = ["blas", "blb", "bs", "nbs"] 
     path_hasil = []
     import json
@@ -160,7 +163,10 @@ def deteksi_penyakit_rumpun(scaler, model, input_folder, output_folder, check_ca
             # Memprediksi piksel 
             if pixels_valid.shape[0] > 0:
                 pixels_valid_scaled = scaler.transform(pixels_valid)
-                predictions_list = model.predict(pixels_valid_scaled, verbose=0)
+                predictions_list = session.run(
+                    onnx_output_names,
+                    {input_name: pixels_valid_scaled.astype(np.float32)}
+                )
             else:
                 predictions_list = [np.array([])] * len(output_names) 
 
@@ -267,12 +273,17 @@ def deteksi_air_petak(polynom, scaler, model_reg, input_folder, shp_path, output
     """
     df = pd.read_csv(input_folder)
     gdf = gpd.read_file(shp_path) 
-
+    session = ort.InferenceSession(model_reg, providers=["CPUExecutionProvider"])
+    input_name = session.get_inputs()[0].name
+    onnx_output_names = [output.name for output in session.get_outputs()]
     fitur = ["M_GREEN", "M_RED", "NDVI", "NDRE", "GNDVI", "EVI", "VIDVI", "CIVE"] 
     X_inf = df[fitur]
     X_poly = polynom.transform(X_inf)
     X_poly_scaled = scaler.transform(X_poly)
-    reg_raw_preds = np.round(model_reg.predict(X_poly_scaled, verbose=0).flatten(), 4)
+    reg_raw_preds = np.round(session.run(
+        onnx_output_names, 
+        {input_name: X_poly_scaled.astype(np.float32)}
+    )[0].flatten(), 4)
     # model = ["klasifikasi", "regresi"]
     map_label = {1: "Cukup", 2: "Kurang"}
     output_folder = f"{output_folder}/Preds_Result/Plot/Water"
@@ -323,7 +334,15 @@ def deteksi_nutrisi_petak(scaler_n, scaler_p, scaler_k, model_n, model_p, model_
     """
     df = pd.read_csv(input_folder)
     gdf = gpd.read_file(shp_path)
- 
+    session_n = ort.InferenceSession(model_n, providers=["CPUExecutionProvider"])
+    session_p = ort.InferenceSession(model_p, providers=["CPUExecutionProvider"])
+    session_k = ort.InferenceSession(model_k, providers=["CPUExecutionProvider"])
+    input_name_n = session_n.get_inputs()[0].name
+    input_name_p = session_n.get_inputs()[0].name
+    input_name_k = session_n.get_inputs()[0].name
+    onnx_output_names_n = [output.name for output in session_n.get_outputs()]
+    onnx_output_names_p = [output.name for output in session_p.get_outputs()]
+    onnx_output_names_k = [output.name for output in session_k.get_outputs()]
     fitur = ["RED", "GREEN", "BLUE", "M_GREEN", "M_RED", "RED_EDGE", "NIR"] 
 
     X_inf = df[fitur]
@@ -331,9 +350,18 @@ def deteksi_nutrisi_petak(scaler_n, scaler_p, scaler_k, model_n, model_p, model_
     X_n_scaled = scaler_n.transform(X_inf_array)
     X_p_scaled = scaler_p.transform(X_inf_array)
     X_k_scaled = scaler_k.transform(X_inf_array)
-    n_preds = model_n.predict(X_n_scaled, verbose=0)
-    p_preds = model_p.predict(X_p_scaled, verbose=0)
-    k_preds = model_k.predict(X_k_scaled, verbose=0)
+    n_preds = session_n.run(
+        onnx_output_names_n,
+        {input_name_n: X_n_scaled.astype(np.float32)}
+        )[0]
+    p_preds = session_p.run(
+        onnx_output_names_p,
+        {input_name_p: X_p_scaled.astype(np.float32)}
+    )[0]
+    k_preds = session_k.run(
+        onnx_output_names_k,
+        {input_name_k: X_k_scaled.astype(np.float32)}
+    )[0]
     # Ambil index kelas tertinggi
     n_class_idx = np.argmax(n_preds, axis=1) + 1
     p_class_idx = np.argmax(p_preds, axis=1) + 1

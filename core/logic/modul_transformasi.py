@@ -5,7 +5,7 @@ Modul untuk transformasi dan segmentasi.
 import numpy as np
 import pandas as pd
 import rasterio as rio
-from core.logic.modul_utilitas import otsu_threshold, simpan_raster, tampilkan_histogram
+from core.logic.modul_utilitas import otsu_threshold, simpan_raster
 from core.logic.modul_klasifikasi import pisahkan_gulma
 from path_config import AppPaths
 import logging

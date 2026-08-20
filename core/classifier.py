@@ -31,9 +31,7 @@ class BaseClassifier:
         if self.model_1 is not None:
             return
         
-        import tensorflow as tf
         import joblib
-
         with joblib.parallel_backend('threading'):
             if self.SCALER_KEY_1 is not None:
                 self.scaler_1 = joblib.load(str(ModelRegistry.scaler_path(self.SCALER_KEY_1)))
@@ -46,22 +44,13 @@ class BaseClassifier:
 
 
         if self.MODEL_KEY_1 is not None:
-            self.model_1 = tf.keras.models.load_model(
-                str(ModelRegistry.model_path(self.MODEL_KEY_1)), 
-                compile=False
-            )
+            self.model_1 = str(ModelRegistry.model_path(self.MODEL_KEY_1))
             
         if self.MODEL_KEY_2 is not None:
-            self.model_2 = tf.keras.models.load_model(
-                str(ModelRegistry.model_path(self.MODEL_KEY_2)), 
-                compile=False
-            )
+            self.model_2 = str(ModelRegistry.model_path(self.MODEL_KEY_2))
             
         if self.MODEL_KEY_3 is not None:
-            self.model_3 = tf.keras.models.load_model(
-                str(ModelRegistry.model_path(self.MODEL_KEY_3)), 
-                compile=False
-            )
+            self.model_3 = str(ModelRegistry.model_path(self.MODEL_KEY_3))
 
     def run(self, input_folder, output_folder, shp_path=None, check_cancel=None, on_progress=None):
         logger.info(f"Memulai prediksi dengan {self.__class__.__name__}...")

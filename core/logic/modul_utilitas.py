@@ -7,7 +7,6 @@ import os
 import json
 import sqlite3
 import numpy as np
-import matplotlib.pyplot as plt
 import rasterio as rio
 import geopandas as gpd
 import fiona
@@ -309,31 +308,6 @@ def otsu_threshold(input_raster, jumlah_bin=256, rentang_nilai=(-1, 1)):
     threshold = bin_mids[nilai_terbaik]
 
     return threshold
-
-# Fungsi menampilkan histogram 
-def tampilkan_histogram(nama, data, nilai_threshold):
-    """
-    Menampilkan histogram dari hasil perhitungan transformasi indeks vegetasi.
-
-    Parameters:
-        nama (str): Nama transformasi indeks vegetasi yang digunakan.
-        data (np.ndarray): Array NumPy yang akan ditampilkan.
-        nilai_threshold (float): Batas yang ditentukan.
-        
-    Returns:
-        None.
-    """
-    # Membuat histogram untuk menampilkan data piksel SAVI
-    print(f"Menampilkan histogram {nama}...")
-    plt.figure(figsize=(10, 6))
-    plt.hist(data, bins=100, color='lightgreen', edgecolor='black')
-    plt.title(f"Histogram Nilai {nama}")
-    plt.xlabel(f"Nilai {nama}")
-    plt.ylabel("Frekuensi Piksel")
-    plt.grid(True, alpha=0.5)
-    plt.axvline(x=nilai_threshold, color='r', linestyle='--', label=f"Batas = {nilai_threshold}")
-    plt.legend()
-    plt.show()
 
 # Fungsi menumpuk semua fitur (band)
 def tumpuk_fitur(lst_fitur, output_folder, output_filename, nilai_nodata=0):
