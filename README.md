@@ -38,18 +38,22 @@ Tekan tombol `Add Raster` pada toolbar untuk menambahkan file GeoTIFF ke aplikas
 <img width="234" height="110" alt="Image" src="https://github.com/user-attachments/assets/3237feb2-811b-4bea-bf7f-a902fd77c9b4" />
 <img width="1921" height="1042" alt="Image" src="https://github.com/user-attachments/assets/522245fd-bd20-4860-bbe6-932ea72bf08a" />
 <img width="1920" height="1040" alt="Image" src="https://github.com/user-attachments/assets/52551814-e48a-41f9-b4b2-16697199b873" />
+
 ### Add Vector
 Tekan tombol `Add Vector` pada toolbar untuk menambahkan file vektor seperi shapefile (.shp) atau geopackage (.gpkg), kemudian file akan dimuat dan ditampilkan pada aplikasi. 
 <img width="1921" height="1042" alt="Image" src="https://github.com/user-attachments/assets/b786284a-4113-4f7f-885b-dd6a3b699b20" />
+
 ### Create New Shapefile
 Jika ingin membuat atau menggambar shapefile, tekan tombol `Create New Shapefile` pada toolbar. Selanjutnya, dialog pembuatan shapefile akan muncul dan dapat disesuaikan dengan kebutuhan. 
 <img width="309" height="116" alt="Image" src="https://github.com/user-attachments/assets/60ba37f7-af65-40de-99bf-4d393dcbd139" />
 <img width="309" height="184" alt="Image" src="https://github.com/user-attachments/assets/81b83d95-9d2a-4f76-bd6b-a29f3824422c" />
 Mode gambar ditandai dengan munculnya instruksi di kanan bawah aplikasi dan kursor berubah menjadi `+`
 <img width="591" height="68" alt="Image" src="https://github.com/user-attachments/assets/4852e717-7ab6-4b67-83f2-11f70d18b3be" />
+
 ### Pan/Zoom
 Tombol `Pan`, `Zoom In/Out`, juga `Fit to View` dapat digunakan untuk menyesuaikan tampilan yang muncul di aplikasi sesuai dengan yang diperlukan. 
 <img width="281" height="161" alt="Image" src="https://github.com/user-attachments/assets/517417ad-141e-473d-98f1-ddb283e28cbf" />
+
 ### Prediksi Model
 Menu prediksi model machine learning dapat diakses pada toolbar yang terdiri dari tiga menu utama yakni prediksi nutrisi, air tersedia, dan penyakit tanaman. Menu akan memunculkan dialog yang memerlukan file GeoTiff, shapefile, dan direktori (folder) untuk menyimpan hasil prediksinya.
 <img width="310" height="103" alt="Image" src="https://github.com/user-attachments/assets/a604fe7d-02aa-4f7b-b0be-28cd1185b017" />
@@ -63,26 +67,3 @@ Hasil prediksi kecukupan nutrisi meliputi nitrogen, phospor, dan kalium.
 <img width="1921" height="1042" alt="Image" src="https://github.com/user-attachments/assets/b0657503-a927-4b3f-b7ed-78b2ffe6146e" />
 Hasil prediksi serangan penyakit tanaman yang umum menyerang seperti blas, bercak daun, dan hawar daun.
 <img width="1922" height="1040" alt="Image" src="https://github.com/user-attachments/assets/63b0aced-e53c-4396-abb0-b6cc05a241fb" />
-
-## Struktur Proyek
-
-```text
-App/
-│
-├── main.py
-├── path_config.py
-│
-├── app/
-├── assets/
-│   ├── defaults/
-│       ├── config/
-│       ├── models/
-│       ├── scalers/
-│       └── textures/
-├── changelogs/
-├── core/
-├── gui/
-└── ui/
-
-
----
