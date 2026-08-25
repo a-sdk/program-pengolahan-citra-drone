@@ -34,6 +34,7 @@ Setelah aplikasi berhasil dibuka, tampilan awal yang muncul seperti berikut. Ter
 <img width="1922" height="1042" alt="Image" src="https://github.com/user-attachments/assets/233ff5e9-5586-44cd-8662-7f3fa0b24c87" />
 ### Add Raster
 Tekan tombol `Add Raster` pada toolbar untuk menambahkan file GeoTIFF ke aplikasi, file tersebut akan dimuat dan ditampilkan pada aplikasi.
+
 <img width="234" height="110" alt="Image" src="https://github.com/user-attachments/assets/3237feb2-811b-4bea-bf7f-a902fd77c9b4" />
 <img width="1921" height="1042" alt="Image" src="https://github.com/user-attachments/assets/522245fd-bd20-4860-bbe6-932ea72bf08a" />
 <img width="1920" height="1040" alt="Image" src="https://github.com/user-attachments/assets/52551814-e48a-41f9-b4b2-16697199b873" />
