@@ -47,15 +47,18 @@ Tekan tombol `Add Vector` pada toolbar untuk menambahkan file vektor seperi shap
 Jika ingin membuat atau menggambar shapefile, tekan tombol `Create New Shapefile` pada toolbar. Selanjutnya, dialog pembuatan shapefile akan muncul dan dapat disesuaikan dengan kebutuhan. 
 <img width="309" height="116" alt="Image" src="https://github.com/user-attachments/assets/60ba37f7-af65-40de-99bf-4d393dcbd139" />
 <img width="309" height="184" alt="Image" src="https://github.com/user-attachments/assets/81b83d95-9d2a-4f76-bd6b-a29f3824422c" />
+
 Mode gambar ditandai dengan munculnya instruksi di kanan bawah aplikasi dan kursor berubah menjadi `+`
 <img width="591" height="68" alt="Image" src="https://github.com/user-attachments/assets/4852e717-7ab6-4b67-83f2-11f70d18b3be" />
 
 ### Pan/Zoom
 Tombol `Pan`, `Zoom In/Out`, juga `Fit to View` dapat digunakan untuk menyesuaikan tampilan yang muncul di aplikasi sesuai dengan yang diperlukan. 
+
 <img width="281" height="161" alt="Image" src="https://github.com/user-attachments/assets/517417ad-141e-473d-98f1-ddb283e28cbf" />
 
 ### Prediksi Model
 Menu prediksi model machine learning dapat diakses pada toolbar yang terdiri dari tiga menu utama yakni prediksi nutrisi, air tersedia, dan penyakit tanaman. Menu akan memunculkan dialog yang memerlukan file GeoTiff, shapefile, dan direktori (folder) untuk menyimpan hasil prediksinya.
+
 <img width="310" height="103" alt="Image" src="https://github.com/user-attachments/assets/a604fe7d-02aa-4f7b-b0be-28cd1185b017" />
 <img width="469" height="241" alt="Image" src="https://github.com/user-attachments/assets/97e21cc6-d0bc-409f-87cf-e8668ebe30d7" />
 Setiap menu prediksi menjalankan serangkaian proses yang ditunjukkan oleh pop-up seperti berikut hingga prosesnya selesai. 
