@@ -61,12 +61,20 @@ Menu prediksi model machine learning dapat diakses pada toolbar yang terdiri dar
 
 <img width="310" height="103" alt="Image" src="https://github.com/user-attachments/assets/a604fe7d-02aa-4f7b-b0be-28cd1185b017" />
 <img width="469" height="241" alt="Image" src="https://github.com/user-attachments/assets/97e21cc6-d0bc-409f-87cf-e8668ebe30d7" />
+
 Setiap menu prediksi menjalankan serangkaian proses yang ditunjukkan oleh pop-up seperti berikut hingga prosesnya selesai. 
+
 <img width="673" height="384" alt="Image" src="https://github.com/user-attachments/assets/260990a3-5860-4077-a2c4-0474ae0e288e" />
 <img width="195" height="153" alt="Image" src="https://github.com/user-attachments/assets/8f4e2926-7bac-4eed-9d23-e6adedf84f4e" />
+
 Hasilnya kemudian ditampilkan dalam kode warna tertentu, informasi warna yang tampil juga dapat dilihat pada legenda. Sebagai contoh, berikut hasil prediksi ketersediaan air.
+
 <img width="1921" height="1041" alt="Image" src="https://github.com/user-attachments/assets/06602a48-ac6f-406a-b5e7-a6c2a90abd53" />
+
 Hasil prediksi kecukupan nutrisi meliputi nitrogen, phospor, dan kalium.
+
 <img width="1921" height="1042" alt="Image" src="https://github.com/user-attachments/assets/b0657503-a927-4b3f-b7ed-78b2ffe6146e" />
+
 Hasil prediksi serangan penyakit tanaman yang umum menyerang seperti blas, bercak daun, dan hawar daun.
+
 <img width="1922" height="1040" alt="Image" src="https://github.com/user-attachments/assets/63b0aced-e53c-4396-abb0-b6cc05a241fb" />
