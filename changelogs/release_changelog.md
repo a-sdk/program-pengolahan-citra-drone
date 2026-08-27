@@ -1,7 +1,7 @@
 # Changelogs
 
 ## Release version changelogs
-### Versi 1.0.0 - 23 Juli 2026
+### Versi 1.0.0 - 27 Agustus 2026
 * **Pembaruan Fitur**:
     * Memuat raster GeoTiff.
     * Memuat vektor berformat ESRI Shapefile dan Geopackage.
