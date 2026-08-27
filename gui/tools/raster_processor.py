@@ -202,7 +202,7 @@ class RasterHandler(QObject):
                     self.scene_origin_y = ymax
                 display_factor = self.choose_display_factor(w)
                 logger.info(f"Display factor: {display_factor}")
-                if display_factor < 8:
+                if dtype == 'uint8':
                     self.OVERVIEW_FACTORS.insert(0, 1)
                 helper.progress(55, "Generating overview...")
                 # Buat overview 
