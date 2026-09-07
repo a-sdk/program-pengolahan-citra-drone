@@ -45,7 +45,7 @@ class BaseController:
                 shp, 
                 out, 
                 on_progress=self.helper.progress,
-                subpoly_area=1
+                subpoly_area=0.45
                 )
         self.helper.check_cancel()
         self.helper.progress(20, "Loading raster file...")

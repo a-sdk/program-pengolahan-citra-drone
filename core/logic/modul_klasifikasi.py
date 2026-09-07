@@ -306,8 +306,9 @@ def deteksi_air_petak(polynom, scaler, model_reg, input_folder, shp_path, output
             on_progress(relative_prog, f"Generating prediction ({i+1}/5)...")
         # Masukkan ke dataframe
         df[f"prediksi_air_regresi "] = reg_raw_preds
-        gdf["regresi"] = reg_raw_preds
-        gdf_single["preds"] = reg_raw_preds
+        reg_preds = pd.Series(reg_raw_preds, index=df.index)
+        gdf["regresi"] = reg_preds
+        gdf_single["preds"] = reg_preds
         gdf_single.to_file(output_gpkg,
                             layer="water",
                             driver="GPKG"
@@ -375,7 +376,7 @@ def deteksi_nutrisi_petak(scaler_n, scaler_p, scaler_k, model_n, model_p, model_
     output_shp = os.path.join(output_folder, "Preds_Result.shp")
     output_gpkg = os.path.join(output_folder, "Preds_Result.gpkg")
     gdf_single = gdf.copy()
-    prediciton = [n_class_idx, p_class_idx, k_class_idx]
+    prediction = [n_class_idx, p_class_idx, k_class_idx]
     for i, name in enumerate(nutrient):
         # Memeriksa interupsi
         if check_cancel and check_cancel():
@@ -389,9 +390,9 @@ def deteksi_nutrisi_petak(scaler_n, scaler_p, scaler_k, model_n, model_p, model_
             on_progress(relative_prog, f"Generating prediction ({i+1}/{len(nutrient)})...")
 
         # Masukkan ke dataframe
-        df[f"Prediksi_{name}"] = [map_label[idx] for idx in prediciton[i]]
-        gdf[name] = [idx for idx in prediciton[i]]
-        gdf_single["preds"] = prediciton[i]
+        df[f"Prediksi_{name}"] = [map_label[idx] for idx in prediction[i]]
+        gdf[name] = pd.Series(prediction[i], index=df.index)
+        gdf_single["preds"] = pd.Series(prediction[i], index=df.index)
         gdf_single.to_file(output_gpkg,
                             layer=name,
                             driver="GPKG"
