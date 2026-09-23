@@ -17,17 +17,13 @@
     },
 
     "disease_detection": {
-      "path": "disease_model_v1.onnx"
+      "path": "disease_model.onnx"
     }
   },
 
   "scalers": {
-    "water_polynom": {
-      "path": "water_regression_polynom.joblib"
-    },
-
     "water_scaler": {
-        "path": "water_regression_scaler.joblib"
+      "path": "water_regression_scaler.pkl"
     },
 
     "nitrogen_scaler": {

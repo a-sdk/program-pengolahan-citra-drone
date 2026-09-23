@@ -15,7 +15,6 @@ from core.stats_calculator import (
 from core.classifier import (
     NutrientPlotClassifier, WaterPlotClassifier, PlantDiseaseClassifier
 )
-from app.worker import OperationCancelledError
 
 import logging
 logger = logging.getLogger(__name__)

@@ -255,7 +255,7 @@ def proses_segmentasi(input_folder, ndvi_path, output_folder, check_cancel=None,
     """
     os.makedirs(output_folder, exist_ok=True)
     # Membuat peta segmentasi gulma dan padi
-    model_gulma = str(AppPaths.assets("defaults/models/model_deteksi_gulma_v1.joblib"))
+    model_gulma = str(AppPaths.assets("defaults/models/segmenter_model.joblib"))
     peta_segmentasi_gulma = pisahkan_gulma(model_gulma, input_folder, output_folder, "segmentasi_gulma.tif", check_cancel, on_progress)
     # print("Memuat file hasil transformasi...")
     with (

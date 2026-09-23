@@ -1,4 +1,7 @@
 import sys
+# ONNX must be imported before PyQt5/GDAL and other native dependencies.
+# Prevents Windows native-library loading conflict when controller imports ORT
+import onnxruntime
 from PyQt5.QtWidgets import QApplication, QSplashScreen
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
@@ -60,4 +63,5 @@ if __name__ == "__main__":
     sys.excepthook = handle_exception
 
     sys.exit(app.exec_())
+
 

@@ -3,7 +3,16 @@ from PyInstaller.utils.hooks import collect_all
 
 datas = [('assets', 'assets'), ('ui', 'ui')]
 binaries = []
-hiddenimports = ['sklearn', 'sklearn.ensemble._forest', 'onnxruntime']
+hiddenimports = [
+    'sklearn', 
+    'sklearn.ensemble._forest', 
+    'onnxruntime',
+    'scipy.special.cython_special',
+    'scipy.spatial.transform._rotation_groups',
+    'sklearn.utils._typedefs',
+    'sklearn.neighbors._partition',
+    'numpy._core'
+]
 tmp_ret = collect_all('rasterio')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('onnxruntime')

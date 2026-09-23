@@ -112,16 +112,14 @@ class WaterPlotClassifier(BaseClassifier):
     Kelas untuk deteksi ketersedian air per plot/petak.
     """ 
     MODEL_KEY_1 = "water_availability"
-    SCALER_KEY_1 = "water_polynom"
-    SCALER_KEY_2 = "water_scaler"
+    SCALER_KEY_1 = "water_scaler"
     def __init__(self):
         super().__init__()
 
     def _do_prediction(self, input_folder, output_folder, shp_path, check_cancel, on_progress):
         self._load_model()
         output_gpkg = deteksi_air_petak(
-            polynom=self.scaler_1, 
-            scaler=self.scaler_2,
+            scaler=self.scaler_1, 
             model_reg=self.model_1, 
             input_folder=input_folder, 
             shp_path=shp_path, 

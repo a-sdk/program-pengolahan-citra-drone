@@ -18,7 +18,7 @@ class RasterHandler(QObject):
 
     def __init__(self, layer_manager):
         super().__init__()
-        self.OVERVIEW_FACTORS = [2,4,8,16,32]
+        self.OVERVIEW_FACTORS = [2,4,8,16]
         self.layer_manager = layer_manager
         self.raster_info = {}
         self.scene_origin_x = None
@@ -62,13 +62,13 @@ class RasterHandler(QObject):
 
     def choose_display_factor(self, width):
         if width >= 10000:
-            factor = 32
-        elif width > 8000:
             factor = 16
-        elif width > 5000:
+        elif width > 8000:
             factor = 8
-        else:
+        elif width > 5000:
             factor = 4
+        else:
+            factor = 2
         return factor
     
     def build_qtransform(self, transform, w, h, out_w, out_h, origin_x, origin_y):
@@ -308,12 +308,11 @@ class RasterHandler(QObject):
                 2: 1,
                 4: 2,
                 8: 3,
-                16: 4,
-                32: 5
+                16: 4
             }
             level = steps[base_factor] - zoom_steps
-            level = max(0, min(5, level))
-            return [1, 2, 4, 8, 16, 32][level]
+            level = max(0, min(4, level))
+            return [1, 2, 4, 8, 16][level]
 
     def update_viewport_raster(self, layer_id):
         logger.info("Membaca ukuran viewport...")

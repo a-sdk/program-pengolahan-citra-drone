@@ -163,6 +163,7 @@ def deteksi_penyakit_rumpun(scaler, model, input_folder, output_folder, check_ca
             # Memprediksi piksel 
             if pixels_valid.shape[0] > 0:
                 pixels_valid_scaled = scaler.transform(pixels_valid)
+                pixels_valid_scaled = np.asarray(pixels_valid_scaled, dtype=np.float32)
                 predictions_list = session.run(
                     onnx_output_names,
                     {input_name: pixels_valid_scaled.astype(np.float32)}
@@ -210,13 +211,19 @@ def deteksi_penyakit_petak(scaler, model, input_folder, shp_path, output_folder,
     """
     df = pd.read_csv(input_folder)
     gdf = gpd.read_file(shp_path)
- 
+    session = ort.InferenceSession(model, providers=["CPUExecutionProvider"])
+    input_name = session.get_inputs()[0].name
+    onnx_output_names = [output.name for output in session.get_outputs()]
     fitur = ["RED", "GREEN", "BLUE", "M_GREEN", "M_RED", "RED_EDGE", "NIR", "NDREI"] 
 
     X_inf = df[fitur]
     X_inf_array = X_inf.values
     X_inf_scaled = scaler.transform(X_inf_array)
-    raw_preds = model.predict(X_inf_scaled, verbose=0)
+    X_inf_scaled = np.asarray(X_inf_scaled, dtype=np.float32)
+    raw_preds = session.run(
+        onnx_output_names,
+        {input_name: X_inf_scaled.astype(np.float32)}
+        )[0]
     
     disease_names = ["blas", "blb", "bs", "nbs"]
     map_label = {1: "Sehat", 2: "Ringan", 3: "Sedang", 4: "Parah"}
@@ -252,13 +259,13 @@ def deteksi_penyakit_petak(scaler, model, input_folder, shp_path, output_folder,
                             driver="GPKG"
                             )
 
-    print(f"Menyimpan hasil prediksi di {output_folder}")
+    # print(f"Menyimpan hasil prediksi di {output_folder}")
     df.to_excel(output_xlsx, index=False)
     gdf.to_file(output_shp, driver="ESRI Shapefile")
     
     return output_gpkg
 
-def deteksi_air_petak(polynom, scaler, model_reg, input_folder, shp_path, output_folder, check_cancel, on_progress):
+def deteksi_air_petak(scaler, model_reg, input_folder, shp_path, output_folder, check_cancel, on_progress):
     """
     Menerapkan model untuk prediksi
     ketersediaan air.
@@ -271,6 +278,8 @@ def deteksi_air_petak(polynom, scaler, model_reg, input_folder, shp_path, output
     Returns:
         str: Output path.
     """
+    from sklearn.preprocessing import PolynomialFeatures
+    poly = PolynomialFeatures(degree=2, interaction_only=True, include_bias=False)
     df = pd.read_csv(input_folder)
     gdf = gpd.read_file(shp_path) 
     session = ort.InferenceSession(model_reg, providers=["CPUExecutionProvider"])
@@ -278,8 +287,9 @@ def deteksi_air_petak(polynom, scaler, model_reg, input_folder, shp_path, output
     onnx_output_names = [output.name for output in session.get_outputs()]
     fitur = ["M_GREEN", "M_RED", "NDVI", "NDRE", "GNDVI", "EVI", "VIDVI", "CIVE"] 
     X_inf = df[fitur]
-    X_poly = polynom.transform(X_inf)
+    X_poly = poly.fit_transform(X_inf)
     X_poly_scaled = scaler.transform(X_poly)
+    X_poly_scaled = np.asarray(X_poly_scaled, dtype=np.float32)
     reg_raw_preds = np.round(session.run(
         onnx_output_names, 
         {input_name: X_poly_scaled.astype(np.float32)}
@@ -314,7 +324,7 @@ def deteksi_air_petak(polynom, scaler, model_reg, input_folder, shp_path, output
                             driver="GPKG"
                             )
         
-    print(f"Menyimpan hasil prediksi di {output_folder}")
+    # print(f"Menyimpan hasil prediksi di {output_folder}")
     df.to_excel(output_xlsx, index=False)
     gdf.to_file(output_shp, driver="ESRI Shapefile")
     
@@ -339,8 +349,8 @@ def deteksi_nutrisi_petak(scaler_n, scaler_p, scaler_k, model_n, model_p, model_
     session_p = ort.InferenceSession(model_p, providers=["CPUExecutionProvider"])
     session_k = ort.InferenceSession(model_k, providers=["CPUExecutionProvider"])
     input_name_n = session_n.get_inputs()[0].name
-    input_name_p = session_n.get_inputs()[0].name
-    input_name_k = session_n.get_inputs()[0].name
+    input_name_p = session_p.get_inputs()[0].name
+    input_name_k = session_k.get_inputs()[0].name
     onnx_output_names_n = [output.name for output in session_n.get_outputs()]
     onnx_output_names_p = [output.name for output in session_p.get_outputs()]
     onnx_output_names_k = [output.name for output in session_k.get_outputs()]
@@ -351,6 +361,9 @@ def deteksi_nutrisi_petak(scaler_n, scaler_p, scaler_k, model_n, model_p, model_
     X_n_scaled = scaler_n.transform(X_inf_array)
     X_p_scaled = scaler_p.transform(X_inf_array)
     X_k_scaled = scaler_k.transform(X_inf_array)
+    X_n_scaled = np.asarray(X_n_scaled, dtype=np.float32)
+    X_p_scaled = np.asarray(X_p_scaled, dtype=np.float32)
+    X_k_scaled = np.asarray(X_k_scaled, dtype=np.float32)
     n_preds = session_n.run(
         onnx_output_names_n,
         {input_name_n: X_n_scaled.astype(np.float32)}
@@ -398,7 +411,7 @@ def deteksi_nutrisi_petak(scaler_n, scaler_p, scaler_k, model_n, model_p, model_
                             driver="GPKG"
                             )
 
-    print(f"Menyimpan hasil prediksi di {output_folder}")
+    # print(f"Menyimpan hasil prediksi di {output_folder}")
     df.to_excel(output_xlsx, index=False)
     gdf.to_file(output_shp, driver="ESRI Shapefile")
     

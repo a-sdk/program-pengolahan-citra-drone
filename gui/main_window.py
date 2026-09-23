@@ -16,7 +16,9 @@ from gui.tools.raster_processor import RasterHandler
 from gui.tools.vector_processor import VectorHandler
 from app.worker import Worker
 from gui.layer_manager import LayerManager
-from app.controller import NutrientController, WaterController, DiseaseController
+from app.controller import (
+    NutrientController, WaterController, DiseaseController
+)
 from app.result_model import AnalysisResult
 from path_config import AppPaths
 import os

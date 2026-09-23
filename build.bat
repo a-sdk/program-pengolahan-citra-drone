@@ -3,7 +3,7 @@
 rmdir /s dist\
 rmdir /s build\
 
-call .venv_ricegis\Scripts\activate.bat
+call .venv\Scripts\activate.bat
 pause
 pyinstaller ^
 --noconfirm ^

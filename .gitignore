@@ -1,7 +1,6 @@
 # Folder
 # Venv
-.venv_stable/
-.venv_ricegis/
+.venv/
 # IDE
 .vscode
 # Python
@@ -10,7 +9,6 @@ __pycache__/
 dist/
 build/
 # Others
-runtime/
 runtime/
 temp/
 *.tif
