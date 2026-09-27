@@ -541,7 +541,7 @@ def hitung_sebaran_petak(gpkg_path, legend_dict):
             msg = f"{penyakit.title()} is {status_desc}"
                 
  
-        elif len(legend) == 5: # Air (rentang)
+        elif len(legend) == 6: # Air (rentang)
             val_ = val_4 + val_5 
             if val_1 > val_2 + val_3 and val_1 > val_:
                 recom = InfoRegistry.get_recom("water", "adequate")
