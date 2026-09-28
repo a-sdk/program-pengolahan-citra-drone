@@ -7,16 +7,16 @@ call .venv\Scripts\activate.bat
 pause
 pyinstaller ^
 --noconfirm ^
---console ^
---hidden-import="sklearn" ^
---hidden-import="sklearn.ensemble._forest" ^
---hidden-import="onnxruntime" ^
---icon=app_icon.ico ^
---name RiceGIS ^
---add-data "assets;assets" ^
---add-data "ui;ui" ^
---collect-all rasterio ^
---collect-all onnxruntime ^
-main.py
+RiceGIS.spec
+
+:: Force remove PyQt5's conflicting C++ runtime DLLs
+if exist "dist\RiceGIS\_internal\PyQt5\Qt5\bin\MSVCP140.dll" (
+    del /f /q "dist\RiceGIS\_internal\PyQt5\Qt5\bin\MSVCP140.dll"
+    echo [FIX] Removed conflicting PyQt5 MSVCP140.dll
+)
+if exist "dist\RiceGIS\_internal\PyQt5\Qt5\bin\VCRUNTIME140.dll" (
+    del /f /q "dist\RiceGIS\_internal\PyQt5\Qt5\bin\VCRUNTIME140.dll"
+    echo [FIX] Removed conflicting PyQt5 VCRUNTIME140.dll
+)
 
 pause

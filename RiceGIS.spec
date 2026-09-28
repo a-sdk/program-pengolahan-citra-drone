@@ -1,38 +1,60 @@
 # -*- mode: python ; coding: utf-8 -*-
-from PyInstaller.utils.hooks import collect_all
+# RiceGIS.spec
+import sys
+from PyInstaller.utils.hooks import collect_all, collect_dynamic_libs, collect_data_files
 
-datas = [('assets', 'assets'), ('ui', 'ui')]
-binaries = []
+block_cipher = None
+
+# Collect rasterio assets and binaries (replaces --collect-all rasterio)
+rasterio_datas, rasterio_binaries, rasterio_hiddenimports = collect_all('rasterio')
+
+# Collect ONNX Runtime dependencies selectively
+onnx_binaries = collect_dynamic_libs('onnxruntime')
+onnx_datas = collect_data_files('onnxruntime')
+
+# Combine all datas and binaries
+datas = [('assets', 'assets'), ('ui', 'ui')] + rasterio_datas + onnx_datas
+binaries = rasterio_binaries + onnx_binaries
+
+# FILTER OUT PyQt5's isolated C++ runtime binaries (safely handles 2-element tuples)
+filtered_binaries = []
+for item in binaries:
+    # Safely extract source path regardless of tuple length
+    src = item[0] if isinstance(item[0], str) else item[1]
+    
+    # Check if the binary is PyQt5's bundled MSVCP140 or VCRUNTIME140
+    src_upper = src.upper()
+    if 'PYQT5' in src_upper and ('MSVCP140' in src_upper or 'VCRUNTIME140' in src_upper):
+        continue  # Skip bundled PyQt5 C++ runtimes
+    
+    filtered_binaries.append(item)
+
 hiddenimports = [
-    'sklearn', 
-    'sklearn.ensemble._forest', 
+    'sklearn',
+    'sklearn.ensemble._forest',
     'onnxruntime',
-    'scipy.special.cython_special',
-    'scipy.spatial.transform._rotation_groups',
-    'sklearn.utils._typedefs',
-    'sklearn.neighbors._partition',
-    'numpy._core'
-]
-tmp_ret = collect_all('rasterio')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
-tmp_ret = collect_all('onnxruntime')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
-
+    'PyQt5',
+    'PyQt5.QtCore',
+    'PyQt5.QtWidgets',
+] + rasterio_hiddenimports
 
 a = Analysis(
     ['main.py'],
     pathex=[],
-    binaries=binaries,
+    binaries=filtered_binaries,
     datas=datas,
     hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
     noarchive=False,
-    optimize=0,
 )
-pyz = PYZ(a.pure)
+
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
 exe = EXE(
     pyz,
@@ -45,19 +67,16 @@ exe = EXE(
     strip=False,
     upx=True,
     console=True,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
     icon=['app_icon.ico'],
 )
+
 coll = COLLECT(
     exe,
     a.binaries,
+    a.zipfiles,
     a.datas,
     strip=False,
-    upx=True,
+    upx=False,
     upx_exclude=[],
     name='RiceGIS',
 )

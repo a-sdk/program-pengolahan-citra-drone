@@ -1,7 +1,11 @@
 import sys
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 # ONNX must be imported before PyQt5/GDAL and other native dependencies.
 # Prevents Windows native-library loading conflict when controller imports ORT
 import onnxruntime
+import rasterio 
+
 from PyQt5.QtWidgets import QApplication, QSplashScreen
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
