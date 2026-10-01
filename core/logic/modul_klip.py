@@ -6,17 +6,18 @@ import os
 import geopandas as gpd
 import rasterio as rio
 from rasterio.mask import mask
+from core.logic.modul_utilitas import getRootFileName
 import logging
 
 logger = logging.getLogger(__name__)
 
 # Fungsi untuk memotong citra bedasarkan shapefile poligon
-def potong_raster(input_folder, shp_path, output_folder, output_filename="clip_result.tif", nilai_nodata=0):
+def potong_raster(input_path, shp_path, output_folder, nilai_nodata=0):
     """
     Memotong citra sesuai dengan shapefile poligon yang dibuat.
 
     Parameters:
-        input_folder (str): Lokasi file raster yang akan dipotong.
+        input_path (str): Lokasi file raster yang akan dipotong.
         shp_path (str): Lokasi shapefile yang menjadi acuan.
         output_folder (str): Nama folder tempat hasil klip disimpan.
         output_filename (str): Nama file output, termasuk ekstensi
@@ -25,14 +26,15 @@ def potong_raster(input_folder, shp_path, output_folder, output_filename="clip_r
         str: Output path.
     """
     # Tentukan lokasi hasil clip
-    output_path = os.path.join(output_folder, output_filename)
+    base_name = getRootFileName(input_path)
+    output_path = os.path.join(output_folder, f"{base_name}_clipped.tif")
     # Pastikan folder output ada, jika tidak, buat folder baru
     os.makedirs(output_folder, exist_ok=True)
     # Baca Shapefile Menggunakan GeoPandas
     # print("\nMemuat shapefile...")
     mask_gdf = gpd.read_file(shp_path)
     # print("Memuat citra...")
-    with rio.open(input_folder) as src:
+    with rio.open(input_path) as src:
         profile = src.profile
         geometries = mask_gdf.geometry
         # Melakukan masking

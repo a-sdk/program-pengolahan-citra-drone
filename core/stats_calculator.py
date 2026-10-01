@@ -15,10 +15,10 @@ class StatsCalculator:
         raw_legend = InfoRegistry.get_legend(name)
         self.legend = {int(k): v for k, v in raw_legend.items()}
 
-    def run(self, input_folder):
+    def run(self, input_path):
         logger.info("Menghitung sebaran dan memunculkan hasil...") 
         try:
-            self.result = self._do_calculation(input_folder)
+            self.result = self._do_calculation(input_path)
             return self.result
         except Exception as e:
             logger.error(f"ERROR: {type(e).__name__}: {e}", exc_info=True)
@@ -35,8 +35,8 @@ class PlantDiseaseCalculator(StatsCalculator):
         super().__init__()
         self.get_legend("disease")
 
-    def _do_calculation(self, input_folder):
-        hitung_sebaran_rumpun(input_folder, legend_dict=self.legend)
+    def _do_calculation(self, input_path):
+        hitung_sebaran_rumpun(input_path, legend_dict=self.legend)
         
 class DiseasePlotCalculator(StatsCalculator):
     """
@@ -46,8 +46,8 @@ class DiseasePlotCalculator(StatsCalculator):
         super().__init__()
         self.get_legend("disease")
 
-    def _do_calculation(self, input_folder):
-        hitung_sebaran_petak(input_folder, legend_dict=self.legend)
+    def _do_calculation(self, input_path):
+        hitung_sebaran_petak(input_path, legend_dict=self.legend)
     
 class NutrientPlotCalculator(StatsCalculator):
     """
@@ -57,8 +57,8 @@ class NutrientPlotCalculator(StatsCalculator):
         super().__init__()
         self.get_legend("nutrient")
 
-    def _do_calculation(self, input_folder):
-        hitung_sebaran_petak(input_folder, legend_dict=self.legend)
+    def _do_calculation(self, input_path):
+        hitung_sebaran_petak(input_path, legend_dict=self.legend)
 
 class WaterPlotCalculator(StatsCalculator):
     """
@@ -68,5 +68,5 @@ class WaterPlotCalculator(StatsCalculator):
         super().__init__()
         self.get_legend("water")
 
-    def _do_calculation(self, input_folder):
-        hitung_sebaran_petak(input_folder, legend_dict=self.legend)
+    def _do_calculation(self, input_path):
+        hitung_sebaran_petak(input_path, legend_dict=self.legend)

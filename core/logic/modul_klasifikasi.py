@@ -1,5 +1,6 @@
 import rasterio as rio
 import os
+from core.logic.modul_utilitas import getRootFileName
 import numpy as np
 import onnxruntime as ort
 import logging
@@ -9,21 +10,21 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, check_cancel, on_progress):
+def pisahkan_gulma(model_path, input_path, output_folder, check_cancel, on_progress):
     """
     Menerapkan model terlatih ke seluruh tumpukan fitur untuk memisahkan padi dan gulma.
 
     Parameters:
         model_path (str): Lokasi model deteksi gulma.
         stack_path (str): Lokasi tumpukan fitur.
-        output_folder (str): Nama folder tempat file akan disimpan.
-        output_filename (str): Nama file output, termasuk ekstensi. 
+        output_folder (str): Nama folder tempat file akan disimpan. 
 
     Returns:
         str: Output path.
     """
     import joblib
-    output_path = os.path.join(output_folder, output_filename)
+    base_name = getRootFileName(input_path)
+    output_path = os.path.join(output_folder, f"{base_name}_segmented.tif")
     os.makedirs(output_folder, exist_ok=True)
     # print(f"Memuat model...")
     try:
@@ -34,7 +35,7 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, check
         return
 
     # print(f"Membuka tumpukan fitur...")
-    with rio.open(stack_path) as src:
+    with rio.open(input_path) as src:
         # Dapatkan metadata untuk file output
         profile = src.profile
         nodata = src.nodata
@@ -94,12 +95,12 @@ def pisahkan_gulma(model_path, stack_path, output_folder, output_filename, check
     # print(f"Pemisahan selesai! Peta segmentasi disimpan di: {output_folder}")
     return output_path
 
-def deteksi_penyakit_rumpun(scaler, model, input_folder, output_folder, check_cancel, on_progress):
+def deteksi_penyakit_rumpun(scaler, model, input_path, output_folder, check_cancel, on_progress):
     """
     Menerapkan model multi-output ke raster dan menghasilkan 4 peta sebaran terpisah.
 
     Parameters:
-        input_folder (str): Lokasi folder berisi file GeoTiff. 
+        input_path (str): Lokasi folder berisi file GeoTiff. 
         output_folder (str): Nama folder tempat file akan disimpan.
 
     Returns:
@@ -113,7 +114,7 @@ def deteksi_penyakit_rumpun(scaler, model, input_folder, output_folder, check_ca
     import json
     isPrediction = json.dumps(True)
     # print(f"Memprediksi citra...")
-    with rio.open(input_folder) as src:
+    with rio.open(input_path) as src:
         base_profile = src.profile
         base_profile.update(
             dtype=rio.uint8, 
@@ -196,20 +197,20 @@ def deteksi_penyakit_rumpun(scaler, model, input_folder, output_folder, check_ca
     # print(f"\nDeteksi selesai! 4 peta disimpan di folder: {output_folder}")
     return path_hasil
 
-def deteksi_penyakit_petak(scaler, model, input_folder, shp_path, output_folder, check_cancel, on_progress):
+def deteksi_penyakit_petak(scaler, model, input_path, shp_path, output_folder, check_cancel, on_progress):
     """
     Menerapkan model untuk prediksi
     penyakit.
 
     Parameters:
-        input_folder (str): Lokasi folder hasil ekstraksi nilai piksel.
+        input_path (str): Lokasi folder hasil ekstraksi nilai piksel.
         shp_path (str): Lokasi shapefile yang menjadi acuan.
         output_folder (str): Nama folder tempat file akan disimpan.
 
     Returns:
         str: Output path.
     """
-    df = pd.read_csv(input_folder)
+    df = pd.read_csv(input_path)
     gdf = gpd.read_file(shp_path)
     session = ort.InferenceSession(model, providers=["CPUExecutionProvider"])
     input_name = session.get_inputs()[0].name
@@ -265,13 +266,13 @@ def deteksi_penyakit_petak(scaler, model, input_folder, shp_path, output_folder,
     
     return output_gpkg
 
-def deteksi_air_petak(scaler, model_reg, input_folder, shp_path, output_folder, check_cancel, on_progress):
+def deteksi_air_petak(scaler, model_reg, input_path, shp_path, output_folder, check_cancel, on_progress):
     """
     Menerapkan model untuk prediksi
     ketersediaan air.
 
     Parameters:
-        input_folder (str): Lokasi folder hasil ekstraksi nilai piksel.
+        input_path (str): Lokasi folder hasil ekstraksi nilai piksel.
         shp_path (str): Lokasi shapefile yang menjadi acuan.
         output_folder (str): Nama folder tempat file akan disimpan.
 
@@ -280,7 +281,7 @@ def deteksi_air_petak(scaler, model_reg, input_folder, shp_path, output_folder, 
     """
     from sklearn.preprocessing import PolynomialFeatures
     poly = PolynomialFeatures(degree=2, interaction_only=True, include_bias=False)
-    df = pd.read_csv(input_folder)
+    df = pd.read_csv(input_path)
     gdf = gpd.read_file(shp_path) 
     session = ort.InferenceSession(model_reg, providers=["CPUExecutionProvider"])
     input_name = session.get_inputs()[0].name
@@ -330,20 +331,20 @@ def deteksi_air_petak(scaler, model_reg, input_folder, shp_path, output_folder, 
     
     return output_gpkg
     
-def deteksi_nutrisi_petak(scaler_n, scaler_p, scaler_k, model_n, model_p, model_k, input_folder, shp_path, output_folder, check_cancel, on_progress):
+def deteksi_nutrisi_petak(scaler_n, scaler_p, scaler_k, model_n, model_p, model_k, input_path, shp_path, output_folder, check_cancel, on_progress):
     """
     Menerapkan model memprediksi
     ketersediaan nutrisi.
 
     Parameters:
-        input_folder (str): Lokasi folder hasil ekstraksi nilai piksel.
+        input_path (str): Lokasi folder hasil ekstraksi nilai piksel.
         shp_path (str): Lokasi shapefile yang menjadi acuan.
         output_folder (str): Nama folder tempat file akan disimpan.
 
     Returns:
         str: Output path.
     """
-    df = pd.read_csv(input_folder)
+    df = pd.read_csv(input_path)
     gdf = gpd.read_file(shp_path)
     session_n = ort.InferenceSession(model_n, providers=["CPUExecutionProvider"])
     session_p = ort.InferenceSession(model_p, providers=["CPUExecutionProvider"])
@@ -420,11 +421,11 @@ def deteksi_nutrisi_petak(scaler_n, scaler_p, scaler_k, model_n, model_p, model_
 if __name__ == "__main__":
     from modul_utilitas import PlantDiseaseAnalyzer
     import glob
-    input_folder = r"C:\Users\acer_\Documents\Orthomosaic\tes aplikasi\Lahan percobaan\Preds_Result\Sebaran_Rumpun"
+    input_path = r"C:\Users\acer_\Documents\Orthomosaic\tes aplikasi\Lahan percobaan\Preds_Result\Sebaran_Rumpun"
     shp_path = r"C:\Users\acer_\Documents\Orthomosaic\tes aplikasi\Lahan percobaan\multipoligon\Lahan 2_0_1029_komponen.shp"
     output_folder = r"C:\Users\acer_\Documents\Orthomosaic\tes aplikasi\Lahan percobaan"
     usep = PlantDiseaseAnalyzer()
-    files = glob.glob(f"{input_folder}/*.tif")
+    files = glob.glob(f"{input_path}/*.tif")
     for file in files:
         hasil = usep.run(file, output_folder)
 

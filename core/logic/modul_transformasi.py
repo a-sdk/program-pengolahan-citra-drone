@@ -5,7 +5,7 @@ Modul untuk transformasi dan segmentasi.
 import numpy as np
 import pandas as pd
 import rasterio as rio
-from core.logic.modul_utilitas import otsu_threshold, simpan_raster
+from core.logic.modul_utilitas import otsu_threshold, simpan_raster, getRootFileName
 from core.logic.modul_klasifikasi import pisahkan_gulma
 from path_config import AppPaths
 import logging
@@ -173,12 +173,12 @@ def hitung_cive(red, green, blue):
     return cive
 
 # Fungsi untuk melakukan proses transformasi
-def persiapan_segmentasi(input_folder, output_folder, nilai_nodata=0):
+def persiapan_segmentasi(input_path, output_folder, nilai_nodata=0):
     """
     Melakukan tranformasi NDVI untuk segmentasi.
     
     Parameters:
-        input_folder (str): Lokasi file raster.
+        input_path (str): Lokasi file raster.
         output_folder (str): Nama folder tempat hasil transformasi disimpan.
         nilai_nodata (float): Nilai nodata raster.
     
@@ -186,7 +186,7 @@ def persiapan_segmentasi(input_folder, output_folder, nilai_nodata=0):
         str: ndvi_file_path.
     """
     # Memuat band
-    with rio.open(input_folder) as src:
+    with rio.open(input_path) as src:
         m_red = src.read(5)
         red_edge = src.read(6)
         nir = src.read(7)
@@ -204,20 +204,22 @@ def persiapan_segmentasi(input_folder, output_folder, nilai_nodata=0):
     ndrei_file_path = simpan_raster(transform_ndrei, profile, output_folder, "NDREI.tif", nilai_nodata)
     return ndrei_file_path, ndvi_file_path 
 
-def hitung_indeks_vegetasi(input_folder, output_folder):
+def hitung_indeks_vegetasi(input_path, output_folder):
     """
-    Melakukan proses transformasi indeks vegetasi.
+    Melakukan proses transformasi indeks vegetasi
+    untuk model deteksi air.
 
     Parameters:
-        input_folder (str): Lokasi file csv hasil ekstrak.
+        input_path (str): Lokasi file csv hasil ekstrak.
         output_folder (str): Lokasi folder ouptut.
 
     Returns:
         str: Output path.
     """
     os.makedirs(output_folder, exist_ok=True)
-    output_path = f"{output_folder}/vegetation_indices.csv"
-    df = pd.read_csv(input_folder)
+    base_name = getRootFileName(input_path)
+    output_path = os.path.join(output_folder, f"{base_name}_vegetation_indices.csv")
+    df = pd.read_csv(input_path)
     bands = ["RED", "GREEN", "BLUE", "M_GREEN", "M_RED", "RED_EDGE", "NIR"]
     data_trimmed = trim_norm_df(df[bands].copy())
     cols_identitas = ["id", "Nama", "X", "Y"]
@@ -225,9 +227,9 @@ def hitung_indeks_vegetasi(input_folder, output_folder):
     # Terapkan urutan
     data_trimmed["CIVE"]  = hitung_cive(data_trimmed["RED"], data_trimmed["GREEN"], data_trimmed["BLUE"])
     data_trimmed["EVI"]   = hitung_evi(data_trimmed["NIR"], data_trimmed["M_RED"], data_trimmed["BLUE"])
-    data_trimmed["GNDVI"] = hitung_gndvi(data_trimmed["NIR"], data_trimmed["GREEN"])
+    data_trimmed["GNDVI"] = hitung_gndvi(data_trimmed["NIR"], data_trimmed["M_GREEN"])
     data_trimmed["NDRE"]  = hitung_ndrei(data_trimmed["NIR"], data_trimmed["RED_EDGE"])
-    data_trimmed["NDVI"]  = hitung_ndvi(data_trimmed["NIR"], data_trimmed["RED"]) # 
+    data_trimmed["NDVI"]  = hitung_ndvi(data_trimmed["NIR"], data_trimmed["M_RED"]) 
     data_trimmed["VIDVI"] = hitung_vidvi(data_trimmed["RED"], data_trimmed["GREEN"], data_trimmed["BLUE"])
 
     for col in cols_identitas:
@@ -240,12 +242,12 @@ def hitung_indeks_vegetasi(input_folder, output_folder):
     return output_path
 
 # Fungsi untuk melakukan proses segmentasi
-def proses_segmentasi(input_folder, ndvi_path, output_folder, check_cancel=None, on_progress=None, nilai_nodata=0):
+def proses_segmentasi(input_path, ndvi_path, output_folder, check_cancel=None, on_progress=None, nilai_nodata=0):
     """
     Melakukan proses segmentasi untuk memisahkan tanaman padi.
 
     Parameters:
-        input_folder (str): Lokasi file raster.
+        input_path (str): Lokasi file raster.
         ndvi_path (str): Lokasi file raster NDVI.
         output_folder (str): Nama folder tempat hasil transformasi disimpan.
         nilai_nodata (float): Nilai nodata raster.
@@ -254,9 +256,16 @@ def proses_segmentasi(input_folder, ndvi_path, output_folder, check_cancel=None,
         str: threshold_file_path.
     """
     os.makedirs(output_folder, exist_ok=True)
+    base_name = getRootFileName(input_path)
     # Membuat peta segmentasi gulma dan padi
     model_gulma = str(AppPaths.assets("defaults/models/segmenter_model.joblib"))
-    peta_segmentasi_gulma = pisahkan_gulma(model_gulma, input_folder, output_folder, "segmentasi_gulma.tif", check_cancel, on_progress)
+    peta_segmentasi_gulma = pisahkan_gulma(
+        model_gulma, 
+        input_path, 
+        output_folder, 
+        check_cancel, 
+        on_progress
+    )
     # print("Memuat file hasil transformasi...")
     with (
         rio.open(ndvi_path) as src_ndvi,
@@ -279,6 +288,12 @@ def proses_segmentasi(input_folder, ndvi_path, output_folder, check_cancel=None,
     hasil_threshold = mask_final.astype(float)
 
     # Menyimpan hasil threshold
-    threshold_file_path = simpan_raster(hasil_threshold, profile, output_folder, "threshold_result.tif", nilai_nodata)
+    threshold_file_path = simpan_raster(
+        hasil_threshold, 
+        profile, 
+        output_folder, 
+        f"{base_name}_threshold_result.tif", 
+        nilai_nodata
+    )
     os.remove(peta_segmentasi_gulma)
     return threshold_file_path

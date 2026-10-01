@@ -4,17 +4,18 @@ Modul untuk mask citra.
 
 import os
 import numpy as np
+from core.logic.modul_utilitas import getRootFileName
 import rasterio as rio
 import logging
 
 logger = logging.getLogger(__name__)
 # Fungsi untuk melakukan masking pada tumpukan fitur
-def mask_tumpukan_fitur(input_folder, mask_path, output_folder, logika=lambda x: x==1, nilai_nodata=0):
+def mask_tumpukan_fitur(input_path, mask_path, output_folder, logika=lambda x: x==1, nilai_nodata=0):
     """
     Menerapkan masking pada tumpukan fitur berdasarkan mask boolean.
     
     Parameters:
-        input_folder (str): Lokasi folder tumpukan fitur yang akan di-mask.
+        input_path (str): Lokasi folder tumpukan fitur yang akan di-mask.
         mask_path (str): Lokasi file mask.
         output_folder (str): Nama folder tempat hasil mask disimpan.
         logika (function): Fungsi lambda sebagai acuan mask.
@@ -32,8 +33,9 @@ def mask_tumpukan_fitur(input_folder, mask_path, output_folder, logika=lambda x:
     logger.info(f"Mask boolean berhasil dibuat. Total piksel valid: {np.sum(mask_valid)}")
     # print(f"Membuka tumpukan fitur...")
     os.makedirs(output_folder, exist_ok=True)
-    output_path = os.path.join(output_folder, "mask result.tif")
-    with rio.open(input_folder) as src_data:
+    base_name = getRootFileName(input_path)
+    output_path = os.path.join(output_folder, f"{base_name}_mask result.tif")
+    with rio.open(input_path) as src_data:
         # Membaca fitur sekaligus
         data_stack = src_data.read()
         profile = src_data.profile
@@ -50,4 +52,59 @@ def mask_tumpukan_fitur(input_folder, mask_path, output_folder, logika=lambda x:
         with rio.open(output_path, "w", **profile) as dest:
             dest.write(data_stack)
     # print(f"File {nf}_masked.tif berhasil disimpan di {output_folder}")
+    return output_path
+
+def water_pred_mask(input_path, ndvi_path, output_folder, nilai_nodata=0):
+    """
+    Menerapkan metode masking khusus
+    untuk prediksi kecukupan air.
+
+    Parameters:
+        input_path (str): Lokasi file yang akan di-mask.
+        ndvi_path (str): Lokasi file hasil transformasi NDVI.
+        output_folder (str): Nama folder tempat hasil mask disimpan.
+        nilai_nodata (float): Nilai nodata raster.
+        
+    Returns:
+        str: Output path.
+    """
+
+    from skimage import exposure
+    from skimage.filters import threshold_local, gaussian
+    from skimage.morphology import remove_small_objects, remove_small_holes, closing, disk
+    from scipy import ndimage
+
+    os.makedirs(output_folder, exist_ok=True)
+    base_name = getRootFileName(input_path)
+    output_path = os.path.join(output_folder, f"{base_name}_water mask.tif")
+
+    with (
+         rio.open(ndvi_path) as src_mask, 
+         rio.open(input_path) as src_img
+        ):
+            ndvi = src_mask.read(1)
+            img = src_img.read()
+            profile = src_img.profile.copy()
+
+    ndvi_enhanced = exposure.equalize_adapthist(ndvi, kernel_size=32, clip_limit=0.02)
+    ndvi_blur = gaussian(ndvi_enhanced, sigma=0.5)
+    local_thresh = threshold_local(ndvi_blur, block_size=101, offset=0.01, method='gaussian')
+    mask_binary = (ndvi_blur > local_thresh) & (ndvi > 0.1)
+    
+    mask_cleaned = closing(mask_binary, disk(1))
+    mask_cleaned = remove_small_objects(mask_cleaned, max_size=100)
+    mask_cleaned = remove_small_holes(mask_cleaned, max_size=500)
+    mask_cleaned = ndimage.median_filter(mask_cleaned, size=3)
+    masked_img = img.copy()  
+    masked_img[:, ~mask_cleaned] = nilai_nodata  
+
+    profile.update(
+        dtype=img.dtype,
+        count=src_img.count, 
+        nodata=nilai_nodata
+    )
+
+    with rio.open(output_path, "w", **profile) as dest: 
+         dest.write(masked_img)
+
     return output_path

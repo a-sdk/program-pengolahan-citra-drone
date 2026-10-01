@@ -6,6 +6,7 @@ Modul untuk ekstraksi fitur citra.
 import pandas as pd
 import rasterio as rio
 from rasterstats import zonal_stats
+from core.logic.modul_utilitas import getRootFileName
 import geopandas as gpd
 import os
 import logging
@@ -13,13 +14,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Fungsi untuk mengekstrak rata-rata nilai piksel dalam sub poligon
-def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename="pixel_val.csv"):
+def ekstrak_rerata_piksel(shp_path, input_path, output_folder):
     """
     Mengekstrak rata-rata piksel dalam poligon dari tumpukan fitur.
 
     Parameters:
         shp_path (str): Lokasi shapefile yang menjadi acuan.
-        input_folder (str): Lokasi file tumpukan fitur.
+        input_path (str): Lokasi file tumpukan fitur.
         output_folder (str): Nama folder tempat file akan disimpan.
         output_filename (str): Nama file output, termasuk ekstensi.
 
@@ -40,7 +41,7 @@ def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename
     # Menyiapkan DataFrame hasil dengan kolom koordinat awal
     hasil_ekstraksi = gdf[["id", "no_urut", "Nama", "X", "Y"]].copy() 
 
-    with rio.open(input_folder) as src:
+    with rio.open(input_path) as src:
         count = src.count
         if count > 7:
             logger.info("Raster punya > 7 band")
@@ -88,7 +89,8 @@ def ekstrak_rerata_piksel(shp_path, input_folder, output_folder, output_filename
     
     # Simpan file
     os.makedirs(output_folder, exist_ok=True)
-    output_path = os.path.join(output_folder, output_filename)
+    base_name = getRootFileName(input_path)
+    output_path = os.path.join(output_folder, f"{base_name}_pixel_val.csv")
     df_urut.to_csv(output_path, index=False)
     logger.info("Menyimpan hasil ekstraksi")
     # print(f"Ekstraksi selesai...")

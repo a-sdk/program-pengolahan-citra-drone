@@ -20,6 +20,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def getRootFileName(input_path):
+    base = os.path.splitext(os.path.basename(input_path))[0]
+    return base.split('_')[0]
+
 # Fungsi bantu membuat raster konstan
 def create_constant_raster(tif, value, output_folder, output_filename):
     """
@@ -356,12 +360,12 @@ def tumpuk_fitur(lst_fitur, output_folder, output_filename, nilai_nodata=0):
     return output_path
 
 # Fungsi untuk menghitung sebaran penyakit per rumpun
-def hitung_sebaran_rumpun(input_folder, legend_dict):
+def hitung_sebaran_rumpun(input_path, legend_dict):
     """
     Menghitung sebaran penyakit.
     
     Parameters:
-        input_folder (list): Lokasi file GeoTIFF hasil prediksi model.
+        input_path (list): Lokasi file GeoTIFF hasil prediksi model.
         legend (dict): Informasi legenda.
 
     Returns:
@@ -369,7 +373,7 @@ def hitung_sebaran_rumpun(input_folder, legend_dict):
     """
     
     from path_config import InfoRegistry
-    for file in input_folder:
+    for file in input_path:
         legend = {k: v.copy() for k, v in legend_dict.items()}
         nf = os.path.splitext(os.path.basename(file))[0]
         nf_penyakit = nf.split("_")[0]
@@ -445,7 +449,6 @@ def hitung_sebaran_petak(gpkg_path, legend_dict):
         layers = fiona.listlayers(gpkg_path)
     except Exception as e:
         logger.info(f"ERROR: {e}")
-        return None
     # Siapkan tabel database gpkg
     conn = sqlite3.connect(gpkg_path)
     cur = conn.cursor()
@@ -459,6 +462,9 @@ def hitung_sebaran_petak(gpkg_path, legend_dict):
     
     # Hitung sebaran per nama layer
     for layer_name in layers:
+        if layer_name == "app_layer_metadata":
+            continue
+        
         legend = {k: v.copy() for k, v in legend_dict.items()}
         # print(f"\n=== Menganalisis Layer: {layer_name} ===")
         # Membaca layer spesifik

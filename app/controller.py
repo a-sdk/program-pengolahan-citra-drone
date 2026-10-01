@@ -7,7 +7,7 @@ from core.logic.modul_klip import potong_raster
 from core.logic.modul_transformasi import (
     persiapan_segmentasi, proses_segmentasi, hitung_indeks_vegetasi
 )
-from core.logic.modul_mask import mask_tumpukan_fitur
+from core.logic.modul_mask import mask_tumpukan_fitur, water_pred_mask
 from core.logic.modul_ekstraksi import ekstrak_rerata_piksel
 from core.stats_calculator import (
     NutrientPlotCalculator, WaterPlotCalculator, PlantDiseaseCalculator
@@ -57,20 +57,16 @@ class BaseController:
         else:
             clipped_path = tif
         self.helper.check_cancel()
-        # hst_band = create_constant_raster(
-        #     tif=clipped_path, 
-        #     value=42, 
-        #     output_folder=out, 
-        #     output_filename="hst.tif"
-        #     )
         self.helper.check_cancel()
         self.helper.progress(30, "Transforming with NDVI...")
         ndrei_path, ndvi_path = persiapan_segmentasi(clipped_path, out)
-        stack_path = tumpuk_fitur(
-            lst_fitur=[clipped_path, ndrei_path],
-            output_folder=out,
-            output_filename="stack result.tif"
-        )
+        if self.task == "disease":
+            # Stack 7 channel + NDREI for disease detection
+            stack_path = tumpuk_fitur(
+                lst_fitur=[clipped_path, ndrei_path],
+                output_folder=out,
+                output_filename="stack result.tif"
+            )
         self.helper.check_cancel()
         self.helper.progress(40, "Separating vegetation...")
         segmented_path = proses_segmentasi(
@@ -83,14 +79,24 @@ class BaseController:
         self.helper.check_cancel()
         self.helper.progress(50, "Masking raster...")
         if self.task == "disease":
+            # Stack result as input
             mask_input = stack_path
         else:
+            # Clip result as input
             mask_input = clipped_path
-        masked_path = mask_tumpukan_fitur(
-            mask_input, 
-            segmented_path, 
-            out
+        if self.task == "water":
+            # Use this particular mask function for water prediction
+            masked_path = water_pred_mask(
+                mask_input,
+                ndvi_path,
+                out
             )
+        else:
+            masked_path = mask_tumpukan_fitur(
+                mask_input, 
+                segmented_path, 
+                out
+                )
         self.helper.check_cancel()
         self.helper.progress(60, "Extracting pixel...")
         extracted_path = ekstrak_rerata_piksel(
@@ -99,6 +105,7 @@ class BaseController:
             out
             )
         self.helper.check_cancel()
+        # Calculate additional vegetation index for water prediction
         vi_path = self.calculate_vi(extracted_path, out)
         if self.task == "disease":
             input_data = masked_path
@@ -108,7 +115,7 @@ class BaseController:
             input_data = extracted_path
         self.helper.progress(70, f"Detecting {self.task}...")
         classified_path = self.classifier.run(
-            input_folder=input_data, 
+            input_path=input_data, 
             shp_path=multipolygon_path,
             output_folder=out, 
             check_cancel=self.helper.cancelled, 

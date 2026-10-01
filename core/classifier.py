@@ -52,10 +52,10 @@ class BaseClassifier:
         if self.MODEL_KEY_3 is not None:
             self.model_3 = str(ModelRegistry.model_path(self.MODEL_KEY_3))
 
-    def run(self, input_folder, output_folder, shp_path=None, check_cancel=None, on_progress=None):
+    def run(self, input_path, output_folder, shp_path=None, check_cancel=None, on_progress=None):
         logger.info(f"Memulai prediksi dengan {self.__class__.__name__}...")
         try:
-            self.result = self._do_prediction(input_folder, output_folder, shp_path, check_cancel, on_progress)
+            self.result = self._do_prediction(input_path, output_folder, shp_path, check_cancel, on_progress)
             return self.result
         except Exception as e:
             logger.error(f"ERROR: {type(e).__name__}: {e}", exc_info=True)
@@ -73,12 +73,12 @@ class PlantDiseaseClassifier(BaseClassifier):
     def __init__(self):
         super().__init__()
 
-    def _do_prediction(self, input_folder, output_folder, shp_path, check_cancel, on_progress):
+    def _do_prediction(self, input_path, output_folder, shp_path, check_cancel, on_progress):
         self._load_model()
         output_path = deteksi_penyakit_rumpun(
             scaler=self.scaler_1, 
             model=self.model_1, 
-            input_folder=input_folder, 
+            input_path=input_path, 
             output_folder=output_folder, 
             check_cancel=check_cancel, 
             on_progress=on_progress
@@ -94,12 +94,12 @@ class DiseasePlotClassifier(BaseClassifier):
     def __init__(self):
         super().__init__()
 
-    def _do_prediction(self, input_folder, output_folder, shp_path, check_cancel, on_progress):
+    def _do_prediction(self, input_path, output_folder, shp_path, check_cancel, on_progress):
         self._load_model()
         output_gpkg = deteksi_penyakit_petak(
             self.scaler_1, 
             self.model_1, 
-            input_folder, 
+            input_path, 
             shp_path, 
             output_folder, 
             check_cancel,
@@ -116,12 +116,12 @@ class WaterPlotClassifier(BaseClassifier):
     def __init__(self):
         super().__init__()
 
-    def _do_prediction(self, input_folder, output_folder, shp_path, check_cancel, on_progress):
+    def _do_prediction(self, input_path, output_folder, shp_path, check_cancel, on_progress):
         self._load_model()
         output_gpkg = deteksi_air_petak(
             scaler=self.scaler_1, 
             model_reg=self.model_1, 
-            input_folder=input_folder, 
+            input_path=input_path, 
             shp_path=shp_path, 
             output_folder=output_folder, 
             check_cancel=check_cancel,
@@ -141,7 +141,7 @@ class NutrientPlotClassifier(BaseClassifier):
     def __init__(self):
         super().__init__()
 
-    def _do_prediction(self, input_folder, output_folder, shp_path, check_cancel, on_progress):
+    def _do_prediction(self, input_path, output_folder, shp_path, check_cancel, on_progress):
         self._load_model()
         output_gpkg = deteksi_nutrisi_petak(
             scaler_n=self.scaler_1, 
@@ -150,7 +150,7 @@ class NutrientPlotClassifier(BaseClassifier):
             model_n=self.model_1,
             model_p=self.model_2, 
             model_k=self.model_3,
-            input_folder=input_folder, 
+            input_path=input_path, 
             shp_path=shp_path, 
             output_folder=output_folder, 
             check_cancel=check_cancel,
