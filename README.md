@@ -1,4 +1,4 @@
-# Program Pengolahan Citra Drone Multispektral
+# RiceGIS App
 
 ## Deskripsi Proyek
 
