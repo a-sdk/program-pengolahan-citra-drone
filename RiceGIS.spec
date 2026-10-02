@@ -1,32 +1,34 @@
 # -*- mode: python ; coding: utf-8 -*-
 # RiceGIS.spec
 import sys
+import os
 from PyInstaller.utils.hooks import collect_all, collect_dynamic_libs, collect_data_files
 
 block_cipher = None
 
-# Collect rasterio assets and binaries (replaces --collect-all rasterio)
+# Collect rasterio, pyproj, and geopandas assets
 rasterio_datas, rasterio_binaries, rasterio_hiddenimports = collect_all('rasterio')
+pyproj_datas, pyproj_binaries, pyproj_hiddenimports = collect_all('pyproj')
 
-# Collect ONNX Runtime dependencies selectively
+# Collect ONNX Runtime dependencies
 onnx_binaries = collect_dynamic_libs('onnxruntime')
 onnx_datas = collect_data_files('onnxruntime')
 
-# Combine all datas and binaries
-datas = [('assets', 'assets'), ('ui', 'ui')] + rasterio_datas + onnx_datas
-binaries = rasterio_binaries + onnx_binaries
+# Combine datas and binaries
+datas = [('assets', 'assets'), ('ui', 'ui')] + rasterio_datas + pyproj_datas + onnx_datas
+binaries = rasterio_binaries + pyproj_binaries + onnx_binaries
 
-# FILTER OUT PyQt5's isolated C++ runtime binaries (safely handles 2-element tuples)
+# Filter binaries selectively based on OS
 filtered_binaries = []
 for item in binaries:
-    # Safely extract source path regardless of tuple length
     src = item[0] if isinstance(item[0], str) else item[1]
-    
-    # Check if the binary is PyQt5's bundled MSVCP140 or VCRUNTIME140
     src_upper = src.upper()
-    if 'PYQT5' in src_upper and ('MSVCP140' in src_upper or 'VCRUNTIME140' in src_upper):
-        continue  # Skip bundled PyQt5 C++ runtimes
     
+    # Windows-specific DLL filter
+    if sys.platform.startswith('win'):
+        if 'PYQT5' in src_upper and ('MSVCP140' in src_upper or 'VCRUNTIME140' in src_upper):
+            continue  # Skip bundled PyQt5 C++ runtimes on Windows
+            
     filtered_binaries.append(item)
 
 hiddenimports = [
@@ -36,7 +38,10 @@ hiddenimports = [
     'PyQt5',
     'PyQt5.QtCore',
     'PyQt5.QtWidgets',
-] + rasterio_hiddenimports
+    'PyQt5.sip',
+    'shapely',
+    'geopandas',
+] + rasterio_hiddenimports + pyproj_hiddenimports
 
 a = Analysis(
     ['main.py'],
@@ -47,7 +52,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['tkinter', 'matplotlib.tests', 'scipy.spatial.tests'],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
@@ -55,6 +60,9 @@ a = Analysis(
 )
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+# Cross-platform Icon handling
+icon_file = 'app_icon.ico' if sys.platform.startswith('win') else None
 
 exe = EXE(
     pyz,
@@ -67,7 +75,7 @@ exe = EXE(
     strip=False,
     upx=True,
     console=True,
-    icon=['app_icon.ico'],
+    icon=icon_file,
 )
 
 coll = COLLECT(

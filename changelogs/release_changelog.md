@@ -1,8 +1,9 @@
 # Changelogs
 
 ## Release version changelogs
-### Versi 1.0.0 - 28 September 2026
+### Versi 1.0.0 - 02 Oktober 2026
 * **Pembaruan Fitur**:
+    * Menambah dukungan distribusi Linux.
     * Memuat raster GeoTiff.
     * Memuat vektor berformat ESRI Shapefile dan Geopackage.
     * Membuat dan menggambar vektor poligon.

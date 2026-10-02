@@ -17,10 +17,13 @@ if __name__ == "__main__":
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
     os.environ["QT_SCALE_FACTOR_ROUNDING_POLICY"] = "PassThrough"
-    import ctypes
-    # Windows App ID
-    myappid = 'unpad.ricegis.beta-0.0.1'
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"
+    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "0"
+    if os.name == "nt":
+        # Windows App ID
+        import ctypes
+        myappid = 'unpad.ricegis.beta-0.0.1'
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     import multiprocessing
     multiprocessing.freeze_support()
     # Start app 
@@ -45,6 +48,8 @@ if __name__ == "__main__":
     splash.showMessage("Loading main window...", Qt.AlignBottom | Qt.AlignCenter, Qt.black)
     app.processEvents()
     window = MainWindow()
+    window.setGeometry(100, 100, 800, 600) 
+    window.setMinimumSize(400, 300)
     window.show()
     splash.finish(window)
     # Logging

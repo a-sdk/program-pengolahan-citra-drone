@@ -1,6 +1,7 @@
 # Folder
 # Venv
 .venv/
+.venv-linux/
 # IDE
 .vscode
 # Python
@@ -14,3 +15,4 @@ temp/
 *.tif
 *.jpg
 tester.py
+RiceGIS-linux-x64.tar.gz
